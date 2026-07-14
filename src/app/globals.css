@@ -1,0 +1,371 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-playfair: var(--font-playfair);
+  --font-cursive: var(--font-great-vibes);
+
+  --color-brand-green: #008751;
+  --color-brand-gold: #FBBF24;
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes tilt {
+
+    0%,
+    50%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(1deg);
+    }
+
+    75% {
+      transform: rotate(-1deg);
+    }
+  }
+
+  @keyframes bounce-subtle {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes pulse-slow {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(0.95);
+    }
+  }
+
+  --animate-float-slow: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 7s ease-in-out infinite 1s;
+  --animate-tilt: tilt 10s infinite linear;
+  --animate-bounce-subtle: bounce-subtle 3s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
+
+  @keyframes gatherly-orbit {
+    from { transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-r, 80px)) rotate(calc(-1 * var(--start-angle, 0deg))); }
+    to   { transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(var(--orbit-r, 80px)) rotate(calc(-1 * (var(--start-angle, 0deg) + 360deg))); }
+  }
+
+  @keyframes gatherly-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes gatherly-spin-reverse {
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes gatherly-char-in {
+    0%   { opacity: 0; transform: translateY(14px) scale(0.85); filter: blur(4px); }
+    60%  { opacity: 1; transform: translateY(-3px) scale(1.04); filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  @keyframes gatherly-blob-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(30px, -20px) scale(1.08); }
+    66%       { transform: translate(-20px, 18px) scale(0.96); }
+  }
+
+  @keyframes gatherly-dot-wave {
+    0%, 80%, 100% { transform: scaleY(0.4); opacity: 0.3; }
+    40%            { transform: scaleY(1);   opacity: 1; }
+  }
+
+  @keyframes gatherly-logo-breathe {
+    0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 16px rgba(16,185,129,0.6)); }
+    50%       { transform: scale(1.06); filter: drop-shadow(0 0 32px rgba(251,191,36,0.8)); }
+  }
+
+  @keyframes gatherly-progress {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes gatherly-glow-pulse {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%       { opacity: 0.65; transform: scale(1.18); }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .help-breadcrumb-link:hover {
+    color: #10b981 !important;
+  }
+}
+
+/* ============================================================
+   GATHERLY LOADER
+   ============================================================ */
+
+.gatherly-loader-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, #022c22 0%, #064e3b 55%, #000 100%);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Ambient blobs */
+.gatherly-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.gatherly-blob-1 {
+  width: 480px; height: 420px;
+  background: radial-gradient(circle, rgba(0,135,81,0.35), transparent 70%);
+  top: -80px; left: -100px;
+  animation: gatherly-blob-drift 14s ease-in-out infinite;
+}
+.gatherly-blob-2 {
+  width: 340px; height: 380px;
+  background: radial-gradient(circle, rgba(251,191,36,0.28), transparent 70%);
+  bottom: -60px; right: -80px;
+  animation: gatherly-blob-drift 18s ease-in-out infinite reverse;
+}
+.gatherly-blob-3 {
+  width: 280px; height: 260px;
+  background: radial-gradient(circle, rgba(52,211,153,0.18), transparent 70%);
+  bottom: 30%; left: 10%;
+  animation: gatherly-blob-drift 22s ease-in-out infinite 3s;
+}
+
+/* Card */
+.gatherly-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 80px rgba(0,135,81,0.2), 0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ring wrapper */
+.gatherly-ring-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer spinning gradient ring */
+.gatherly-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(16,185,129,0.9) 50%,
+    rgba(251,191,36,0.9) 70%,
+    transparent 85%,
+    transparent 100%
+  );
+  animation: gatherly-spin 2s linear infinite;
+  -webkit-mask: radial-gradient(circle at center, transparent 72%, black 72%);
+  mask: radial-gradient(circle at center, transparent 72%, black 72%);
+}
+
+/* Inner slower reverse ring */
+.gatherly-ring-inner {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0%,
+    transparent 50%,
+    rgba(4,120,87,0.5) 65%,
+    rgba(16,185,129,0.5) 80%,
+    transparent 90%,
+    transparent 100%
+  );
+  animation: gatherly-spin-reverse 3.5s linear infinite;
+  -webkit-mask: radial-gradient(circle at center, transparent 78%, black 78%);
+  mask: radial-gradient(circle at center, transparent 78%, black 78%);
+}
+
+/* Orbiting particles */
+.gatherly-particle {
+  position: absolute;
+  top: 50%; left: 50%;
+  margin-top: calc(var(--size, 4px) / -2);
+  margin-left: calc(var(--size, 4px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fcd34d, #008751);
+  box-shadow: 0 0 6px 2px rgba(16,185,129,0.7);
+  animation: gatherly-orbit 3s linear infinite;
+  transform-origin: 0 0;
+}
+
+/* Logo container */
+.gatherly-logo-container {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gatherly-logo-glow {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.5), rgba(251,191,36,0.3), transparent 70%);
+  animation: gatherly-glow-pulse 2.5s ease-in-out infinite;
+}
+
+.gatherly-logo-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: gatherly-logo-breathe 3s ease-in-out infinite;
+}
+
+/* Brand name letters */
+.gatherly-name-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5px;
+}
+
+.gatherly-char {
+  font-family: var(--font-playfair), serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(135deg, #f3f4f6 20%, #10b981 50%, #fcd34d 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: 0;
+  animation: gatherly-char-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Tagline */
+.gatherly-tagline {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  font-family: var(--font-inter), sans-serif;
+  margin-top: -8px;
+}
+
+/* Wave dots */
+.gatherly-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+}
+
+.gatherly-dot {
+  width: 4px;
+  height: 20px;
+  border-radius: 999px;
+  background: linear-gradient(to top, #008751, #fcd34d);
+  animation: gatherly-dot-wave 1.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Progress bar */
+.gatherly-progress-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.gatherly-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #008751, #10b981, #f59e0b, #10b981, #008751);
+  background-size: 200% 100%;
+  animation: gatherly-progress 1.8s linear infinite;
+  transition: width 0.25s ease-out;
+  box-shadow: 0 0 12px rgba(16,185,129,0.8);
+}

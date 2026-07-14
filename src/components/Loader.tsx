@@ -1,0 +1,147 @@
+"use client";
+
+import { useLoader } from "@/lib/contexts/LoaderContext";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+
+const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    angle: (i / 12) * 360,
+    size: i % 3 === 0 ? 5 : i % 3 === 1 ? 3.5 : 2,
+    delay: i * 0.12,
+    radius: i % 2 === 0 ? 90 : 78,
+    opacity: i % 3 === 0 ? 0.9 : i % 3 === 1 ? 0.6 : 0.4,
+}));
+
+export default function Loader() {
+    const { isLoading } = useLoader();
+    const [visible, setVisible] = useState(false);
+    const [exiting, setExiting] = useState(false);
+    const [progress, setProgress] = useState(0);
+
+    useEffect(() => {
+        if (isLoading) {
+            setExiting(false);
+            setProgress(0);
+            setVisible(true);
+
+            // Simulate indeterminate progress
+            let p = 0;
+            const tick = setInterval(() => {
+                p += Math.random() * 12;
+                if (p >= 88) {
+                    clearInterval(tick);
+                    p = 88;
+                }
+                setProgress(Math.min(p, 88));
+            }, 180);
+
+            return () => clearInterval(tick);
+        } else {
+            // Complete the bar then exit
+            setProgress(100);
+            const finishTimeout = setTimeout(() => {
+                setExiting(true);
+            }, 350);
+            const hideTimeout = setTimeout(() => {
+                setVisible(false);
+                setExiting(false);
+            }, 850);
+            return () => {
+                clearTimeout(finishTimeout);
+                clearTimeout(hideTimeout);
+            };
+        }
+    }, [isLoading]);
+
+    if (!visible) return null;
+
+    return (
+        <div
+            className="gatherly-loader-root"
+            style={{ opacity: exiting ? 0 : 1 }}
+            aria-label="Loading Gatherly"
+            role="status"
+        >
+            {/* Ambient background blobs */}
+            <div className="gatherly-blob gatherly-blob-1" />
+            <div className="gatherly-blob gatherly-blob-2" />
+            <div className="gatherly-blob gatherly-blob-3" />
+
+            {/* Central card */}
+            <div className="gatherly-card" style={{ opacity: exiting ? 0 : 1, transform: exiting ? "scale(0.94) translateY(12px)" : "scale(1) translateY(0)" }}>
+
+                {/* Spinning ring */}
+                <div className="gatherly-ring-wrap">
+                    <div className="gatherly-ring" />
+                    <div className="gatherly-ring-inner" />
+
+                    {/* Orbiting particles */}
+                    {PARTICLES.map(p => (
+                        <span
+                            key={p.id}
+                            className="gatherly-particle"
+                            style={{
+                                width: p.size,
+                                height: p.size,
+                                opacity: p.opacity,
+                                animationDelay: `${p.delay}s`,
+                                "--orbit-r": `${p.radius}px`,
+                                "--start-angle": `${p.angle}deg`,
+                            } as React.CSSProperties}
+                        />
+                    ))}
+
+                    {/* Logo */}
+                    <div className="gatherly-logo-container">
+                        <div className="gatherly-logo-glow" />
+                        <div className="gatherly-logo-img-wrap">
+                            <Image
+                                src="/logo/logo-white.svg"
+                                alt="Gatherly"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Brand name */}
+                <div className="gatherly-name-wrap">
+                    {"Gatherly".split("").map((char, i) => (
+                        <span
+                            key={i}
+                            className="gatherly-char"
+                            style={{ animationDelay: `${i * 0.07}s` }}
+                        >
+                            {char}
+                        </span>
+                    ))}
+                </div>
+
+                {/* Tagline */}
+                <p className="gatherly-tagline">Creating moments that matter</p>
+
+                {/* Dots */}
+                <div className="gatherly-dots">
+                    {[0, 1, 2, 3, 4].map(i => (
+                        <div
+                            key={i}
+                            className="gatherly-dot"
+                            style={{ animationDelay: `${i * 0.15}s` }}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="gatherly-progress-wrap">
+                <div
+                    className="gatherly-progress-bar"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
+        </div>
+    );
+}
