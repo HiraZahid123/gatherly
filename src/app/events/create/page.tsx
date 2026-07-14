@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -33,7 +33,7 @@ interface SessionData {
     };
 }
 
-export default function CreateEventPage() {
+function CreateEventContent() {
     const router = useRouter();
     const { data: session } = useSession() as { data: SessionData | null };
     const [isLoading, setIsLoading] = useState(false);
@@ -2012,5 +2012,13 @@ export default function CreateEventPage() {
                 isHost={true}
             />
         </div>
+    );
+}
+
+export default function CreateEventPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#252464] flex items-center justify-center text-white"><Loader2 className="w-8 h-8 animate-spin text-white/50" /></div>}>
+            <CreateEventContent />
+        </Suspense>
     );
 }
