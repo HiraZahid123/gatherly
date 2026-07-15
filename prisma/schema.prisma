@@ -173,6 +173,7 @@ model Event {
   announcements Announcement[]
   ticketTiers  TicketTier[]
   orders       Order[]
+  reminders    EventReminder[]
 
   @@index([slug])
   @@index([hostId])
@@ -186,6 +187,23 @@ model Event {
 enum EventType {
   EVENT
   CARD
+}
+
+model EventReminder {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  hoursBefore Int      // How many hours before the event to send
+  message     String?  // Custom message for this reminder
+  isSent      Boolean  @default(false)
+  sentAt      DateTime?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([eventId])
+  @@index([isSent, hoursBefore])
+  @@map("event_reminders")
 }
 
 model Photo {

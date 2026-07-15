@@ -17,9 +17,10 @@ interface PhotoAlbumProps {
     eventId: string;
     isHost?: boolean;
     primaryColor?: string;
+    allowGuestUpload?: boolean;
 }
 
-export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed" }: PhotoAlbumProps) {
+export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed", allowGuestUpload = true }: PhotoAlbumProps) {
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
@@ -29,7 +30,11 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed" }
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (eventId) fetchPhotos();
+        if (eventId) {
+            fetchPhotos();
+        } else {
+            setIsLoading(false);
+        }
     }, [eventId]);
 
     // Keyboard nav for lightbox
@@ -175,10 +180,15 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed" }
             )}
 
             {/* Hidden Inputs */}
-            <input type="file" ref={fileInputRef} onChange={handleUpload} multiple accept="image/*" className="hidden" />
-            <input type="file" ref={cameraInputRef} onChange={handleUpload} accept="image/*" capture="environment" className="hidden" />
+            {(isHost || allowGuestUpload) && (
+                <>
+                    <input type="file" ref={fileInputRef} onChange={handleUpload} multiple accept="image/*" className="hidden" />
+                    <input type="file" ref={cameraInputRef} onChange={handleUpload} accept="image/*" capture="environment" className="hidden" />
+                </>
+            )}
 
             {/* Add Photos */}
+            {(isHost || allowGuestUpload) && (
             <div className="space-y-3">
                 <AnimatePresence mode="wait">
                     {!showOptions ? (
@@ -188,13 +198,13 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed" }
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowOptions(true)}
-                            disabled={isUploading}
+                            disabled={isUploading || !eventId}
                             className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]"
                             style={{ background: primaryColor, color: "#fff" }}
                             whileTap={{ scale: 0.98 }}
                         >
                             {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
-                            {isUploading ? "Uploading..." : "Add photos"}
+                            {(!eventId) ? "Save event first to upload" : (isUploading ? "Uploading..." : "Add photos")}
                         </motion.button>
                     ) : (
                         <motion.div
@@ -230,6 +240,7 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed" }
                     )}
                 </AnimatePresence>
             </div>
+            )}
 
             {/* Lightbox */}
             <AnimatePresence>

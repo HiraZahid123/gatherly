@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
                 id: true,
                 title: true,
                 slug: true,
+                description: true,
                 startDate: true,
                 endDate: true,
                 location: true,
@@ -58,6 +59,13 @@ export async function GET(request: NextRequest) {
                 theme: true,
                 hostId: true,
                 isPaid: true,
+                capacity: true,
+                visibility: true,
+                rsvpDeadline: true,
+                checkInWindowStart: true,
+                maxCheckIns: true,
+                isPrivate: true,
+                guestListHidden: true,
                 createdAt: true,
                 host: {
                     select: { id: true, name: true, image: true },
@@ -65,6 +73,9 @@ export async function GET(request: NextRequest) {
                 rsvps: {
                     where: { userId: session.user.id },
                     select: { id: true, status: true },
+                },
+                reminders: {
+                    select: { hoursBefore: true, message: true, isSent: true }
                 },
                 _count: {
                     select: { rsvps: true },
@@ -80,8 +91,14 @@ export async function GET(request: NextRequest) {
             const isHosting = event.hostId === session.user.id;
             const rsvp = event.rsvps?.[0];
 
+            // Inject reminders into theme.settings for the edit UI
+            const theme = event.theme ? JSON.parse(JSON.stringify(event.theme)) : { settings: {} };
+            if (!theme.settings) theme.settings = {};
+            theme.settings.reminders = event.reminders;
+
             return {
                 ...event,
+                theme,
                 rsvpCount: event._count.rsvps,
                 isHosting,
                 userRsvpStatus: rsvp?.status || null,

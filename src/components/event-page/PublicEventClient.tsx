@@ -794,7 +794,8 @@ export default function PublicEventClient({
                     rsvp: event.theme?.settings?.rsvp || { requireApproval: false, capacity: null, plusOnes: 0, allowMutuals: false, allowMaybe: true },
                     privacy: event.theme?.settings?.privacy || { showTimestamps: true, showNames: true, showCount: true, requirePassword: false, isPrivate: false, guestListHidden: false },
                     hostName: event.host?.name || "Host",
-                    hostImage: event.host?.image
+                    hostImage: event.host?.image,
+                    reminders: event.theme?.settings?.reminders || []
                 }}
                 guests={guests}
                 onUpdate={setEvent}

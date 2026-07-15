@@ -183,7 +183,7 @@ function CreateEventContent() {
             isPrivate: settings.privacy?.isPrivate,
             visibility: settings.privacy?.isPrivate ? "PRIVATE" : (data.visibility || settings.privacy?.visibility || "PUBLIC"),
             guestListHidden: settings.privacy?.guestListHidden,
-            capacity: settings.rsvp?.capacity !== null ? Number(settings.rsvp.capacity) : null,
+            capacity: data.capacity,
             cost: data.cost || settings.cost,
             isPaid: data.isPaid !== undefined ? data.isPaid : (settings.cost !== ""),
             // MERGE theme explicitly to ensure colors/effects from sidebar are preserved

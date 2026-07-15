@@ -221,7 +221,7 @@ export default function EditEventPage() {
             isPrivate: settings.privacy?.isPrivate,
             visibility: settings.privacy?.isPrivate ? "PRIVATE" : (data.visibility || settings.privacy?.visibility || "PUBLIC"),
             guestListHidden: settings.privacy?.guestListHidden,
-            capacity: settings.rsvp?.capacity !== null ? Number(settings.rsvp.capacity) : null,
+            capacity: data.capacity,
             // MERGE theme explicitly to ensure colors/effects from sidebar are preserved
             theme: {
                 ...(pendingData?.theme || {}),
@@ -662,9 +662,9 @@ export default function EditEventPage() {
                 event={pendingData}
                 settings={settings}
                 onUpdate={(updatedData) => {
-                    setPendingData(updatedData);
+                    setPendingData({ ...updatedData });
                     if (updatedData.theme?.settings) {
-                        setSettings(updatedData.theme.settings);
+                        setSettings({ ...updatedData.theme.settings });
                     }
                 }}
                 onStyleChange={setRSVPStyle}

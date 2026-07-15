@@ -61,6 +61,25 @@ export async function PATCH(
             }
         });
 
+        // Sync reminders if they were updated via theme settings (from the Live Event Page)
+        if (body.theme?.settings?.reminders !== undefined) {
+            const reminders = body.theme.settings.reminders;
+            await (prisma as any).eventReminder.deleteMany({
+                where: { eventId, isSent: false }
+            });
+            
+            if (Array.isArray(reminders) && reminders.length > 0) {
+                await (prisma as any).eventReminder.createMany({
+                    data: reminders.map((r: any) => ({
+                        eventId,
+                        hoursBefore: r.hoursBefore,
+                        message: r.message || null,
+                        isSent: false
+                    }))
+                });
+            }
+        }
+
         return NextResponse.json({
             success: true,
             event: {

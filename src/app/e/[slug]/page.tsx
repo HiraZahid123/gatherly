@@ -11,6 +11,7 @@ const getEventBySlug = (slug: string) => unstable_cache(
                 host: { select: { id: true, name: true, email: true, image: true } },
                 _count: { select: { rsvps: { where: { status: "ACCEPTED" } } } },
                 staff: true,
+                reminders: { select: { hoursBefore: true, message: true, isSent: true } },
             },
         });
     },
@@ -49,8 +50,14 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
             event.theme = JSON.parse(event.theme);
         } catch (e) {
             console.error("Failed to parse event theme", e);
+            event.theme = { settings: {} };
         }
+    } else if (!event.theme) {
+        event.theme = { settings: {} };
     }
+    
+    if (!event.theme.settings) event.theme.settings = {};
+    event.theme.settings.reminders = event.reminders;
 
     // Check Permissions for Private Events
     if (event.visibility === "PRIVATE") {

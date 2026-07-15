@@ -203,6 +203,7 @@ export const eventCreateSchema = z.object({
                 requirePassword: z.boolean().optional(),
                 password: z.string().optional().or(z.literal("")),
             }).optional(),
+            reminders: z.any().optional(),
             links: z.array(z.object({
                 id: z.string(),
                 text: z.string(),
@@ -295,6 +296,7 @@ export const eventUpdateSchema = z.object({
                 requirePassword: z.boolean().optional(),
                 password: z.string().optional().or(z.literal("")),
             }).optional(),
+            reminders: z.any().optional(),
             links: z.array(z.object({
                 id: z.string(),
                 text: z.string(),

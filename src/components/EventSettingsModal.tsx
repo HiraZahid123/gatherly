@@ -9,7 +9,8 @@ import BroadcastPanel from "./BroadcastPanel";
 import TicketTierManager from "./TicketTierManager";
 import SalesReportPanel from "./SalesReportPanel";
 import StripeConnectPanel from "./StripeConnectPanel";
-import { X, Crown, Users, FileText, Shield, Globe, Camera, DollarSign, AlarmClock, ChevronRight, Info, Plus, Settings, HelpCircle, ShieldPlus, Search, Megaphone, Mail, QrCode, Download, CheckSquare, Square, CheckCheck, UserX, Ticket, TrendingUp, CreditCard, Bell, Check } from "lucide-react";
+import PhotoAlbum from "./event-page/PhotoAlbum";
+import { X, Crown, Users, FileText, Shield, Globe, Camera, DollarSign, AlarmClock, ChevronRight, Info, Plus, Settings, HelpCircle, ShieldPlus, Search, Megaphone, Mail, QrCode, Download, CheckSquare, Square, CheckCheck, UserX, Ticket, TrendingUp, CreditCard, Bell, Check, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface EventSettingsModalProps {
@@ -132,7 +133,6 @@ export default function EventSettingsModal({
         { id: "Staff", icon: Users, label: "Manage Staff" },
         { id: "Scanner", icon: QrCode, label: "Check-in Terminal" },
         { id: "RSVPs", icon: Users, label: "RSVP Settings" },
-        { id: "Questionnaire", icon: FileText, label: "Questionnaire" },
         { id: "Privacy", icon: Shield, label: "Display & Privacy" },
         { id: "Messaging", icon: Megaphone, label: "Messaging" },
         { id: "Photo Album", icon: Camera, label: "Photo Album" },
@@ -149,20 +149,25 @@ export default function EventSettingsModal({
             ? allNavItems.filter(item => ["RSVPs", "Scanner"].includes(item.id))
             : allNavItems.filter(item => item.id === "RSVPs");
 
-    const updateSetting = (section: string, key: string, value: any) => {
+    const updateSetting = (section: string, key: string | null, value: any) => {
         let updatedEvent = {
             ...event,
             theme: {
-                ...event.theme,
+                ...(event?.theme || {}),
                 settings: {
-                    ...event.theme?.settings,
-                    [section]: {
-                        ...(event.theme?.settings?.[section] || {}),
+                    ...(event?.theme?.settings || {}),
+                    [section]: key === null ? value : {
+                        ...(event?.theme?.settings?.[section] || {}),
                         [key]: value
                     }
                 }
             }
         };
+        
+        // Force a completely new reference for arrays to guarantee re-renders
+        if (section === "reminders" && Array.isArray(value)) {
+            updatedEvent.theme.settings.reminders = [...value];
+        }
 
         // Sync visibility with isPrivate
         if (section === "privacy" && key === "isPrivate") {
@@ -1027,7 +1032,42 @@ export default function EventSettingsModal({
                             </div>
                         )}
 
-                        {["Questionnaire", "Audience", "Photo Album", "Chip In", "Auto-Reminders"].includes(activeTab) && (
+                        {activeTab === "Photo Album" && (
+                            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <section>
+                                    <div className="flex items-center gap-2 mb-8">
+                                        <h3 className="text-2xl font-black tracking-tight">Photo Album</h3>
+                                        <HelpCircle className="w-5 h-5 text-white/20 cursor-help" />
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                                            <div className="space-y-1">
+                                                <span className="text-[13px] font-bold">Allow Guests to Upload Photos</span>
+                                                <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">Invited guests and attendees can add to the album</p>
+                                            </div>
+                                             <label className={`relative inline-flex items-center ${isHost ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    disabled={!isHost}
+                                                    checked={settings.photos?.allowGuestUpload ?? true}
+                                                    onChange={(e) => updateSetting("photos", "allowGuestUpload", e.target.checked)}
+                                                    className="sr-only peer"
+                                                />
+                                                <div
+                                                    className="w-10 h-5 bg-white/10 peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-4 after:w-4 after:transition-all transition-all"
+                                                    style={{ backgroundColor: (settings.photos?.allowGuestUpload ?? true) ? (selectedTheme === 'streak' ? '#6366f1' : primaryColor) : 'rgba(255,255,255,0.1)' }}
+                                                ></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section className="pt-4 border-t border-white/5">
+                                    <PhotoAlbum eventId={event?.id || ""} isHost={isHost} primaryColor={primaryColor} allowGuestUpload={settings.photos?.allowGuestUpload ?? true} />
+                                </section>
+                            </div>
+                        )}
+
+                        {["Questionnaire", "Audience", "Chip In"].includes(activeTab) && (
                             <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
                                 <div className="w-16 h-16 rounded-none bg-white/5 border border-white/10 flex items-center justify-center">
                                     <Settings className="w-8 h-8 text-white/20 animate-spin-slow" />
@@ -1045,6 +1085,84 @@ export default function EventSettingsModal({
                                 >
                                     Back to Hosts
                                 </button>
+                            </div>
+                        )}
+
+                        {activeTab === "Auto-Reminders" && (
+                            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <section>
+                                    <div className="flex items-center justify-between mb-8">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-2xl font-black tracking-tight">Auto-Reminders</h3>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const currentReminders = Array.isArray(settings.reminders) ? settings.reminders : [];
+                                                const newReminders = [...currentReminders, { hoursBefore: 24, message: "" }];
+                                                
+                                                // Double-update: Force local component mutation to guarantee re-render
+                                                settings.reminders = newReminders; 
+                                                
+                                                updateSetting("reminders", null, newReminders);
+                                            }}
+                                            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            + Add Reminder {Array.isArray(settings.reminders) && settings.reminders.length > 0 ? `(${settings.reminders.length})` : ""}
+                                        </button>
+                                    </div>
+
+                                    {!Array.isArray(settings.reminders) || settings.reminders.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-white/10 bg-white/[0.02]">
+                                            <p className="text-[11px] text-white/40 font-bold uppercase tracking-widest mb-4">No reminders set</p>
+                                            <p className="text-[10px] text-white/30 max-w-xs">We'll automatically send an email to accepted guests at these intervals.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {settings.reminders.map((reminder: any, index: number) => (
+                                                <div key={index} className="p-4 border border-white/5 bg-white/[0.02] space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <select
+                                                            value={reminder.hoursBefore}
+                                                            onChange={(e) => {
+                                                                const newReminders = [...settings.reminders];
+                                                                newReminders[index].hoursBefore = parseInt(e.target.value);
+                                                                updateSetting("reminders", null, newReminders);
+                                                            }}
+                                                            className="bg-white/5 border border-white/10 rounded px-3 py-2 text-sm outline-none text-white [&>option]:bg-zinc-900"
+                                                        >
+                                                            <option value={1} className="bg-zinc-900">1 hour before</option>
+                                                            <option value={2} className="bg-zinc-900">2 hours before</option>
+                                                            <option value={12} className="bg-zinc-900">12 hours before</option>
+                                                            <option value={24} className="bg-zinc-900">1 day before</option>
+                                                            <option value={48} className="bg-zinc-900">2 days before</option>
+                                                            <option value={168} className="bg-zinc-900">1 week before</option>
+                                                        </select>
+                                                        <button
+                                                            onClick={() => {
+                                                                const newReminders = settings.reminders.filter((_: any, i: number) => i !== index);
+                                                                updateSetting("reminders", null, newReminders);
+                                                            }}
+                                                            className="p-2 hover:bg-red-500/10 text-red-500/50 hover:text-red-500 rounded transition-colors"
+                                                        >
+                                                            <XCircle className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <textarea
+                                                        placeholder="Custom note for this reminder (optional)..."
+                                                        value={reminder.message || ""}
+                                                        onChange={(e) => {
+                                                            const newReminders = [...settings.reminders];
+                                                            newReminders[index].message = e.target.value;
+                                                            updateSetting("reminders", null, newReminders);
+                                                        }}
+                                                        className="w-full bg-white/5 border border-white/10 rounded px-4 py-3 text-sm min-h-[80px] outline-none focus:border-white/20 placeholder:text-white/20"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </section>
                             </div>
                         )}
                     </div>

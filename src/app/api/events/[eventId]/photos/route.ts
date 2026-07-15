@@ -65,6 +65,34 @@ export async function POST(
             return NextResponse.json({ error: "Event not found" }, { status: 404 });
         }
 
+        const userId = session?.user?.id;
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const isHost = event.hostId === userId;
+        const theme = event.theme as any;
+        const allowGuestUpload = theme?.settings?.photos?.allowGuestUpload ?? true;
+
+        if (!isHost) {
+            if (!allowGuestUpload) {
+                return NextResponse.json({ error: "Guest uploads are disabled by the host" }, { status: 403 });
+            }
+
+            // Verify the user is an accepted guest or co-host
+            const isCohost = theme?.settings?.hosts?.cohosts?.some((c: any) => c.id === userId);
+            
+            if (!isCohost) {
+                const rsvp = await prisma.rSVP.findFirst({
+                    where: { eventId, userId, status: "ACCEPTED" }
+                });
+                
+                if (!rsvp) {
+                    return NextResponse.json({ error: "Only invited or joined guests can upload photos" }, { status: 403 });
+                }
+            }
+        }
+
         const formData = await request.formData();
         const file = formData.get("file") as File;
 

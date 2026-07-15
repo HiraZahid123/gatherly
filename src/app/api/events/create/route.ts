@@ -125,6 +125,21 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // Create reminders if they were provided in the theme settings
+        if (processedTheme?.settings?.reminders !== undefined) {
+            const reminders = processedTheme.settings.reminders;
+            if (Array.isArray(reminders) && reminders.length > 0) {
+                await (prisma as any).eventReminder.createMany({
+                    data: reminders.map((r: any) => ({
+                        eventId: event.id,
+                        hoursBefore: r.hoursBefore,
+                        message: r.message || null,
+                        isSent: false
+                    }))
+                });
+            }
+        }
+
         return NextResponse.json({
             success: true,
             message: "Event created successfully.",

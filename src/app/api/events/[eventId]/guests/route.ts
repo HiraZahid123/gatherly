@@ -43,7 +43,8 @@ export async function GET(
                         email: true,
                         image: true
                     }
-                }
+                },
+                ...(isHost ? { checkIns: true } : {})
             },
             orderBy: { createdAt: "desc" },
             take: 500,
@@ -63,7 +64,10 @@ export async function GET(
                 email: email || (isHost ? "No Email" : undefined),
                 image: rsvp.user?.image || undefined,
                 status: rsvp.status,
-                updatedAt: rsvp.updatedAt
+                updatedAt: rsvp.updatedAt,
+                checkedIn: rsvp.checkedIn,
+                qrToken: isHost ? rsvp.qrToken : undefined,
+                checkIns: isHost ? rsvp.checkIns : undefined
             };
         });
 
