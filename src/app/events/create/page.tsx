@@ -7,7 +7,7 @@ import Link from "next/link";
 import EventForm from "@/components/EventForm";
 import RSVPOptions, { RSVP_STYLES } from "@/components/RSVPOptions";
 import CreateEventSidebar from "@/components/CreateEventSidebar";
-import { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import Image from "next/image";
 import CoverImageGallery from "@/components/CoverImageGallery";
@@ -415,19 +415,37 @@ function CreateEventContent() {
                 )}
             </div>
 
-            {/* Foreground Overlay VFX (Overlaps UI) */}
-            <div className="fixed inset-0 pointer-events-none z-[50]">
+            {/* Foreground Overlay VFX (Overlaps background, behind UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[8]">
                 {/* Custom Uploaded Effect */}
                 {effect?.startsWith('custom-uploaded:') && (
                     <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
                 )}
-
                 {/* Preset Image FX */}
                 {effect?.startsWith('preset-image:') && (() => {
                     const presetId = effect.split(':')[1];
                     const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
                         return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
+
+                {/* Preset WebM Video FX */}
+                {effect?.startsWith('preset-webm:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return (
+                            <video 
+                                src={preset.videoUrl} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                            />
+                        );
                     }
                     return null;
                 })()}

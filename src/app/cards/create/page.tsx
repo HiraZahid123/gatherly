@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import CreateEventSidebar from "@/components/CreateEventSidebar";
 import ThemeSelector from "@/components/ThemeSelector";
-import EffectSelector, { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import EffectSelector, { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import FontSelector from "@/components/FontSelector"; // New
 import CoverImageGallery from "@/components/CoverImageGallery"; // New
@@ -169,8 +169,8 @@ export default function CreateCardPage() {
                 })()}
             </div>
 
-            {/* Visual Effects Layer */}
-            <div className="fixed inset-0 pointer-events-none z-[80]">
+            {/* Visual Effects Layer (Overlaps background, behind UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[8]">
                 {effect === 'particles' && <FloatingParticles />}
                 {(INTERACTIVE_THEMES.includes(selectedTheme || '') || effect === 'skiing') && (
                     <InteractiveBackground currentTheme={selectedTheme} currentEffect={effect} />
@@ -186,16 +186,33 @@ export default function CreateCardPage() {
                 }
 
                 {/* Preset Image FX */}
-                {
-                    effect?.startsWith('preset-image:') && (() => {
-                        const presetId = effect.split(':')[1];
-                        const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
-                        if (preset) {
-                            return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
-                        }
-                        return null;
-                    })()
-                }
+                {effect?.startsWith('preset-image:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
+
+                {/* Preset WebM Video FX */}
+                {effect?.startsWith('preset-webm:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return (
+                            <video 
+                                src={preset.videoUrl} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* Main Layout - Single Column Centered */}

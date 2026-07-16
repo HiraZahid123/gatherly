@@ -16,7 +16,7 @@ import { VIBE_THEMES } from "@/lib/theme";
 import InteractiveBackground from "@/components/InteractiveBackground";
 import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
-import { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
 import { ChevronLeft } from "lucide-react";
@@ -477,8 +477,8 @@ export default function EditEventPage() {
                 }
             </div >
 
-            {/* Foreground Overlay VFX (Overlaps UI) */}
-            <div className="fixed inset-0 pointer-events-none z-[50]">
+            {/* Foreground Overlay VFX (Overlaps background, behind UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[8]">
                 {/* Custom Uploaded Effect */}
                 {
                     effect?.startsWith('custom-uploaded:') && (
@@ -487,16 +487,33 @@ export default function EditEventPage() {
                 }
 
                 {/* Preset Image FX */}
-                {
-                    effect?.startsWith('preset-image:') && (() => {
-                        const presetId = effect.split(':')[1];
-                        const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
-                        if (preset) {
-                            return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
-                        }
-                        return null;
-                    })()
-                }
+                {effect?.startsWith('preset-image:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
+
+                {/* Preset WebM Video FX */}
+                {effect?.startsWith('preset-webm:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return (
+                            <video 
+                                src={preset.videoUrl} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* Preview Mode Header */}

@@ -24,7 +24,7 @@ import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
 import { QrCode, Ticket, Calendar } from "lucide-react";
 import { getCalendarLinks } from "@/lib/calendar";
-import { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 
 // Lazy-load EventSettingsModal — 31 Lucide icons, only needed when host opens Settings
@@ -541,8 +541,8 @@ export default function PublicEventClient({
                 )}
             </div>
 
-            {/* Foreground Overlay VFX (Overlaps UI) */}
-            <div className="fixed inset-0 pointer-events-none z-[50]">
+            {/* Foreground Overlay VFX (Overlaps background, behind UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[8]">
                 {/* Custom Uploaded FX */}
                 {effect?.startsWith('custom-uploaded:') && (
                     <CustomFloatingVfxClient imageUrl={effect.split(':')[1]} />
@@ -554,6 +554,25 @@ export default function PublicEventClient({
                     const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
                         return <CustomFloatingVfxClient imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
+
+                {/* Preset WebM Video FX */}
+                {effect?.startsWith('preset-webm:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return (
+                            <video 
+                                src={preset.videoUrl} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                            />
+                        );
                     }
                     return null;
                 })()}
