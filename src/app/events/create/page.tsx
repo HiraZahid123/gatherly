@@ -7,6 +7,8 @@ import Link from "next/link";
 import EventForm from "@/components/EventForm";
 import RSVPOptions, { RSVP_STYLES } from "@/components/RSVPOptions";
 import CreateEventSidebar from "@/components/CreateEventSidebar";
+import { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import Image from "next/image";
 import CoverImageGallery from "@/components/CoverImageGallery";
 import FontStyleSelector, { FONT_STYLES } from "@/components/FontStyleSelector";
@@ -341,6 +343,25 @@ function CreateEventContent() {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
+                
+                {/* Preset Video Theme Background */}
+                {selectedTheme?.startsWith('preset-video:') && (() => {
+                    const presetId = selectedTheme.split(':')[1];
+                    const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
+                    if (preset && preset.type === 'video') {
+                        return (
+                            <video 
+                                src={preset.url} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* Fixed Viewport Effects */}
@@ -388,15 +409,28 @@ function CreateEventContent() {
                 {/* Rain */}
                 {effect === 'rain' && <Rain />}
 
+                {/* Cinematic Vignette */}
+                {effect === 'vignette' && (
+                    <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 300px rgba(0,0,0,0.95)' }}></div>
+                )}
+            </div>
+
+            {/* Foreground Overlay VFX (Overlaps UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[50]">
                 {/* Custom Uploaded Effect */}
                 {effect?.startsWith('custom-uploaded:') && (
                     <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
                 )}
 
-                {/* Cinematic Vignette */}
-                {effect === 'vignette' && (
-                    <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 300px rgba(0,0,0,0.95)' }}></div>
-                )}
+                {/* Preset Image FX */}
+                {effect?.startsWith('preset-image:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* Preview Mode Header */}

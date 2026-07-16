@@ -13,9 +13,11 @@ import CoverImageGallery from "@/components/CoverImageGallery";
 import EffectSelector from "@/components/EffectSelector";
 import ThemeSelector from "@/components/ThemeSelector";
 import { VIBE_THEMES } from "@/lib/theme";
-import FloatingParticles from "@/components/FloatingParticles";
-import VfxCanvas from "@/components/vfx/VfxCanvas";
+import InteractiveBackground from "@/components/InteractiveBackground";
+import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
+import { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
 import { ChevronLeft } from "lucide-react";
 
@@ -392,6 +394,27 @@ export default function EditEventPage() {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
+                
+                {/* Preset Video Theme Background */}
+                {
+                    selectedTheme?.startsWith('preset-video:') && (() => {
+                        const presetId = selectedTheme.split(':')[1];
+                        const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
+                        if (preset && preset.type === 'video') {
+                            return (
+                                <video 
+                                    src={preset.url} 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                />
+                            );
+                        }
+                        return null;
+                    })()
+                }
             </div>
 
             {/* Fixed Viewport Effects */}
@@ -446,13 +469,6 @@ export default function EditEventPage() {
                     )
                 }
 
-                {/* Custom Uploaded Effect */}
-                {
-                    effect?.startsWith('custom-uploaded:') && (
-                        <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
-                    )
-                }
-
                 {/* Cinematic Vignette */}
                 {
                     effect === 'vignette' && (
@@ -460,6 +476,28 @@ export default function EditEventPage() {
                     )
                 }
             </div >
+
+            {/* Foreground Overlay VFX (Overlaps UI) */}
+            <div className="fixed inset-0 pointer-events-none z-[50]">
+                {/* Custom Uploaded Effect */}
+                {
+                    effect?.startsWith('custom-uploaded:') && (
+                        <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
+                    )
+                }
+
+                {/* Preset Image FX */}
+                {
+                    effect?.startsWith('preset-image:') && (() => {
+                        const presetId = effect.split(':')[1];
+                        const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                        if (preset) {
+                            return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                        }
+                        return null;
+                    })()
+                }
+            </div>
 
             {/* Preview Mode Header */}
             {

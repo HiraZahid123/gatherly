@@ -6,7 +6,8 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import CreateEventSidebar from "@/components/CreateEventSidebar";
 import ThemeSelector from "@/components/ThemeSelector";
-import EffectSelector from "@/components/EffectSelector";
+import EffectSelector, { IMAGE_VFX_PRESETS } from "@/components/EffectSelector";
+import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import FontSelector from "@/components/FontSelector"; // New
 import CoverImageGallery from "@/components/CoverImageGallery"; // New
 import FloatingParticles from "@/components/FloatingParticles";
@@ -147,6 +148,25 @@ export default function CreateCardPage() {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
+                
+                {/* Preset Video Theme Background */}
+                {selectedTheme?.startsWith('preset-video:') && (() => {
+                    const presetId = selectedTheme.split(':')[1];
+                    const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
+                    if (preset && preset.type === 'video') {
+                        return (
+                            <video 
+                                src={preset.url} 
+                                autoPlay 
+                                loop 
+                                muted 
+                                playsInline 
+                                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* Visual Effects Layer */}
@@ -158,9 +178,24 @@ export default function CreateCardPage() {
                 {effect === 'floral' && <VfxCanvas type="floral" count={1} speed={1} />}
                 {effect === 'confetti' && <Confetti />}
                 {effect === 'rain' && <Rain />}
-                {effect?.startsWith('custom-uploaded:') && (
-                    <CustomFloatingVfx imageUrl={effect.substring("custom-uploaded:".length)} />
-                )}
+                {/* Custom Uploaded Effect */}
+                {
+                    effect?.startsWith('custom-uploaded:') && (
+                        <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
+                    )
+                }
+
+                {/* Preset Image FX */}
+                {
+                    effect?.startsWith('preset-image:') && (() => {
+                        const presetId = effect.split(':')[1];
+                        const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                        if (preset) {
+                            return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                        }
+                        return null;
+                    })()
+                }
             </div>
 
             {/* Main Layout - Single Column Centered */}

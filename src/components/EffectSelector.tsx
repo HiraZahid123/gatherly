@@ -86,6 +86,29 @@ export const EFFECTS: Effect[] = [
     },
 ];
 
+export const IMAGE_VFX_PRESETS = [
+    {
+        id: "money",
+        label: "Money",
+        imageUrl: "/effects/money.svg",
+    },
+    {
+        id: "heart",
+        label: "Hearts",
+        imageUrl: "/effects/heart.svg",
+    },
+    {
+        id: "snow",
+        label: "Snow",
+        imageUrl: "/effects/snow.svg",
+    },
+    {
+        id: "star",
+        label: "Stars",
+        imageUrl: "/effects/star.svg",
+    },
+];
+
 export default function EffectSelector({ isOpen, onClose, onSelect, currentEffect }: EffectSelectorProps) {
     if (!isOpen) return null;
 
@@ -201,6 +224,38 @@ export default function EffectSelector({ isOpen, onClose, onSelect, currentEffec
                             </span>
                         </div>
                     ))}
+
+                    {/* Image Preset Effects */}
+                    {IMAGE_VFX_PRESETS.map((preset) => {
+                        const effectId = `preset-image:${preset.id}`;
+                        const isSelected = currentEffect === effectId;
+                        return (
+                            <div key={effectId} className="flex flex-col items-center gap-2">
+                                <button
+                                    type="button"
+                                    aria-label={`Select ${preset.label} effect`}
+                                    onClick={() => { onSelect(effectId); onClose(); }}
+                                    className={`w-14 h-14 rounded-full relative transition-all overflow-hidden border-2 bg-white/5 ${isSelected ? "border-white scale-110 shadow-xl" : "border-transparent hover:scale-105 hover:bg-white/10"}`}
+                                >
+                                    {/* Visual preview */}
+                                    <div className="absolute inset-0 flex items-center justify-center p-2 opacity-50">
+                                        <img src={preset.imageUrl} alt={preset.label} className="w-full h-full object-contain" />
+                                    </div>
+
+                                    {isSelected && (
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                            <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-black shadow-lg">
+                                                <Check className="w-3 h-3" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </button>
+                                <span className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? "text-white" : "text-white/40"}`}>
+                                    {preset.label}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex items-center gap-2">

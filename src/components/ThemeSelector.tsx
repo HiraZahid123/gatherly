@@ -10,7 +10,7 @@ interface ThemeSelectorProps {
     currentTheme: string;
 }
 
-const CATEGORIES = ["All", "Dark", "Minimal"];
+const CATEGORIES = ["All", "Dark", "Minimal", "Animated"];
 
 export const THEMES = [
     {
@@ -76,6 +76,17 @@ export const THEMES = [
         ),
         accentColor: "#0ea5e9",
     },
+];
+
+export const ANIMATED_THEME_PRESETS = [
+    {
+        id: "ski",
+        label: "Ski Trip",
+        category: "Animated",
+        type: "video",
+        url: "/themes/ski.mp4",
+        primaryColor: "#3b82f6"
+    }
 ];
 
 export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme }: ThemeSelectorProps) {
@@ -167,6 +178,46 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
                                 </span>
                             </div>
                         ))}
+
+                        {/* Animated Theme Presets */}
+                        {(activeCategory === "All" || activeCategory === "Animated") && ANIMATED_THEME_PRESETS.map((preset) => {
+                            const themeId = `preset-video:${preset.id}`;
+                            const isSelected = currentTheme === themeId;
+                            return (
+                                <div key={preset.id} className="flex flex-col items-center gap-2">
+                                    <button
+                                        onClick={() => { onSelect(themeId, preset.primaryColor); onClose(); }}
+                                        className={`w-14 h-14 rounded-full relative transition-all overflow-hidden border-2 bg-black ${isSelected
+                                            ? "border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                                            : "border-transparent hover:scale-105 hover:border-white/20"
+                                            }`}
+                                    >
+                                        <div className="absolute inset-0">
+                                            {preset.type === 'video' && (
+                                                <video 
+                                                    src={preset.url} 
+                                                    autoPlay 
+                                                    loop 
+                                                    muted 
+                                                    playsInline 
+                                                    className="w-full h-full object-cover opacity-80"
+                                                />
+                                            )}
+                                        </div>
+                                        {isSelected && (
+                                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                                <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center text-black shadow-lg">
+                                                    <Check className="w-3 h-3" />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </button>
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? "text-white" : "text-white/40"}`}>
+                                        {preset.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
 
                         {/* Custom Gradient Picker */}
                         {(activeCategory === "All" || activeCategory === "Minimal") && (

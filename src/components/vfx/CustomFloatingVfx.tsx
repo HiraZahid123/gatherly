@@ -11,7 +11,7 @@ interface CustomFloatingVfxProps {
 
 export default function CustomFloatingVfx({
     imageUrl,
-    count = 20, // Increased count
+    count = 35, // Increased count for more chaos
     speed = 1
 }: CustomFloatingVfxProps) {
     useEffect(() => {
@@ -19,15 +19,49 @@ export default function CustomFloatingVfx({
     }, [imageUrl]);
 
     const particles = useMemo(() => {
-        return Array.from({ length: count }).map((_, i) => ({
-            id: i,
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            size: 20 + Math.random() * 40,
-            duration: (10 + Math.random() * 20) / speed,
-            delay: Math.random() * -20,
-            rotation: Math.random() * 360,
-        }));
+        return Array.from({ length: count }).map((_, i) => {
+            const directionType = Math.floor(Math.random() * 4); // 0, 1, 2, 3
+            
+            let initialX: string | number, initialY: string | number;
+            let animateX: any, animateY: any;
+            const startOffset = Math.random() * 100;
+            const wobble = Math.random() * 20;
+
+            if (directionType === 0) { // Top to Bottom
+                initialX = `${startOffset}vw`;
+                initialY = "-20vh";
+                animateX = [`${startOffset}vw`, `${startOffset + wobble}vw`, `${startOffset - wobble}vw`, `${startOffset}vw`];
+                animateY = "120vh";
+            } else if (directionType === 1) { // Bottom to Top
+                initialX = `${startOffset}vw`;
+                initialY = "120vh";
+                animateX = [`${startOffset}vw`, `${startOffset - wobble}vw`, `${startOffset + wobble}vw`, `${startOffset}vw`];
+                animateY = "-20vh";
+            } else if (directionType === 2) { // Left to Right
+                initialX = "-20vw";
+                initialY = `${startOffset}vh`;
+                animateX = "120vw";
+                animateY = [`${startOffset}vh`, `${startOffset + wobble}vh`, `${startOffset - wobble}vh`, `${startOffset}vh`];
+            } else { // Right to Left
+                initialX = "120vw";
+                initialY = `${startOffset}vh`;
+                animateX = "-20vw";
+                animateY = [`${startOffset}vh`, `${startOffset - wobble}vh`, `${startOffset + wobble}vh`, `${startOffset}vh`];
+            }
+
+            return {
+                id: i,
+                initialX,
+                initialY,
+                animateX,
+                animateY,
+                size: 25 + Math.random() * 45, // Varying sizes
+                duration: (15 + Math.random() * 25) / speed, // Slow and smooth
+                delay: Math.random() * -30, // Heavy negative delay to start already filled
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() > 0.5 ? 1 : -1) * (180 + Math.random() * 360), // Smooth rotation
+            };
+        });
     }, [count, speed]);
 
     return (
@@ -37,18 +71,18 @@ export default function CustomFloatingVfx({
                     key={p.id}
                     className="absolute"
                     initial={{
-                        x: `${p.x}vw`,
-                        y: "110vh",
+                        x: p.initialX,
+                        y: p.initialY,
                         rotate: p.rotation,
                         scale: 0,
                         opacity: 0
                     }}
                     animate={{
-                        y: "-20vh",
-                        x: [`${p.x}vw`, `${p.x + 5}vw`, `${p.x}vw`],
-                        rotate: p.rotation + 360,
-                        scale: [0, 1.2, 1.2, 0.8],
-                        opacity: [0, 0.8, 0.8, 0] // Increased opacity
+                        x: p.animateX,
+                        y: p.animateY,
+                        rotate: p.rotation + p.rotationSpeed,
+                        scale: [0, 1, 1.2, 1, 0],
+                        opacity: [0, 0.9, 0.9, 0.9, 0]
                     }}
                     transition={{
                         duration: p.duration,
