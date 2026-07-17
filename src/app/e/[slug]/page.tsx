@@ -56,8 +56,9 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
         event.theme = { settings: {} };
     }
     
-    if (!event.theme.settings) event.theme.settings = {};
-    event.theme.settings.reminders = event.reminders;
+    const theme: any = event.theme;
+    if (!theme.settings) theme.settings = {};
+    theme.settings.reminders = event.reminders;
 
     // Check Permissions for Private Events
     if (event.visibility === "PRIVATE") {
