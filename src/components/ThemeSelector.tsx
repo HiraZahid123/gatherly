@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Check, Palette, Search } from "lucide-react";
+import { Check, X, Search, Hexagon, Palette } from "lucide-react";
 import { useState } from "react";
 
 interface ThemeSelectorProps {
@@ -111,7 +111,10 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
                 {/* Header */}
                 <div className="px-6 pt-6 pb-2">
                     <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-xl font-bold text-white tracking-tight">Background</h3>
+                        <div className="flex items-center gap-2">
+                            <Hexagon className="w-5 h-5 text-white/60" />
+                            <h3 className="text-xl font-bold text-white tracking-tight">Theme</h3>
+                        </div>
                         <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                             <X className="w-5 h-5 text-white/40" />
                         </button>
@@ -120,7 +123,7 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
 
                 {/* Categories */}
                 <div className="px-6 mb-4">
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-2">
+                    <div className="flex flex-wrap gap-2 py-2">
                         {CATEGORIES.map((cat) => (
                             <button
                                 key={cat}
