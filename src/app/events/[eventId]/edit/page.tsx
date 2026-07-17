@@ -18,6 +18,8 @@ import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
+import FloatingParticles from "@/components/FloatingParticles";
+import VfxCanvas from "@/components/vfx/VfxCanvas";
 import { ChevronLeft } from "lucide-react";
 
 // Dynamically import InteractiveBackground (Three.js — client only)
