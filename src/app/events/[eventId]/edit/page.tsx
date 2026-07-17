@@ -13,7 +13,6 @@ import CoverImageGallery from "@/components/CoverImageGallery";
 import EffectSelector from "@/components/EffectSelector";
 import ThemeSelector from "@/components/ThemeSelector";
 import { VIBE_THEMES } from "@/lib/theme";
-import InteractiveBackground from "@/components/InteractiveBackground";
 import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
