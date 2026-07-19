@@ -80,12 +80,388 @@ export const THEMES = [
 
 export const ANIMATED_THEME_PRESETS = [
     {
-        id: "ski",
-        label: "Ski Trip",
-        category: "Animated",
-        type: "video",
-        url: "/themes/ski.mp4",
-        primaryColor: "#3b82f6"
+        "id": "aquamarine",
+        "label": "Aquamarine",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/aquamarine/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "aquatica",
+        "label": "Aquatica",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/aquatica/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "aurora",
+        "label": "Aurora",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/aurora/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "beach",
+        "label": "Beach",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/beach/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "beer",
+        "label": "Beer",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/beer/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "blacklight",
+        "label": "Blacklight",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/blacklight/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "bokeh",
+        "label": "Bokeh",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/bokeh/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "bubblegum",
+        "label": "Bubblegum",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/bubblegum/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "candy",
+        "label": "Candy",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/candy/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "champagne",
+        "label": "Champagne",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/champagne/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "cloudflow",
+        "label": "Cloudflow",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/cloudflow/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "crystal",
+        "label": "Crystal",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/crystal/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "darkSky",
+        "label": "Dark Sky",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/darkSky/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "daybreak",
+        "label": "Daybreak",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/daybreak/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "forest",
+        "label": "Forest",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/forest/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "galaxy",
+        "label": "Galaxy",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/galaxy/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "girlyMac",
+        "label": "Girly Mac",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/girlyMac/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "golden",
+        "label": "Golden",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/golden/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "grass",
+        "label": "Grass",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/grass/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "ice",
+        "label": "Ice",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/ice/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "ink",
+        "label": "Ink",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/ink/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "kaleidoscope",
+        "label": "Kaleidoscope",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/kaleidoscope/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "karaoke",
+        "label": "Karaoke",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/karaoke/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "komorebi",
+        "label": "Komorebi",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/komorebi/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "lavaRave",
+        "label": "Lava Rave",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/lavaRave/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "lofiGrass",
+        "label": "Lofi Grass",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/lofiGrass/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "meadows",
+        "label": "Meadows",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/meadows/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "midday",
+        "label": "Midday",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/midday/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "midnight",
+        "label": "Midnight",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/midnight/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "oxblood",
+        "label": "Oxblood",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/oxblood/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "parchment",
+        "label": "Parchment",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/parchment/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "phantom",
+        "label": "Phantom",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/phantom/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "pool",
+        "label": "Pool",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/pool/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "rainbowGlitter",
+        "label": "Rainbow Glitter",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/rainbowGlitter/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "rush",
+        "label": "Rush",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/rush/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "shroomset",
+        "label": "Shroomset",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/shroomset/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "ski",
+        "label": "Ski",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/ski/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "slate",
+        "label": "Slate",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/slate/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "snowPaws",
+        "label": "Snow Paws",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/snowPaws/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "starburst",
+        "label": "Starburst",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/starburst/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "storybloom",
+        "label": "Storybloom",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/storybloom/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "sunrise",
+        "label": "Sunrise",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/sunrise/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "sunset",
+        "label": "Sunset",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/sunset/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "toile",
+        "label": "Toile",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/toile/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "twilight",
+        "label": "Twilight",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/twilight/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "watercolor",
+        "label": "Watercolor",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/watercolor/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "whisky",
+        "label": "Whisky",
+        "category": "Static",
+        "type": "image",
+        "url": "/themes/whisky/web.jpg",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
+    },
+    {
+        "id": "winterWonderland",
+        "label": "Winter Wonderland",
+        "category": "Animated",
+        "type": "video",
+        "url": "/themes/winterWonderland/web.mp4",
+        "thumbnail": "linear-gradient(to bottom right, #ffffff, #a0aec0)"
     }
 ];
 
@@ -189,22 +565,31 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
                             return (
                                 <div key={preset.id} className="flex flex-col items-center gap-2">
                                     <button
-                                        onClick={() => { onSelect(themeId, preset.primaryColor); onClose(); }}
+                                        onClick={() => { onSelect(themeId, (preset as any).primaryColor); onClose(); }}
                                         className={`w-14 h-14 rounded-full relative transition-all overflow-hidden border-2 bg-black ${isSelected
                                             ? "border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
                                             : "border-transparent hover:scale-105 hover:border-white/20"
                                             }`}
                                     >
                                         <div className="absolute inset-0">
-                                            {preset.type === 'video' && (
+                                            {preset.type === 'video' ? (
                                                 <video 
-                                                    src={preset.url} 
-                                                    autoPlay 
+                                                    src={`${preset.url}#t=0.001`} 
+                                                    preload="metadata"
                                                     loop 
                                                     muted 
                                                     playsInline 
                                                     className="w-full h-full object-cover opacity-80"
+                                                    onMouseEnter={(e) => {
+                                                        const p = e.currentTarget.play();
+                                                        if (p !== undefined) {
+                                                            p.catch(() => {});
+                                                        }
+                                                    }}
+                                                    onMouseLeave={(e) => e.currentTarget.pause()}
                                                 />
+                                            ) : (
+                                                <img src={preset.url} className="w-full h-full object-cover opacity-80" alt={preset.label} />
                                             )}
                                         </div>
                                         {isSelected && (

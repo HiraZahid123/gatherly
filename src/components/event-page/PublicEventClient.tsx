@@ -26,6 +26,7 @@ import { QrCode, Ticket, Calendar } from "lucide-react";
 import { getCalendarLinks } from "@/lib/calendar";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 
 // Lazy-load EventSettingsModal — 31 Lucide icons, only needed when host opens Settings
 const EventSettingsModal = dynamic(() => import("@/components/EventSettingsModal"), { ssr: false });
@@ -484,17 +485,27 @@ export default function PublicEventClient({
                 {backgroundTheme.startsWith('preset-video:') && (() => {
                     const presetId = backgroundTheme.split(':')[1];
                     const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
-                    if (preset && preset.type === 'video') {
-                        return (
-                            <video 
-                                src={preset.url} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
-                                className="absolute inset-0 w-full h-full object-cover opacity-80"
-                            />
-                        );
+                    if (preset) {
+                        if (preset.type === 'video') {
+                            return (
+                                <video 
+                                    src={preset.url} 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                />
+                            );
+                        } else if (preset.type === 'image') {
+                            return (
+                                <img 
+                                    src={preset.url} 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                    alt=""
+                                />
+                            );
+                        }
                     }
                     return null;
                 })()}
@@ -558,11 +569,22 @@ export default function PublicEventClient({
                     return null;
                 })()}
 
-                {/* Preset WebM Video FX */}
+                {/* Preset WebM Video FX / Lottie */}
                 {effect?.startsWith('preset-webm:') && (() => {
                     const presetId = effect.split(':')[1];
                     const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
+                        if ((preset as any).type === 'lottie') {
+                            return (
+                                <SafeLottiePlayer
+                                    src={preset.videoUrl}
+                                    autoplay
+                                    loop
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            );
+                        }
                         return (
                             <video 
                                 src={preset.videoUrl} 
@@ -570,7 +592,7 @@ export default function PublicEventClient({
                                 loop 
                                 muted 
                                 playsInline 
-                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                                className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );
                     }

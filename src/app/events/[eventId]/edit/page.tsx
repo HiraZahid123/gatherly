@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -18,8 +18,11 @@ import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
-import FloatingParticles from "@/components/FloatingParticles";
+import Confetti from "@/components/vfx/Confetti";
+import Rain from "@/components/vfx/Rain";
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 import VfxCanvas from "@/components/vfx/VfxCanvas";
+import FloatingParticles from "@/components/FloatingParticles";
 import { ChevronLeft } from "lucide-react";
 
 // Dynamically import InteractiveBackground (Three.js — client only)
@@ -114,8 +117,10 @@ export default function EditEventPage() {
     };
 
     // Fetch Event Data
+    const hasFetchedRef = useRef(false);
     useEffect(() => {
         const fetchEvent = async () => {
+            if (hasFetchedRef.current) return;
             if (status === "loading") return;
             if (!session) {
                 router.push("/auth/signin");
@@ -136,6 +141,8 @@ export default function EditEventPage() {
                 if (!foundEvent) {
                     throw new Error("Event not found or you don't have permission to edit it");
                 }
+
+                hasFetchedRef.current = true;
 
                 // Map fetched data to state
                 // Map theme/visuals
@@ -401,17 +408,27 @@ export default function EditEventPage() {
                     selectedTheme?.startsWith('preset-video:') && (() => {
                         const presetId = selectedTheme.split(':')[1];
                         const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
-                        if (preset && preset.type === 'video') {
-                            return (
-                                <video 
-                                    src={preset.url} 
-                                    autoPlay 
-                                    loop 
-                                    muted 
-                                    playsInline 
-                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
-                                />
-                            );
+                        if (preset) {
+                            if (preset.type === 'video') {
+                                return (
+                                    <video 
+                                        src={preset.url} 
+                                        autoPlay 
+                                        loop 
+                                        muted 
+                                        playsInline 
+                                        className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                    />
+                                );
+                            } else if (preset.type === 'image') {
+                                return (
+                                    <img 
+                                        src={preset.url} 
+                                        className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                        alt=""
+                                    />
+                                );
+                            }
                         }
                         return null;
                     })()
@@ -497,11 +514,22 @@ export default function EditEventPage() {
                     return null;
                 })()}
 
-                {/* Preset WebM Video FX */}
+                {/* Preset WebM Video FX / Lottie */}
                 {effect?.startsWith('preset-webm:') && (() => {
                     const presetId = effect.split(':')[1];
                     const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
+                        if ((preset as any).type === 'lottie') {
+                            return (
+                                <SafeLottiePlayer
+                                    src={preset.videoUrl}
+                                    autoplay
+                                    loop
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            );
+                        }
                         return (
                             <video 
                                 src={preset.videoUrl} 
@@ -509,7 +537,7 @@ export default function EditEventPage() {
                                 loop 
                                 muted 
                                 playsInline 
-                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                                className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );
                     }

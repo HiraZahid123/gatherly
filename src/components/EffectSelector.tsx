@@ -1,6 +1,8 @@
 "use client";
 
-import { X, Check, Sparkles } from "lucide-react";
+import { Check, X, Search, Sparkles } from "lucide-react";
+import dynamic from 'next/dynamic';
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 
 interface EffectSelectorProps {
     isOpen: boolean;
@@ -88,16 +90,6 @@ export const EFFECTS: Effect[] = [
 
 export const IMAGE_VFX_PRESETS = [
     {
-        id: "money",
-        label: "Money",
-        imageUrl: "/effects/money.svg",
-    },
-    {
-        id: "heart",
-        label: "Hearts",
-        imageUrl: "/effects/heart.svg",
-    },
-    {
         id: "snow",
         label: "Snow",
         imageUrl: "/effects/snow.svg",
@@ -110,12 +102,300 @@ export const IMAGE_VFX_PRESETS = [
 ];
 
 export const VIDEO_VFX_PRESETS = [
-    { id: "sakura", label: "Sakura", videoUrl: "/effects/sakura.webm" },
-    { id: "balloons", label: "Balloons", videoUrl: "/effects/balloons.webm" },
-    { id: "disco", label: "Disco", videoUrl: "/effects/disco.webm" },
-    { id: "sparkles", label: "Sparkles", videoUrl: "/effects/sparkles.webm" },
-    { id: "bubbles", label: "Bubbles", videoUrl: "/effects/bubbles.webm" },
-    { id: "fireworks", label: "Fireworks", videoUrl: "/effects/fireworks.webm" },
+    {
+        "id": "balloons",
+        "label": "Balloons",
+        "type": "video",
+        "videoUrl": "/effects/balloons/web.webm"
+    },
+    {
+        "id": "basketball",
+        "label": "Basketball",
+        "type": "lottie",
+        "videoUrl": "/effects/basketball/web.json"
+    },
+    {
+        "id": "beachballs",
+        "label": "Beachballs",
+        "type": "lottie",
+        "videoUrl": "/effects/beachballs/web.json"
+    },
+    {
+        "id": "beerPong",
+        "label": "Beer Pong",
+        "type": "video",
+        "videoUrl": "/effects/beerPong/web.webm"
+    },
+    {
+        "id": "bows",
+        "label": "Bows",
+        "type": "video",
+        "videoUrl": "/effects/bows/web.webm"
+    },
+    {
+        "id": "bubbles",
+        "label": "Bubbles",
+        "type": "video",
+        "videoUrl": "/effects/bubbles/web.webm"
+    },
+    {
+        "id": "bunnies",
+        "label": "Bunnies",
+        "type": "video",
+        "videoUrl": "/effects/bunnies/web.webm"
+    },
+    {
+        "id": "cascade",
+        "label": "Cascade",
+        "type": "video",
+        "videoUrl": "/effects/cascade/web.webm"
+    },
+    {
+        "id": "cash",
+        "label": "Cash",
+        "type": "lottie",
+        "videoUrl": "/effects/cash/web.json"
+    },
+    {
+        "id": "christmasLights",
+        "label": "Christmas Lights",
+        "type": "video",
+        "videoUrl": "/effects/christmasLights/web.webm"
+    },
+    {
+        "id": "confettiExplosion",
+        "label": "Confetti Explosion",
+        "type": "video",
+        "videoUrl": "/effects/confettiExplosion/web.webm"
+    },
+    {
+        "id": "crayons",
+        "label": "Crayons",
+        "type": "video",
+        "videoUrl": "/effects/crayons/web.webm"
+    },
+    {
+        "id": "dandelions",
+        "label": "Dandelions",
+        "type": "lottie",
+        "videoUrl": "/effects/dandelions/web.json"
+    },
+    {
+        "id": "disco",
+        "label": "Disco",
+        "type": "video",
+        "videoUrl": "/effects/disco/web.webm"
+    },
+    {
+        "id": "doge",
+        "label": "Doge",
+        "type": "lottie",
+        "videoUrl": "/effects/doge/web.json"
+    },
+    {
+        "id": "fireCannons",
+        "label": "Fire Cannons",
+        "type": "video",
+        "videoUrl": "/effects/fireCannons/web.webm"
+    },
+    {
+        "id": "fireflies",
+        "label": "Fireflies",
+        "type": "video",
+        "videoUrl": "/effects/fireflies/web.webm"
+    },
+    {
+        "id": "fireworks",
+        "label": "Fireworks",
+        "type": "video",
+        "videoUrl": "/effects/fireworks/web.webm"
+    },
+    {
+        "id": "football",
+        "label": "Football",
+        "type": "lottie",
+        "videoUrl": "/effects/football/web.json"
+    },
+    {
+        "id": "gelt",
+        "label": "Gelt",
+        "type": "video",
+        "videoUrl": "/effects/gelt/web.webm"
+    },
+    {
+        "id": "ghosts",
+        "label": "Ghosts",
+        "type": "video",
+        "videoUrl": "/effects/ghosts/web.webm"
+    },
+    {
+        "id": "gingerbread",
+        "label": "Gingerbread",
+        "type": "video",
+        "videoUrl": "/effects/gingerbread/web.webm"
+    },
+    {
+        "id": "ginkgo",
+        "label": "Ginkgo",
+        "type": "video",
+        "videoUrl": "/effects/ginkgo/web.webm"
+    },
+    {
+        "id": "glowbugs",
+        "label": "Glowbugs",
+        "type": "video",
+        "videoUrl": "/effects/glowbugs/web.webm"
+    },
+    {
+        "id": "graduation",
+        "label": "Graduation",
+        "type": "video",
+        "videoUrl": "/effects/graduation/web.webm"
+    },
+    {
+        "id": "handprints",
+        "label": "Handprints",
+        "type": "video",
+        "videoUrl": "/effects/handprints/web.webm"
+    },
+    {
+        "id": "kisses",
+        "label": "Kisses",
+        "type": "video",
+        "videoUrl": "/effects/kisses/web.webm"
+    },
+    {
+        "id": "lasers",
+        "label": "Lasers",
+        "type": "video",
+        "videoUrl": "/effects/lasers/web.webm"
+    },
+    {
+        "id": "leaves",
+        "label": "Leaves",
+        "type": "video",
+        "videoUrl": "/effects/leaves/web.webm"
+    },
+    {
+        "id": "lightning",
+        "label": "Lightning",
+        "type": "video",
+        "videoUrl": "/effects/lightning/web.webm"
+    },
+    {
+        "id": "lights",
+        "label": "Lights",
+        "type": "video",
+        "videoUrl": "/effects/lights/web.webm"
+    },
+    {
+        "id": "pizzaToppings",
+        "label": "Pizza Toppings",
+        "type": "video",
+        "videoUrl": "/effects/pizzaToppings/web.webm"
+    },
+    {
+        "id": "presents",
+        "label": "Presents",
+        "type": "video",
+        "videoUrl": "/effects/presents/web.webm"
+    },
+    {
+        "id": "sakura",
+        "label": "Sakura",
+        "type": "video",
+        "videoUrl": "/effects/sakura/web.webm"
+    },
+    {
+        "id": "shadowBats",
+        "label": "Shadow Bats",
+        "type": "video",
+        "videoUrl": "/effects/shadowBats/web.webm"
+    },
+    {
+        "id": "shamrock",
+        "label": "Shamrock",
+        "type": "lottie",
+        "videoUrl": "/effects/shamrock/web.json"
+    },
+    {
+        "id": "smoke",
+        "label": "Smoke",
+        "type": "video",
+        "videoUrl": "/effects/smoke/web.webm"
+    },
+    {
+        "id": "snowflakes",
+        "label": "Snowflakes",
+        "type": "video",
+        "videoUrl": "/effects/snowflakes/web.webm"
+    },
+    {
+        "id": "snowman",
+        "label": "Snowman",
+        "type": "video",
+        "videoUrl": "/effects/snowman/web.webm"
+    },
+    {
+        "id": "spaceInvaders",
+        "label": "Space Invaders",
+        "type": "video",
+        "videoUrl": "/effects/spaceInvaders/web.webm"
+    },
+    {
+        "id": "sparkles",
+        "label": "Sparkles",
+        "type": "video",
+        "videoUrl": "/effects/sparkles/web.webm"
+    },
+    {
+        "id": "spiders",
+        "label": "Spiders",
+        "type": "video",
+        "videoUrl": "/effects/spiders/web.webm"
+    },
+    {
+        "id": "spiderwebs",
+        "label": "Spiderwebs",
+        "type": "video",
+        "videoUrl": "/effects/spiderwebs/web.webm"
+    },
+    {
+        "id": "starrySky",
+        "label": "Starry Sky",
+        "type": "video",
+        "videoUrl": "/effects/starrySky/web.webm"
+    },
+    {
+        "id": "stars",
+        "label": "Stars",
+        "type": "lottie",
+        "videoUrl": "/effects/stars/web.json"
+    },
+    {
+        "id": "sunbeams",
+        "label": "Sunbeams",
+        "type": "video",
+        "videoUrl": "/effects/sunbeams/web.webm"
+    },
+    {
+        "id": "tennis",
+        "label": "Tennis",
+        "type": "video",
+        "videoUrl": "/effects/tennis/web.webm"
+    },
+    {
+        "id": "thanksgivingFood",
+        "label": "Thanksgiving Food",
+        "type": "video",
+        "videoUrl": "/effects/thanksgivingFood/web.webm"
+    },
+    {
+        "id": "winterCreatures",
+        "label": "Winter Creatures",
+        "type": "video",
+        "videoUrl": "/effects/winterCreatures/web.webm"
+    }
 ];
 
 export default function EffectSelector({ isOpen, onClose, onSelect, currentEffect }: EffectSelectorProps) {
@@ -138,7 +418,8 @@ export default function EffectSelector({ isOpen, onClose, onSelect, currentEffec
                     </div>
                 </div>
 
-                <div className="p-6 grid grid-cols-3 gap-y-6 gap-x-4">
+                <div className="px-6 pb-6 max-h-[500px] overflow-y-auto no-scrollbar">
+                    <div className="grid grid-cols-3 gap-y-6 gap-x-4 pt-2">
                     {/* None option */}
                     <div className="flex flex-col items-center gap-2">
                         <button
@@ -280,7 +561,33 @@ export default function EffectSelector({ isOpen, onClose, onSelect, currentEffec
                                 >
                                     {/* Visual preview */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-80">
-                                        <video src={preset.videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                                        {(preset as any).type === 'lottie' ? (
+                                            <SafeLottiePlayer
+                                                src={preset.videoUrl}
+                                                hover
+                                                loop
+                                                className="w-full h-full object-cover"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        ) : (preset as any).type === 'icon' ? (
+                                            <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl">🎉</div>
+                                        ) : (
+                                            <video 
+                                                src={`${preset.videoUrl}#t=0.001`} 
+                                                preload="metadata"
+                                                loop 
+                                                muted 
+                                                playsInline 
+                                                className="w-full h-full object-cover"
+                                                onMouseEnter={(e) => {
+                                                    const p = e.currentTarget.play();
+                                                    if (p !== undefined) {
+                                                        p.catch(() => {});
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => e.currentTarget.pause()}
+                                            />
+                                        )}
                                     </div>
 
                                     {isSelected && (
@@ -297,6 +604,7 @@ export default function EffectSelector({ isOpen, onClose, onSelect, currentEffec
                             </div>
                         );
                     })}
+                    </div>
                 </div>
 
                 <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex items-center gap-2">

@@ -16,6 +16,8 @@ import VfxCanvas from "@/components/vfx/VfxCanvas";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
+import dynamic from 'next/dynamic';
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 import EnvelopeView from "@/components/cards/EnvelopeView";
 import {
     Image as ImageIcon,
@@ -153,17 +155,27 @@ export default function CreateCardPage() {
                 {selectedTheme?.startsWith('preset-video:') && (() => {
                     const presetId = selectedTheme.split(':')[1];
                     const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
-                    if (preset && preset.type === 'video') {
-                        return (
-                            <video 
-                                src={preset.url} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
-                                className="absolute inset-0 w-full h-full object-cover opacity-80"
-                            />
-                        );
+                    if (preset) {
+                        if (preset.type === 'video') {
+                            return (
+                                <video 
+                                    src={preset.url} 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                />
+                            );
+                        } else if (preset.type === 'image') {
+                            return (
+                                <img 
+                                    src={preset.url} 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                    alt=""
+                                />
+                            );
+                        }
                     }
                     return null;
                 })()}
@@ -195,11 +207,22 @@ export default function CreateCardPage() {
                     return null;
                 })()}
 
-                {/* Preset WebM Video FX */}
+                {/* Preset WebM Video FX / Lottie */}
                 {effect?.startsWith('preset-webm:') && (() => {
                     const presetId = effect.split(':')[1];
                     const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
+                        if ((preset as any).type === 'lottie') {
+                            return (
+                                <SafeLottiePlayer
+                                    src={preset.videoUrl}
+                                    autoplay
+                                    loop
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            );
+                        }
                         return (
                             <video 
                                 src={preset.videoUrl} 
@@ -207,7 +230,7 @@ export default function CreateCardPage() {
                                 loop 
                                 muted 
                                 playsInline 
-                                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-90"
+                                className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );
                     }
