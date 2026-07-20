@@ -22,7 +22,7 @@ const EXAMPLE_EVENT = {
     visibility: "PUBLIC",
     status: "PUBLISHED",
     coverImage:
-        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=80",
+        "/partiful/bitchy-shrek-sophia.avif",
     guestListHidden: false,
     capacity: 200,
     isPrivate: false,

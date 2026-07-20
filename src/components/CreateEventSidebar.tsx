@@ -11,7 +11,7 @@ interface CreateEventSidebarProps {
     /** Currently selected foreground effect id (e.g. 'skiing') */
     selectedEffect?: string;
     mode?: 'event' | 'card';
-    isLoading?: boolean; 
+    isLoading?: boolean;
 }
 
 // Preview look-ups must stay in sync with ThemeSelector.tsx and EffectSelector.tsx

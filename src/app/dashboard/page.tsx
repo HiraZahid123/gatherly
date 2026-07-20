@@ -137,6 +137,11 @@ export default function DashboardPage() {
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Create</span>
                         </Link>
+                        {session.user.role === "ADMIN" && (
+                            <Link href="/admin" className="text-sm font-black text-red-500 hover:text-red-400 transition-colors hidden md:block">
+                                Admin Panel
+                            </Link>
+                        )}
                         <Link href="/blog" className="text-sm font-black text-white/50 hover:text-white transition-colors hidden md:block">Blog</Link>
                         <div className="flex items-center gap-3 sm:gap-6 border-l border-white/10 pl-3 sm:pl-8">
                             <HelpCircle className="w-5 h-5 text-white/30 hover:text-white cursor-pointer transition-colors hidden sm:block" />

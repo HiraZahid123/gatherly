@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
     Users as UsersIcon,
@@ -37,6 +39,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function UsersManagement() {
+    const { data: session } = useSession();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -389,6 +392,7 @@ export default function UsersManagement() {
                                     <td className="px-4 py-5 text-center">
                                         <select
                                             value={user.role}
+                                            disabled={user.id === session?.user?.id}
                                             onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
                                             title="Update User Role"
                                             className={`text-[10px] font-black uppercase tracking-widest rounded-full px-3 py-1.5 border-none outline-none cursor-pointer transition-all ${ROLE_COLORS[user.role]}`}
@@ -433,18 +437,22 @@ export default function UsersManagement() {
                                             <button onClick={() => { setEditingUser(user); setEditForm({ name: user.name || "", email: user.email || "", phone: user.phone || "", role: user.role }); }} title="Edit Profile" className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
                                                 <Edit3 className="w-4 h-4 text-white/40" />
                                             </button>
-                                            {user.suspendedAt ? (
-                                                <button onClick={() => handleUnsuspend(user.id)} title="Unsuspend User" className="w-9 h-9 rounded-xl bg-green-500/10 hover:bg-green-500/20 flex items-center justify-center transition-all">
-                                                    <Shield className="w-4 h-4 text-green-400" />
-                                                </button>
-                                            ) : (
-                                                <button onClick={() => setSuspendModal({ user, open: true })} title="Suspend User" className="w-9 h-9 rounded-xl bg-amber-500/5 hover:bg-amber-500/20 flex items-center justify-center transition-all">
-                                                    <ShieldOff className="w-4 h-4 text-amber-500/50" />
-                                                </button>
+                                            {user.id !== session?.user?.id && (
+                                                <>
+                                                    {user.suspendedAt ? (
+                                                        <button onClick={() => handleUnsuspend(user.id)} title="Unsuspend User" className="w-9 h-9 rounded-xl bg-green-500/10 hover:bg-green-500/20 flex items-center justify-center transition-all">
+                                                            <Shield className="w-4 h-4 text-green-400" />
+                                                        </button>
+                                                    ) : (
+                                                        <button onClick={() => setSuspendModal({ user, open: true })} title="Suspend User" className="w-9 h-9 rounded-xl bg-amber-500/5 hover:bg-amber-500/20 flex items-center justify-center transition-all">
+                                                            <ShieldOff className="w-4 h-4 text-amber-500/50" />
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => handleDeleteUser(user.id, user.name)} title="Delete User Permanently" className="w-9 h-9 rounded-xl bg-red-500/5 hover:bg-red-500/20 flex items-center justify-center transition-all">
+                                                        <Trash2 className="w-4 h-4 text-red-500/40" />
+                                                    </button>
+                                                </>
                                             )}
-                                            <button onClick={() => handleDeleteUser(user.id, user.name)} title="Delete User Permanently" className="w-9 h-9 rounded-xl bg-red-500/5 hover:bg-red-500/20 flex items-center justify-center transition-all">
-                                                <Trash2 className="w-4 h-4 text-red-500/40" />
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -674,20 +682,22 @@ export default function UsersManagement() {
                             </div>
 
                             {/* Drawer Footer Actions */}
-                            <div className="px-8 py-6 border-t border-white/5 flex gap-3 flex-shrink-0">
-                                {drawerUser.suspendedAt ? (
-                                    <button onClick={() => handleUnsuspend(drawerUser.id)} className="flex-1 h-12 bg-green-500/20 text-green-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-green-500/30 transition-all flex items-center justify-center gap-2">
-                                        <Shield className="w-4 h-4" />Restore Account
+                            {drawerUser.id !== session?.user?.id && (
+                                <div className="px-8 py-6 border-t border-white/5 flex gap-3 flex-shrink-0">
+                                    {drawerUser.suspendedAt ? (
+                                        <button onClick={() => handleUnsuspend(drawerUser.id)} className="flex-1 h-12 bg-green-500/20 text-green-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-green-500/30 transition-all flex items-center justify-center gap-2">
+                                            <Shield className="w-4 h-4" />Restore Account
+                                        </button>
+                                    ) : (
+                                        <button onClick={() => setSuspendModal({ user: drawerUser, open: true })} className="flex-1 h-12 bg-amber-500/10 text-amber-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-amber-500/20 transition-all flex items-center justify-center gap-2">
+                                            <ShieldOff className="w-4 h-4" />Suspend
+                                        </button>
+                                    )}
+                                    <button onClick={() => handleDeleteUser(drawerUser.id, drawerUser.name)} className="flex-1 h-12 bg-red-500/10 text-red-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-red-500/20 transition-all flex items-center justify-center gap-2">
+                                        <Trash2 className="w-4 h-4" />Delete
                                     </button>
-                                ) : (
-                                    <button onClick={() => setSuspendModal({ user: drawerUser, open: true })} className="flex-1 h-12 bg-amber-500/10 text-amber-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-amber-500/20 transition-all flex items-center justify-center gap-2">
-                                        <ShieldOff className="w-4 h-4" />Suspend
-                                    </button>
-                                )}
-                                <button onClick={() => handleDeleteUser(drawerUser.id, drawerUser.name)} className="flex-1 h-12 bg-red-500/10 text-red-400 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-red-500/20 transition-all flex items-center justify-center gap-2">
-                                    <Trash2 className="w-4 h-4" />Delete
-                                </button>
-                            </div>
+                                </div>
+                            )}
                         </motion.aside>
                     </>
                 )}

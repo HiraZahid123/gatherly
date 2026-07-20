@@ -1,53 +1,39 @@
-const { Client } = require('pg');
+const { PrismaClient } = require('../src/generated/client');
 const bcrypt = require('bcryptjs');
-require('dotenv').config();
+
+const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'admin@example.com';
-  const password = 'Admin@123';
-  const phone = '+1999999999'; // Unique phone number to avoid constraint errors
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const connectionString = process.env.DATABASE_URL;
+  const email = 'admin@gatherly.com';
+  const password = 'password123';
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const client = new Client({ connectionString });
+  const admin = await prisma.user.upsert({
+    where: { email },
+    update: {
+      role: 'ADMIN',
+      password: hashedPassword
+    },
+    create: {
+      email,
+      name: 'Admin User',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  });
 
-  console.log(`[Admin Creator] Connecting to database...`);
-
-  try {
-    await client.connect();
-    
-    // Check if user exists by email
-    const checkRes = await client.query('SELECT id FROM users WHERE email = $1', [email]);
-    
-    if (checkRes.rows.length > 0) {
-      console.log(`[Admin Creator] User exists, updating to ADMIN...`);
-      await client.query(
-        'UPDATE users SET password = $1, role = $2, name = $3, phone = $4, "emailVerified" = NOW(), "updatedAt" = NOW() WHERE email = $5',
-        [hashedPassword, 'ADMIN', 'Super Admin', phone, email]
-      );
-    } else {
-      console.log(`[Admin Creator] Creating new ADMIN user...`);
-      const id = 'admin_' + Math.random().toString(36).substr(2, 9);
-      // Clean up any existing user with this phone number to avoid conflicts
-      await client.query('DELETE FROM users WHERE phone = $1 AND email != $2', [phone, email]);
-      
-      await client.query(
-        'INSERT INTO users (id, name, email, phone, password, role, "emailVerified", "updatedAt", "createdAt") VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), NOW())',
-        [id, 'Super Admin', email, phone, hashedPassword, 'ADMIN']
-      );
-    }
-
-    console.log(`[Admin Creator] SUCCESS! Admin user ready.`);
-    console.log(`[Admin Creator] Credentials:`);
-    console.log(`  - Email: ${email}`);
-    console.log(`  - Password: ${password}`);
-    console.log(`  - Endpoint: /admin/login`);
-
-  } catch (error) {
-    console.error(`[Admin Creator] Error:`, error);
-  } finally {
-    await client.end();
-  }
+  console.log('====================================');
+  console.log('✅ Admin user created successfully!');
+  console.log(`📧 Email: ${email}`);
+  console.log(`🔑 Password: ${password}`);
+  console.log('====================================');
 }
 
-main();
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

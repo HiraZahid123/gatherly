@@ -11,9 +11,14 @@ interface FontSelectorProps {
 
 const FONTS = [
     { id: "inter", name: "Modern", variable: "var(--font-inter)", class: "font-sans" },
+    { id: "montserrat", name: "Clean", variable: "var(--font-montserrat)", class: "font-sans" },
     { id: "playfair", name: "Elegant", variable: "var(--font-playfair)", class: "font-serif" },
+    { id: "cinzel", name: "Classic", variable: "var(--font-cinzel)", class: "font-serif" },
     { id: "jetbrains-mono", name: "Technical", variable: "var(--font-jetbrains-mono)", class: "font-mono" },
+    { id: "oswald", name: "Bold", variable: "var(--font-oswald)", class: "font-sans" },
     { id: "great-vibes", name: "Handwritten", variable: "var(--font-great-vibes)", class: "font-handwriting" },
+    { id: "caveat", name: "Playful", variable: "var(--font-caveat)", class: "font-handwriting" },
+    { id: "dancing-script", name: "Cursive", variable: "var(--font-dancing-script)", class: "font-handwriting" },
 ];
 
 export default function FontSelector({ isOpen, onClose, currentFont, onSelect }: FontSelectorProps) {

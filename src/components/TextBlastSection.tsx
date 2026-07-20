@@ -35,7 +35,7 @@ const TextBlastSection = () => {
                                 <div className="relative mb-3">
                                     <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden shadow-lg bg-gray-200">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop"
+                                            src="/partiful/adminnightladygaga.avif"
                                             alt="Host Avatar"
                                             fill
                                             className="object-cover"

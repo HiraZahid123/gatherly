@@ -32,7 +32,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+                                            src="/partiful/awards-night.avif"
                                             alt="Joy"
                                             fill
                                             className="object-cover"
@@ -56,7 +56,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+                                            src="/partiful/badbunnyaward.avif"
                                             alt="Jojo"
                                             fill
                                             className="object-cover"
@@ -80,7 +80,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
+                                            src="/partiful/dumplingschopsticks.avif"
                                             alt="Jackie"
                                             fill
                                             className="object-cover"
@@ -115,7 +115,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+                                            src="/partiful/dinner-02.avif"
                                             alt="Sammy"
                                             fill
                                             className="object-cover"
@@ -137,7 +137,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100">
                                         <Image
-                                            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+                                            src="/partiful/mocktail-party.avif"
                                             alt="Ryan"
                                             fill
                                             className="object-cover"
@@ -157,7 +157,7 @@ const FeaturesSection = () => {
                             <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                                 <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200">
                                     <Image
-                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
+                                        src="/partiful/galentines-party.avif"
                                         alt="Current User"
                                         fill
                                         className="object-cover"

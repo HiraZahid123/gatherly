@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, Plus, LogIn, Menu, X, LayoutDashboard, Settings, LogOut, ChevronDown, BookOpen } from "lucide-react";
+import { User, Plus, LogIn, Menu, X, LayoutDashboard, Settings, LogOut, ChevronDown, BookOpen, Compass } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
@@ -91,16 +91,34 @@ export default function Navbar() {
                         How it Works
                     </Link> */}
                     <Link
-                        href="/blog"
+                        href="/summer-parties"
                         className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
                     >
-                        Blog
+                        Summer Parties
                     </Link>
                     <Link
-                        href="/help"
+                        href="/birthdays"
                         className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
                     >
-                        Help Center
+                        Birthdays
+                    </Link>
+                    <Link
+                        href="/dinners"
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                    >
+                        Dinners
+                    </Link>
+                    <Link
+                        href="/housewarmings"
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                    >
+                        Housewarmings
+                    </Link>
+                    <Link
+                        href="/explore"
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                    >
+                        Explore
                     </Link>
                     {isAuthenticated && (
                         <Link
@@ -280,6 +298,14 @@ export default function Navbar() {
                     >
                         <BookOpen size={20} className={"text-white/50"} />
                         <span>Blog</span>
+                    </Link>
+                    <Link
+                        href="/explore"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`text-lg font-medium flex items-center space-x-3 text-white`}
+                    >
+                        <Compass size={20} className={"text-white/50"} />
+                        <span>Explore</span>
                     </Link>
                     <Link
                         href="/help"

@@ -9,6 +9,8 @@ import VfxCanvas from "@/components/vfx/VfxCanvas";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
 import { VIBE_THEMES } from "@/lib/theme";
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
+import { VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 
 export default function InteractiveShowcase() {
     const [themeIdx, setThemeIdx] = useState(0);
@@ -16,13 +18,13 @@ export default function InteractiveShowcase() {
     const [fontIdx, setFontIdx] = useState(0);
     const [posterIdx, setPosterIdx] = useState(0);
 
-    const themes = ["dark", "meadow", "streak"];
-    const effects = ["none", "particles", "aurora", "glow", "floral"];
+    const themes = ["dark", "meadow", "streak", "crystal", "waves"];
+    const effects = ["none", "particles", "aurora", "glow", "confetti", "rain", "balloons", "doge", "ghosts", "graduation"];
     const posters = [
         "/partiful/Aquarius.avif",
-        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
-        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
-        "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80"
+        "/partiful/disco-pride.avif",
+        "/partiful/awards-night.avif",
+        "/partiful/mocktail-party.avif"
     ];
     // Select a few distinct fonts from the platform
     const vibes = ["classic", "fancy", "digital", "royal"];
@@ -106,9 +108,17 @@ export default function InteractiveShowcase() {
 
                         {/* Card Animations */}
                         {currentEffect === 'particles' && <FloatingParticles />}
-                        {currentEffect === 'floral' && <VfxCanvas type="floral" count={1} speed={1} />}
                         {currentEffect === 'confetti' && <Confetti />}
                         {currentEffect === 'rain' && <Rain />}
+                        
+                        {(() => {
+                            const preset = VIDEO_VFX_PRESETS.find(p => p.id === currentEffect);
+                            if (preset) {
+                                if (preset.type === 'video') return <video src={preset.videoUrl} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none mix-blend-screen" />;
+                                if (preset.type === 'lottie') return <SafeLottiePlayer src={preset.videoUrl} className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-80" />;
+                            }
+                            return null;
+                        })()}
                         
                         {currentEffect === 'aurora' && (
                             <div className="absolute inset-0 opacity-60 mix-blend-screen">

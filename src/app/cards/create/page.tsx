@@ -150,7 +150,7 @@ export default function CreateCardPage() {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
-                
+
                 {/* Preset Video Theme Background */}
                 {selectedTheme?.startsWith('preset-video:') && (() => {
                     const presetId = selectedTheme.split(':')[1];
@@ -158,19 +158,19 @@ export default function CreateCardPage() {
                     if (preset) {
                         if (preset.type === 'video') {
                             return (
-                                <video 
-                                    src={preset.url} 
-                                    autoPlay 
-                                    loop 
-                                    muted 
-                                    playsInline 
+                                <video
+                                    src={preset.url}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
                                     className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 />
                             );
                         } else if (preset.type === 'image') {
                             return (
-                                <img 
-                                    src={preset.url} 
+                                <img
+                                    src={preset.url}
                                     className="absolute inset-0 w-full h-full object-cover opacity-80"
                                     alt=""
                                 />
@@ -224,12 +224,12 @@ export default function CreateCardPage() {
                             );
                         }
                         return (
-                            <video 
-                                src={preset.videoUrl} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
+                            <video
+                                src={preset.videoUrl}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );
@@ -239,12 +239,12 @@ export default function CreateCardPage() {
             </div>
 
             {/* Main Layout - Single Column Centered */}
-            <main className="relative z-10 min-h-screen flex flex-col items-center justify-center pt-8 pb-12">
+            <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-4">
 
                 <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col items-center w-full max-w-lg">
 
                     {/* From User Label */}
-                    <div className="flex items-center gap-2 mb-6 bg-black/30 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/10 shadow-xl">
+                    <div className="flex items-center gap-2 mb-2 bg-black/30 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/10 shadow-xl z-10">
                         <span className="text-white/60 text-[10px] font-bold uppercase tracking-wider">From</span>
                         {session?.user?.image && (
                             <Image src={session.user.image} alt="User" width={16} height={16} className="rounded-full ring-1 ring-white/20" />
@@ -252,10 +252,10 @@ export default function CreateCardPage() {
                         <span className="text-white font-bold text-xs">{session?.user?.name || "You"}</span>
                     </div>
 
-                    {/* Envelope / Card Area - Signficantly Reduced Scale for Realism */}
-                    <div className="relative mb-8 group perspective-1000">
+                    {/* Envelope / Card Area - Increased Scale */}
+                    <div className="relative mb-4 group perspective-1000">
                         {/* Card Wrapper */}
-                        <div className="transform scale-75 md:scale-90 transition-transform duration-500 hover:scale-[0.77] md:hover:scale-[0.92] ease-out-expo">
+                        <div className="transform scale-[1.0] md:scale-[1.2] transition-transform duration-500 hover:scale-[1.02] md:hover:scale-[1.22] ease-out-expo">
                             <EnvelopeView
                                 title={title || "Card Title"}
                                 description={description || "Card message..."}
@@ -271,14 +271,14 @@ export default function CreateCardPage() {
                     </div>
 
                     {/* Input Fields - Glassmorphic Realism */}
-                    <div className="w-full max-w-[340px] space-y-3 text-center mt-6">
+                    <div className="w-full max-w-[340px] space-y-3 text-center mt-2 relative z-10">
                         <div className="relative group">
                             <input
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Add a title"
                                 style={{ fontFamily: selectedFont }}
-                                className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 text-2xl font-black text-white placeholder:text-white/20 text-center outline-none transition-all focus:bg-white/10 focus:border-white/20 shadow-lg"
+                                className="w-full bg-white/15 backdrop-blur-xl border-t border-white/20 border-b border-transparent border-x border-transparent rounded-xl px-4 py-3 text-2xl font-black text-white placeholder:text-white/50 text-center outline-none transition-all focus:bg-white/20 focus:border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)]"
                             />
                         </div>
 
@@ -289,7 +289,7 @@ export default function CreateCardPage() {
                                 placeholder="Add a note"
                                 rows={1}
                                 style={{ fontFamily: selectedFont }}
-                                className="w-full bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 text-base font-medium text-white placeholder:text-white/20 text-center outline-none resize-none transition-all focus:bg-white/10 focus:border-white/20 shadow-lg min-h-[50px]"
+                                className="w-full bg-white/15 backdrop-blur-xl border-t border-white/20 border-b border-transparent border-x border-transparent rounded-xl px-4 py-3 text-base font-medium text-white placeholder:text-white/50 text-center outline-none resize-none transition-all focus:bg-white/20 focus:border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] min-h-[50px]"
                                 onInput={(e) => {
                                     const target = e.target as HTMLTextAreaElement;
                                     target.style.height = 'auto';

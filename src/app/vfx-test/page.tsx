@@ -12,7 +12,7 @@ export default function VfxTestPage() {
     const [useClones, setUseClones] = useState(false);
 
     // Sample image for cloning demo
-    const cloneUrl = "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=100&h=100&fit=crop";
+    const cloneUrl = "/partiful/cutie-pie-blue.avif";
 
     return (
         <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans overflow-hidden">

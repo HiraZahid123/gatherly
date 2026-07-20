@@ -7,6 +7,11 @@ import dynamic from "next/dynamic";
 import { applyTheme } from "@/lib/theme"; // Reuse theme logic
 import EnvelopeView from "@/components/cards/EnvelopeView";
 import FloatingParticles from "@/components/FloatingParticles";
+import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
+import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
+import Confetti from "@/components/vfx/Confetti";
+import Rain from "@/components/vfx/Rain";
+import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 
 const InteractiveBackground = dynamic(
     () => import("@/components/InteractiveBackground"),
@@ -89,7 +94,7 @@ export default function CardPage() {
     }
 
     return (
-        <div className="min-h-screen text-white font-sans antialiased overflow-hidden relative flex flex-col items-center justify-center transition-colors duration-1000" style={bgStyle}>
+        <div className="min-h-screen pt-24 text-white font-sans antialiased overflow-hidden relative flex flex-col items-center justify-center transition-colors duration-1000" style={bgStyle}>
             {/* Dark Ribbed Texture Overlay */}
             <div
                 className="absolute inset-0 pointer-events-none opacity-[0.4] z-0 mix-blend-multiply"
@@ -103,6 +108,35 @@ export default function CardPage() {
             <div className="fixed inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/5 blur-[120px] rounded-full"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
+                
+                {/* Preset Video Theme Background */}
+                {backgroundTheme?.startsWith('preset-video:') && (() => {
+                    const presetId = backgroundTheme.split(':')[1];
+                    const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        if (preset.type === 'video') {
+                            return (
+                                <video
+                                    src={preset.url}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                />
+                            );
+                        } else if (preset.type === 'image') {
+                            return (
+                                <img
+                                    src={preset.url}
+                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                    alt=""
+                                />
+                            );
+                        }
+                    }
+                    return null;
+                })()}
             </div>
 
             {/* 3D Backgrounds & Core Effects */}
@@ -114,9 +148,51 @@ export default function CardPage() {
             <div className="fixed inset-0 pointer-events-none z-[5]">
                 {effect === 'particles' && <FloatingParticles />}
                 {effect === 'floral' && <VfxCanvas type="floral" count={1} speed={1} />}
+                {effect === 'confetti' && <Confetti />}
+                {effect === 'rain' && <Rain />}
                 {effect?.startsWith('custom-uploaded:') && (
                     <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
                 )}
+
+                {/* Preset Image FX */}
+                {effect?.startsWith('preset-image:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
+                    }
+                    return null;
+                })()}
+
+                {/* Preset WebM Video FX / Lottie */}
+                {effect?.startsWith('preset-webm:') && (() => {
+                    const presetId = effect.split(':')[1];
+                    const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
+                    if (preset) {
+                        if ((preset as any).type === 'lottie') {
+                            return (
+                                <SafeLottiePlayer
+                                    src={preset.videoUrl}
+                                    autoplay
+                                    loop
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            );
+                        }
+                        return (
+                            <video
+                                src={preset.videoUrl}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-cover opacity-90"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
 
                 {/* Texture Overlay */}
                 <div className={`fixed inset-0 pointer-events-none z-[70] mix-blend-overlay ${effect === 'grain' ? 'opacity-[0.15]' : 'opacity-[0.05]'}`}
