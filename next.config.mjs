@@ -15,8 +15,8 @@ const nextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      'react': path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      'react': './node_modules/react',
+      'react-dom': './node_modules/react-dom',
     }
   },
   webpack: (config) => {
