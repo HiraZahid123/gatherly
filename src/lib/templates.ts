@@ -19,7 +19,7 @@ export const TEMPLATES: EventTemplate[] = [
         bgClass: "bg-emerald-100",
         config: {
             theme: "meadow",
-            effect: "floral",
+            effect: "particles",
             poster: "/partiful/dinner-butterflies_ywle19.avif",
             vibeId: "fancy"
         }

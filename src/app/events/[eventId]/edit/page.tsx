@@ -476,12 +476,7 @@ export default function EditEventPage() {
                     )
                 }
 
-                {/* Floral Cinematic Effect (Masterpiece Branch arrangement) */}
-                {
-                    effect === 'floral' && (
-                        <VfxCanvas type="floral" count={1} speed={1} />
-                    )
-                }
+                {/* Floral Cinematic Effect removed */}
 
                 {/* Cinematic Vignette */}
                 {

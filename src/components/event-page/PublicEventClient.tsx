@@ -521,8 +521,7 @@ export default function PublicEventClient({
 
                 {effect === 'particles' && <FloatingParticles />}
 
-                {/* Masterpiece floral logic */}
-                {effect === 'floral' && <VfxCanvasClient type="floral" count={1} speed={1} />}
+                {/* Masterpiece floral logic removed */}
                 
                 {effect === 'confetti' && <Confetti />}
                 {effect === 'rain' && <Rain />}

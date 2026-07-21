@@ -71,14 +71,6 @@ export const EFFECTS: Effect[] = [
         accentColor: "#ffffff",
     },
     {
-        id: "floral",
-        label: "Floral",
-        emoji: "🌸",
-        description: "Cinematic Orchid Branches",
-        previewGradient: "bg-gradient-to-br from-white via-neutral-100 to-transparent opacity-60",
-        accentColor: "#ffffff",
-    },
-    {
         id: "vignette",
         label: "Vignette",
         emoji: "🌑",

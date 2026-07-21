@@ -143,7 +143,7 @@ export default function CardPage() {
             {/* Effects Layer */}
             <div className="fixed inset-0 pointer-events-none z-[5]">
                 {effect === 'particles' && <FloatingParticles />}
-                {effect === 'floral' && <VfxCanvas type="floral" count={1} speed={1} />}
+
                 {effect === 'confetti' && <Confetti />}
                 {effect === 'rain' && <Rain />}
                 {effect?.startsWith('custom-uploaded:') && (

@@ -406,11 +406,6 @@ function CreateEventContent() {
                     </div>
                 )}
 
-                {/* Floral Cinematic Effect (Masterpiece Branch arrangement) */}
-                {effect === 'floral' && (
-                    <VfxCanvas type="floral" count={1} speed={1} />
-                )}
-
                 {/* Confetti Explosion */}
                 {effect === 'confetti' && <Confetti />}
 

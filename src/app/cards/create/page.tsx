@@ -183,7 +183,7 @@ export default function CreateCardPage() {
                 {(INTERACTIVE_THEMES.includes(selectedTheme || '') || effect === 'skiing') && (
                     <InteractiveBackground currentTheme={selectedTheme} currentEffect={effect} />
                 )}
-                {effect === 'floral' && <VfxCanvas type="floral" count={1} speed={1} />}
+
                 {effect === 'confetti' && <Confetti />}
                 {effect === 'rain' && <Rain />}
                 {/* Custom Uploaded Effect */}
