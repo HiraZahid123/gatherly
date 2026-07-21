@@ -3,8 +3,7 @@ const nextConfig = {
   /* config options here */
   // output: 'standalone', // DISABLING STANDALONE FOR SHARED HOSTING COMPATIBILITY
   // reactCompiler: false, // DEPRECATED in Next 15 config root
-  transpilePackages: ['@whiskeysockets/baileys', '@hapi/boom'],
-  serverExternalPackages: ['jimp', 'socket.io', 'socket.io-adapter', 'socket.io-parser'],
+  serverExternalPackages: ['jimp', 'socket.io', 'socket.io-adapter', 'socket.io-parser', '@whiskeysockets/baileys', '@hapi/boom'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
   },
