@@ -1,11 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getAllBlogPosts, formatDate } from "@/lib/blog-data";
+import { getAllBlogPosts, formatDate, type BlogPost } from "@/lib/blog-data";
 
 export default function BlogSection() {
-    const blogs = getAllBlogPosts().slice(0, 3);
+    const [blogs, setBlogs] = useState<BlogPost[]>(() => getAllBlogPosts().slice(0, 3));
+
+    useEffect(() => {
+        fetch("/api/blog")
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.posts.length > 0) {
+                    setBlogs(data.posts.slice(0, 3));
+                }
+            })
+            .catch(() => {
+                // keep static fallback already set in useState
+            });
+    }, []);
 
     return (
         <section className="py-24 bg-white">

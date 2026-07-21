@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllBlogPosts, formatDate } from "@/lib/blog-data";
+import { getAllBlogPostsFromDB, formatDate } from "@/lib/blog-data";
 import { ArrowRight, Clock, BookOpen } from "lucide-react";
 
 export const metadata = {
@@ -7,8 +7,8 @@ export const metadata = {
     description: "Event planning guides, psychology, and design advice from the Gatherly team.",
 };
 
-export default function BlogListPage() {
-    const posts = getAllBlogPosts();
+export default async function BlogListPage() {
+    const posts = await getAllBlogPostsFromDB();
     const [featured, ...rest] = posts;
 
     return (

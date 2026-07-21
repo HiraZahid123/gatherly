@@ -11,6 +11,7 @@ import {
     ShieldAlert,
     LogOut,
     ExternalLink,
+    BookOpen,
 } from "lucide-react";
 
 const NAV = [
@@ -18,6 +19,7 @@ const NAV = [
     { href: "/admin/users",      label: "Users",       icon: Users },
     { href: "/admin/events",     label: "Events",      icon: Calendar },
     { href: "/admin/moderation", label: "Moderation",  icon: ShieldAlert },
+    { href: "/admin/blog",       label: "Blog",        icon: BookOpen },
 ];
 
 export default function AdminLayout({

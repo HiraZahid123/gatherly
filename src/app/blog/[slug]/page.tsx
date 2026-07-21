@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getBlogPost, getAllBlogPosts, formatDate } from "@/lib/blog-data";
+import { getBlogPostFromDB, getAllBlogPostsFromDB, formatDate } from "@/lib/blog-data";
 import { ArrowLeft, Clock, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -9,12 +9,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-    return getAllBlogPosts().map((p) => ({ slug: p.slug }));
+    const posts = await getAllBlogPostsFromDB();
+    return posts.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-    const post = getBlogPost(slug);
+    const post = await getBlogPostFromDB(slug);
     if (!post) return { title: "Post not found" };
     return {
         title: `${post.title} — Gatherly Blog`,
@@ -24,10 +25,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
     const { slug } = await params;
-    const post = getBlogPost(slug);
+    const post = await getBlogPostFromDB(slug);
     if (!post) notFound();
 
-    const allPosts = getAllBlogPosts();
+    const allPosts = await getAllBlogPostsFromDB();
     const currentIndex = allPosts.findIndex((p) => p.slug === slug);
     const prev = allPosts[currentIndex + 1] ?? null;
     const next = allPosts[currentIndex - 1] ?? null;

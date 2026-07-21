@@ -550,3 +550,31 @@ model Order {
   @@index([status])
   @@map("orders")
 }
+
+// ============================================
+// BLOG SYSTEM
+// ============================================
+
+model Blog {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  excerpt       String   @db.Text
+  category      String   @default("General")
+  authorName    String   @default("Gatherly Team")
+  authorRole    String   @default("Editor")
+  authorAvatar  String   @default("GT") // initials
+  publishedAt   DateTime @default(now())
+  readingTime   Int      @default(5)
+  coverGradient String   @default("from-green-600 via-teal-700 to-emerald-800")
+  coverEmoji    String   @default("✨")
+  content       String   @db.Text
+  published     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([publishedAt])
+  @@map("blogs")
+}

@@ -15,7 +15,9 @@ export interface BlogPost {
     content: string; // HTML
 }
 
-export const BLOG_POSTS: BlogPost[] = [
+// ─── Static seed posts (shown only when DB is empty) ─────────────────────────
+
+export const STATIC_BLOG_POSTS: BlogPost[] = [
     {
         slug: "how-to-create-unforgettable-events-2026",
         title: "How to Create Unforgettable Events in 2026",
@@ -195,12 +197,75 @@ export const BLOG_POSTS: BlogPost[] = [
     },
 ];
 
+// ─── DB-aware functions (called from server components / API routes) ──────────
+
+/**
+ * Fetches all published posts from the DB.
+ * Falls back to static posts if DB is empty or unavailable.
+ * Import prisma lazily so this file also works in client-side imports.
+ */
+export async function getAllBlogPostsFromDB(): Promise<BlogPost[]> {
+    try {
+        const { prisma } = await import("@/lib/prisma");
+        const rows = await prisma.blog.findMany({
+            where: { published: true },
+            orderBy: { publishedAt: "desc" },
+        });
+
+        if (rows.length === 0) return getAllBlogPosts(); // static fallback
+
+        return rows.map(r => ({
+            slug: r.slug,
+            title: r.title,
+            excerpt: r.excerpt,
+            category: r.category,
+            author: { name: r.authorName, role: r.authorRole, avatar: r.authorAvatar },
+            publishedAt: r.publishedAt.toISOString(),
+            readingTime: r.readingTime,
+            coverGradient: r.coverGradient,
+            coverEmoji: r.coverEmoji,
+            content: r.content,
+        }));
+    } catch {
+        return getAllBlogPosts(); // static fallback on error
+    }
+}
+
+export async function getBlogPostFromDB(slug: string): Promise<BlogPost | undefined> {
+    try {
+        const { prisma } = await import("@/lib/prisma");
+        const row = await prisma.blog.findUnique({ where: { slug, published: true } });
+        if (row) {
+            return {
+                slug: row.slug,
+                title: row.title,
+                excerpt: row.excerpt,
+                category: row.category,
+                author: { name: row.authorName, role: row.authorRole, avatar: row.authorAvatar },
+                publishedAt: row.publishedAt.toISOString(),
+                readingTime: row.readingTime,
+                coverGradient: row.coverGradient,
+                coverEmoji: row.coverEmoji,
+                content: row.content,
+            };
+        }
+        // fallback to static
+        return getBlogPost(slug);
+    } catch {
+        return getBlogPost(slug);
+    }
+}
+
+// ─── Synchronous helpers (static data only — used in client components) ───────
+
+export const BLOG_POSTS = STATIC_BLOG_POSTS;
+
 export function getBlogPost(slug: string): BlogPost | undefined {
-    return BLOG_POSTS.find((p) => p.slug === slug);
+    return STATIC_BLOG_POSTS.find((p) => p.slug === slug);
 }
 
 export function getAllBlogPosts(): BlogPost[] {
-    return [...BLOG_POSTS].sort(
+    return [...STATIC_BLOG_POSTS].sort(
         (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
 }
