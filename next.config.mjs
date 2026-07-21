@@ -12,6 +12,8 @@ const nextConfig = {
   serverExternalPackages: ['jimp', 'socket.io', 'socket.io-adapter', 'socket.io-parser', '@whiskeysockets/baileys', '@hapi/boom'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
+    workerThreads: false,
+    cpus: 1,
   },
   turbopack: {
     resolveAlias: {
