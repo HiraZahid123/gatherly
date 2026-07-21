@@ -1,18 +1,21 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import type { ArticleSection } from "@/lib/help-data";
+import { useState, useEffect } from "react";
+import TableOfContents from "./TableOfContents";
 
-// ssr:false is only allowed inside "use client" components.
-const TableOfContents = dynamic(() => import("./TableOfContents"), {
-  ssr: false,
-  loading: () => null,
-});
-
+// Manual mounted check to bypass Next.js Turbopack SSG dynamic bugs
 export default function TableOfContentsWrapper({
   sections,
-}: {
-  sections: ArticleSection[];
-}) {
+}: React.ComponentProps<typeof TableOfContents>) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <aside style={{ width: "200px", minWidth: "200px", flexShrink: 0 }} />;
+  }
+
   return <TableOfContents sections={sections} />;
 }
