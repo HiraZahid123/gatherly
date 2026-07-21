@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, helpCategories } from "@/lib/help-data";
-import HelpSidebar from "@/components/help/HelpSidebar";
-import TableOfContents from "@/components/help/TableOfContents";
 import type { ArticleSection } from "@/lib/help-data";
+import HelpSidebarWrapper from "@/components/help/HelpSidebarWrapper";
+import TableOfContentsWrapper from "@/components/help/TableOfContentsWrapper";
 
 interface Props {
   params: Promise<{ category: string; article: string }>;
@@ -270,9 +270,9 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <div style={{ display: "flex", minHeight: "calc(100vh - 60px)" }}>
       {/* Left Sidebar */}
-      <HelpSidebar
-        activeCategorySlug={category.slug}
-        activeArticleSlug={article.slug}
+      <HelpSidebarWrapper
+          activeCategorySlug={category.slug}
+          activeArticleSlug={article.slug}
       />
 
       {/* Main content */}
@@ -399,7 +399,7 @@ export default async function ArticlePage({ params }: Props) {
       </main>
 
       {/* Right: Table of Contents */}
-      <TableOfContents sections={article.sections} />
+      <TableOfContentsWrapper sections={article.sections} />
     </div>
   );
 }

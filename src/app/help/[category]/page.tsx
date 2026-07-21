@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCategoryBySlug, helpCategories } from "@/lib/help-data";
-import HelpSidebar from "@/components/help/HelpSidebar";
+import HelpSidebarWrapper from "@/components/help/HelpSidebarWrapper";
 import ArticleCard from "@/components/help/ArticleCard";
 
 interface Props {
@@ -31,7 +31,7 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <div style={{ display: "flex", minHeight: "calc(100vh - 60px)" }}>
       {/* Left Sidebar */}
-      <HelpSidebar activeCategorySlug={category.slug} />
+      <HelpSidebarWrapper activeCategorySlug={category.slug} />
 
       {/* Main content */}
       <main style={{ flex: 1, padding: "0 0 80px", minWidth: 0 }}>
