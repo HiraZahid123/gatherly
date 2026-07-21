@@ -16,7 +16,7 @@ const getEventBySlug = (slug: string) => unstable_cache(
         });
     },
     ["event-by-slug", slug],
-    { revalidate: 300 }
+    { revalidate: 10, tags: [`event-by-slug-${slug}`] }
 )();
 
 interface PublicEventPageProps {

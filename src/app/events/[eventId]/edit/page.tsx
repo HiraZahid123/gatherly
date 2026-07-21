@@ -269,7 +269,8 @@ export default function EditEventPage() {
                 throw new Error(result.error || "Failed to update event");
             }
 
-            // Redirect to the event page
+            // Bust client-side cache then navigate so the event page shows updated data instantly
+            router.refresh();
             router.push(`/e/${result.event.slug}`);
         } catch (error: any) {
             console.error("Failed to update event:", error);
