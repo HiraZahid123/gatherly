@@ -22,6 +22,7 @@ import RSVPModal from "@/components/RSVPModal";
 import TicketCheckoutDrawer from "@/components/TicketCheckoutDrawer";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { QrCode, Ticket, Calendar } from "lucide-react";
 import { getCalendarLinks } from "@/lib/calendar";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
@@ -488,13 +489,8 @@ export default function PublicEventClient({
                     if (preset) {
                         if (preset.type === 'video') {
                             return (
-                                <video 
+                                <BackgroundVideo 
                                     src={preset.url} 
-                                    autoPlay 
-                                    loop 
-                                    muted 
-                                    playsInline 
-                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 />
                             );
                         } else if (preset.type === 'image') {
@@ -586,12 +582,8 @@ export default function PublicEventClient({
                             );
                         }
                         return (
-                            <video 
+                            <BackgroundVideo 
                                 src={preset.videoUrl} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );

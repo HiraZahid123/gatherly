@@ -23,6 +23,7 @@ import Rain from "@/components/vfx/Rain";
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 import VfxCanvas from "@/components/vfx/VfxCanvas";
 import FloatingParticles from "@/components/FloatingParticles";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { ChevronLeft } from "lucide-react";
 
 // Dynamically import InteractiveBackground (Three.js — client only)
@@ -411,13 +412,8 @@ export default function EditEventPage() {
                         if (preset) {
                             if (preset.type === 'video') {
                                 return (
-                                    <video 
+                                    <BackgroundVideo 
                                         src={preset.url} 
-                                        autoPlay 
-                                        loop 
-                                        muted 
-                                        playsInline 
-                                        className="absolute inset-0 w-full h-full object-cover opacity-80"
                                     />
                                 );
                             } else if (preset.type === 'image') {
@@ -531,12 +527,8 @@ export default function EditEventPage() {
                             );
                         }
                         return (
-                            <video 
+                            <BackgroundVideo 
                                 src={preset.videoUrl} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );

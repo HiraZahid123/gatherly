@@ -19,6 +19,7 @@ import Rain from "@/components/vfx/Rain";
 import dynamic from 'next/dynamic';
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 import EnvelopeView from "@/components/cards/EnvelopeView";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 import {
     Image as ImageIcon,
     Palette,
@@ -158,13 +159,8 @@ export default function CreateCardPage() {
                     if (preset) {
                         if (preset.type === 'video') {
                             return (
-                                <video
+                                <BackgroundVideo
                                     src={preset.url}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 />
                             );
                         } else if (preset.type === 'image') {
@@ -224,12 +220,8 @@ export default function CreateCardPage() {
                             );
                         }
                         return (
-                            <video
+                            <BackgroundVideo
                                 src={preset.videoUrl}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );

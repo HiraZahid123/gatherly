@@ -25,6 +25,7 @@ import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
 import dynamic from 'next/dynamic';
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 
 const INTERACTIVE_THEMES = ['streak', 'meadow', 'crystal', 'waves'];
 
@@ -353,13 +354,8 @@ function CreateEventContent() {
                     if (preset) {
                         if (preset.type === 'video') {
                             return (
-                                <video 
+                                <BackgroundVideo 
                                     src={preset.url} 
-                                    autoPlay 
-                                    loop 
-                                    muted 
-                                    playsInline 
-                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 />
                             );
                         } else if (preset.type === 'image') {
@@ -460,12 +456,8 @@ function CreateEventContent() {
                             );
                         }
                         return (
-                            <video 
+                            <BackgroundVideo 
                                 src={preset.videoUrl} 
-                                autoPlay 
-                                loop 
-                                muted 
-                                playsInline 
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );

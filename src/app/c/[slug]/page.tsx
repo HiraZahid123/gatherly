@@ -11,7 +11,9 @@ import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
+import Rain from "@/components/vfx/Rain";
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 
 const InteractiveBackground = dynamic(
     () => import("@/components/InteractiveBackground"),
@@ -116,13 +118,8 @@ export default function CardPage() {
                     if (preset) {
                         if (preset.type === 'video') {
                             return (
-                                <video
+                                <BackgroundVideo
                                     src={preset.url}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    className="absolute inset-0 w-full h-full object-cover opacity-80"
                                 />
                             );
                         } else if (preset.type === 'image') {
@@ -181,12 +178,8 @@ export default function CardPage() {
                             );
                         }
                         return (
-                            <video
+                            <BackgroundVideo
                                 src={preset.videoUrl}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
                         );
