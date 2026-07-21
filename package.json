@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "build": "prisma generate && NODE_ENV=production next build",
+    "build": "prisma generate && next build",
     "start": "node server.js",
     "lint": "eslint",
     "db:cleanup": "node scripts/cleanup.js",
@@ -62,23 +62,23 @@
     "sonner": "^2.0.7",
     "stripe": "^22.1.0",
     "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4",
     "three": "^0.182.0",
     "typescript": "^5",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "zod": "^4.3.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/downloadjs": "^1.4.6",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react-dom": "^19"
+  },
+  "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
-    "prisma": "6.4.1",
-    "tailwindcss": "^4"
+    "prisma": "6.4.1"
   },
   "overrides": {
     "react": "$react",
