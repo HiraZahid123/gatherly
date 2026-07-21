@@ -134,7 +134,6 @@ export async function PATCH(
 
         // Bust the Next.js cache so the event page shows updated data immediately
         revalidatePath(`/e/${updatedEvent.slug}`);
-        try { revalidateTag(`event-by-slug-${updatedEvent.slug}`); } catch {/* non-critical */}
 
         return NextResponse.json({
             success: true,
