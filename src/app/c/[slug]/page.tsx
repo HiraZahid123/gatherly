@@ -11,7 +11,6 @@ import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
-import Rain from "@/components/vfx/Rain";
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 import { BackgroundVideo } from "@/components/BackgroundVideo";
 
