@@ -73,12 +73,12 @@
     "@types/pg": "^8.16.0",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/react": "^19",
-    "@types/react-dom": "^19"
+    "@types/react-dom": "^19",
+    "prisma": "6.4.1"
   },
   "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "15.1.0",
-    "prisma": "6.4.1"
+    "eslint-config-next": "15.1.0"
   },
   "overrides": {
     "react": "$react",
