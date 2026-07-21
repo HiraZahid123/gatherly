@@ -575,7 +575,8 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
                                             {preset.type === 'video' ? (
                                                 <video 
                                                     src={`${preset.url}#t=0.001`} 
-                                                    preload="metadata"
+                                                    preload="none"
+                                                    poster={`/themes/${preset.id}/thumbnail.png`}
                                                     loop 
                                                     muted 
                                                     playsInline 
@@ -589,7 +590,7 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
                                                     onMouseLeave={(e) => e.currentTarget.pause()}
                                                 />
                                             ) : (
-                                                <img src={preset.url} className="w-full h-full object-cover opacity-80" alt={preset.label} />
+                                                <img src={preset.url} loading="lazy" className="w-full h-full object-cover opacity-80" alt={preset.label} />
                                             )}
                                         </div>
                                         {isSelected && (

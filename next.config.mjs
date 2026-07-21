@@ -29,6 +29,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year for images
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },       // Google OAuth
@@ -40,6 +41,27 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
+  // Cache theme & effect static media for 1 year in browser (immutable)
+  headers: async () => [
+    {
+      source: '/themes/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+      ],
+    },
+    {
+      source: '/effects/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+      ],
+    },
+    {
+      source: '/partiful/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;
