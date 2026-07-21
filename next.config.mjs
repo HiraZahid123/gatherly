@@ -12,11 +12,11 @@ const nextConfig = {
   serverExternalPackages: ['jimp', 'socket.io', 'socket.io-adapter', 'socket.io-parser', '@whiskeysockets/baileys', '@hapi/boom'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'date-fns'],
-    turbo: {
-      resolveAlias: {
-        'react': path.resolve(__dirname, 'node_modules/react'),
-        'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-      }
+  },
+  turbo: {
+    resolveAlias: {
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     }
   },
   webpack: (config) => {
