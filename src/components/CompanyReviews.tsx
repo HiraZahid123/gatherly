@@ -5,22 +5,22 @@ import React from 'react';
 export default function CompanyReviews() {
     const reviews = [
         {
-            company: "THE WALL STREET JOURNAL.",
+            company: "Premium Times Nigeria",
             quote: "\"Evites are so last decade\"",
-            fontClass: "font-serif font-black"
+            fontClass: "font-serif font-black tracking-widest text-red-700"
         },
         {
-            company: "The Washington Post",
+            company: "The State House, Abuja",
             quote: "\"This is where my social calendar exists\"",
-            fontClass: "font-serif font-bold italic"
+            fontClass: "font-serif font-bold italic text-green-700"
         },
         {
-            company: "USA TODAY",
+            company: "THISDAY",
             quote: "\"A mainstay of my social life\"",
             fontClass: "font-sans font-black tracking-tighter"
         },
         {
-            company: "The New York Times",
+            company: "The Guardian",
             quote: "\"The primary party platform\"",
             fontClass: "font-serif font-bold"
         }
