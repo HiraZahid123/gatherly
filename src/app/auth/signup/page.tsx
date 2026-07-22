@@ -132,27 +132,16 @@ export default function SignUpPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] px-4 py-12 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] px-4 pt-24 pb-12 relative overflow-hidden">
             {/* Ambient Background Effects */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-600/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="w-full max-w-md z-10">
-                {/* Logo/Brand */}
+                {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="flex items-center justify-center gap-4 mb-6">
-                        <div className="relative w-16 h-16">
-                            <Image
-                                src="/logo/logo-white.svg"
-                                alt="Gatherly Logo"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
-                        </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">Gatherly</h1>
-                    </div>
-                    <p className="text-gray-400 mt-2 text-lg">Create your account to get started</p>
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Create your account</h1>
+                    <p className="text-gray-400 mt-2 text-lg">Sign up to get started</p>
                 </div>
 
                 {/* Sign Up Card */}
@@ -206,12 +195,12 @@ export default function SignUpPage() {
                                 Phone Number (WhatsApp)
                             </label>
                             <div className="flex gap-3">
-                                <div className="relative w-[35%]">
+                                <div className="relative w-[40%]">
                                     <select
                                         value={selectedCountry}
                                         onChange={(e) => setSelectedCountry(e.target.value)}
                                         aria-label="Select Country Code"
-                                        className="w-full appearance-none bg-[#1e1e20] border border-white/10 text-white px-3 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none text-sm cursor-pointer truncate"
+                                        className="w-full appearance-none bg-[#1e1e20] border border-white/10 text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none text-sm font-medium cursor-pointer"
                                     >
                                         {countries.map((c) => (
                                             <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#161618]">
@@ -219,8 +208,8 @@ export default function SignUpPage() {
                                             </option>
                                         ))}
                                     </select>
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </div>
@@ -232,7 +221,7 @@ export default function SignUpPage() {
                                     value={formData.phone}
                                     onChange={handleChange}
                                     required
-                                    className="flex-1 bg-[#1e1e20] border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-600 font-mono"
+                                    className="flex-1 min-w-0 bg-[#1e1e20] border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-600 font-mono tracking-wider"
                                     placeholder="300 1234567"
                                 />
                             </div>

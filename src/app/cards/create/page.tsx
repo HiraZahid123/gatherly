@@ -231,7 +231,7 @@ export default function CreateCardPage() {
             </div>
 
             {/* Main Layout - Single Column Centered */}
-            <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-4">
+            <main className="relative z-10 min-h-screen flex flex-col items-center justify-center py-4 pb-24 md:pb-4">
 
                 <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col items-center w-full max-w-lg">
 
