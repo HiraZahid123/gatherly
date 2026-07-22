@@ -6,21 +6,21 @@ import { Star } from "lucide-react";
 export default function CustomerReviews() {
     const reviews = [
         {
-            name: "Sarah L.",
+            name: "Semilore A.",
             role: "Event Organizer",
-            avatar: "/guests/mikdog.webp",
+            avatar: "/assets/g-1.avif",
             content: "This platform completely changed how I organize my events. The customizable templates are stunning and the guest management is incredibly intuitive."
         },
         {
-            name: "David M.",
+            name: "Babatunde O.",
             role: "Host",
-            avatar: "/guests/antico.webp",
+            avatar: "/assets/b-1.avif",
             content: "I used to dread collecting RSVPs and tracking who was coming. Now it's the easiest part of throwing a party. Highly recommend to everyone!"
         },
         {
-            name: "Jessica T.",
+            name: "Ifeoma N.",
             role: "Wedding Planner",
-            avatar: "/guests/nnhg.webp",
+            avatar: "/assets/g-2.avif",
             content: "The aesthetic quality of the invites is unmatched. My clients are always blown away by how professional and beautiful their event pages look."
         }
     ];

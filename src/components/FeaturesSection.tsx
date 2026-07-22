@@ -32,7 +32,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="/partiful/awards-night.avif"
+                                            src="/assets/g-1.avif"
                                             alt="Joy"
                                             fill
                                             className="object-cover"
@@ -56,7 +56,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="/partiful/badbunnyaward.avif"
+                                            src="/assets/b-2.webp"
                                             alt="Jojo"
                                             fill
                                             className="object-cover"
@@ -80,7 +80,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/20">
                                         <Image
-                                            src="/partiful/dumplingschopsticks.avif"
+                                            src="/assets/g-2.avif"
                                             alt="Jackie"
                                             fill
                                             className="object-cover"
@@ -115,7 +115,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100">
                                         <Image
-                                            src="/partiful/dinner-02.avif"
+                                            src="/assets/b-3.webp"
                                             alt="Sammy"
                                             fill
                                             className="object-cover"
@@ -137,7 +137,7 @@ const FeaturesSection = () => {
                                 <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100">
                                         <Image
-                                            src="/partiful/mocktail-party.avif"
+                                            src="/assets/b-4.webp"
                                             alt="Ryan"
                                             fill
                                             className="object-cover"
@@ -157,7 +157,7 @@ const FeaturesSection = () => {
                             <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                                 <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200">
                                     <Image
-                                        src="/partiful/galentines-party.avif"
+                                        src="/assets/b-1.avif"
                                         alt="Current User"
                                         fill
                                         className="object-cover"

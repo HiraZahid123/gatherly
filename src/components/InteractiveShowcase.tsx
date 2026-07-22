@@ -149,7 +149,7 @@ export default function InteractiveShowcase() {
                             <div className="pt-4 space-y-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden relative border border-white/20">
-                                         <Image src="/guests/mikdog.webp" alt="Host" fill className="object-cover" />
+                                         <Image src="/assets/b-1.avif" alt="Host" fill className="object-cover" sizes="32px" />
                                     </div>
                                     <span className="text-sm text-white/80">Hosted by <span className="font-bold text-white">You</span></span>
                                 </div>
@@ -170,9 +170,15 @@ export default function InteractiveShowcase() {
                             <div className="pt-8">
                                 <p className="text-xs font-bold uppercase tracking-wider mb-3 text-white/50">Guest List (16 Going)</p>
                                 <div className="flex -space-x-3">
-                                    {[1, 2, 3, 4, 5].map((i) => (
+                                    {[
+                                        "/assets/g-1.avif",
+                                        "/assets/b-2.webp",
+                                        "/assets/g-2.avif",
+                                        "/assets/b-3.webp",
+                                        "/assets/b-4.webp"
+                                    ].map((imgSrc, i) => (
                                         <div key={i} className="w-10 h-10 rounded-full bg-white/10 border-2 border-transparent overflow-hidden relative shadow-sm">
-                                            <Image src={`/guests/antico.webp`} alt="Guest" fill className="object-cover" />
+                                            <Image src={imgSrc} alt="Guest" fill className="object-cover" sizes="40px" />
                                         </div>
                                     ))}
                                     <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border-2 border-transparent flex items-center justify-center text-xs font-bold text-white shadow-sm">

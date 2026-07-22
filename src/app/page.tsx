@@ -96,24 +96,24 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-3 text-center">
                 {[
                   {
-                    name: "Mikdog",
-                    img: "/guests/mikdog.webp",
+                    name: "Ola",
+                    img: "/assets/b-2.webp",
                   },
                   {
-                    name: "Antico",
-                    img: "/guests/antico.webp",
+                    name: "Semilore",
+                    img: "/assets/g-1.avif",
                   },
                   {
-                    name: "Nnhg",
-                    img: "/guests/nnhg.webp",
+                    name: "Babatunde",
+                    img: "/assets/b-3.webp",
                   },
                   {
-                    name: "Nbia",
-                    img: "/guests/nbia.webp",
+                    name: "Ifeoma",
+                    img: "/assets/g-2.avif",
                   },
                   {
-                    name: "Tommw",
-                    img: "/guests/tommw.webp",
+                    name: "Shegzy",
+                    img: "/assets/b-4.webp",
                   },
                 ].map((guest, i) => (
                   <div key={i} className="flex flex-col items-center">
@@ -136,7 +136,7 @@ export default function Home() {
                     <Plus size={16} />
                   </button>
                   <span className="text-[9px] text-gray-900 mt-1 font-medium">
-                    Oliver
+                    Chigozie
                   </span>
                 </div>
               </div>
