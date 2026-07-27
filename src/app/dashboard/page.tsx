@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -127,9 +127,9 @@ export default function DashboardPage() {
                 <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
                         <div className="relative w-10 h-10 transition-transform group-hover:scale-110">
-                            <Image src="/logo/logo-white.svg" alt="Gatherly Logo" fill className="object-contain" />
+                            <Image src="/logo/logo-white.svg" alt="JollyWitMe Logo" fill className="object-contain" />
                         </div>
-                        <span className="text-2xl font-black tracking-tighter text-white">gatherly</span>
+                        <span className="text-2xl font-black tracking-tighter text-white">JollyWitMe</span>
                     </Link>
 
                     <div className="flex items-center gap-3 sm:gap-8">

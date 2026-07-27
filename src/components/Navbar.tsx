@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -70,7 +70,7 @@ export default function Navbar() {
                     <div className="relative w-16 h-16 mr-3 transition-transform group-hover:scale-110">
                         <Image
                             src={finalLogoWhite ? "/logo/logo-white.svg" : "/logo/logo.svg"}
-                            alt="Gatherly Logo"
+                            alt="JollyWitMe Logo"
                             fill
                             className="object-contain"
                             priority
@@ -78,7 +78,7 @@ export default function Navbar() {
                     </div>
                     <span className={`text-2xl font-bold tracking-tight transition-colors ${finalLogoWhite ? "text-white" : "bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
                         }`}>
-                        Gatherly
+                        JollyWitMe
                     </span>
                 </Link>
 

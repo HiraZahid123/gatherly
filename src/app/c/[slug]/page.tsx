@@ -219,7 +219,7 @@ export default function CardPage() {
                             Share this card
                         </button>
                         <div className="text-[10px] text-white/20 font-black tracking-widest uppercase">
-                            Sent via Gatherly
+                            Sent via jollywitme
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Mail, Send, CheckCircle2, MessageSquare, ArrowLeft } from "lucide-react";
@@ -56,7 +56,7 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg">Email us</h3>
-                                    <p className="text-sm text-white/40">support@gatherly.app</p>
+                                    <p className="text-sm text-white/40">support@JollyWitMe.app</p>
                                 </div>
                             </div>
                             <div className="p-8 bg-white/[0.03] border border-white/10 rounded-3xl space-y-4 hover:bg-white/[0.05] transition-colors">

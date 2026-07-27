@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props) {
   const category = getCategoryBySlug(categorySlug);
   if (!category) return {};
   return {
-    title: `${category.title} — Gatherly Help Center`,
+    title: `${category.title} — JollyWitMe Help Center`,
     description: category.description,
   };
 }

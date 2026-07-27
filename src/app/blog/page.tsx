@@ -1,10 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { getAllBlogPostsFromDB, formatDate } from "@/lib/blog-data";
 import { ArrowRight, Clock, BookOpen } from "lucide-react";
 
 export const metadata = {
-    title: "Blog — Gatherly",
-    description: "Event planning guides, psychology, and design advice from the Gatherly team.",
+    title: "Blog — JollyWitMe",
+    description: "Event planning guides, psychology, and design advice from the JollyWitMe team.",
 };
 
 export default async function BlogListPage() {
@@ -24,7 +24,7 @@ export default async function BlogListPage() {
                 <div className="max-w-5xl mx-auto">
                     <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-6">
                         <BookOpen className="w-3.5 h-3.5 text-green-400" />
-                        <span className="text-xs font-bold text-green-400 uppercase tracking-widest">The Gatherly Blog</span>
+                        <span className="text-xs font-bold text-green-400 uppercase tracking-widest">The JollyWitMe Blog</span>
                     </div>
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.05] mb-4">
                         Ideas for better<br />

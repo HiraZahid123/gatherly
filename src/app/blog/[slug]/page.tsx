@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = await getBlogPostFromDB(slug);
     if (!post) return { title: "Post not found" };
     return {
-        title: `${post.title} — Gatherly Blog`,
+        title: `${post.title} — JollyWitMe Blog`,
         description: post.excerpt,
     };
 }
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: Props) {
             <section className="relative z-10 px-6 pb-24">
                 <div className="max-w-2xl mx-auto bg-gradient-to-r from-green-600/20 via-yellow-600/10 to-transparent border border-green-500/20 rounded-3xl p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                     <div>
-                        <p className="text-xs font-black uppercase tracking-widest text-green-400 mb-1">Try Gatherly free</p>
+                        <p className="text-xs font-black uppercase tracking-widest text-green-400 mb-1">Try JollyWitMe free</p>
                         <h3 className="text-xl font-black">Create your first event today</h3>
                     </div>
                     <Link

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -55,13 +55,13 @@ export default function ForgotPasswordPage() {
                         <div className="relative w-16 h-16">
                             <Image
                                 src="/logo/logo-white.svg"
-                                alt="Gatherly Logo"
+                                alt="JollyWitMe Logo"
                                 fill
                                 className="object-contain"
                                 priority
                             />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">Gatherly</h1>
+                        <h1 className="text-4xl font-extrabold text-white tracking-tight">JollyWitMe</h1>
                     </div>
                 </div>
 

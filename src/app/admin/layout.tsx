@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -35,7 +35,7 @@ export default function AdminLayout({
                 <div className="p-8 pb-12">
                     <Link href="/" className="flex items-center gap-3 group">
                         <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-black font-black text-xs">G</div>
-                        <span className="text-xl font-black tracking-tighter">gatherly.<span className="text-white/40">ops</span></span>
+                        <span className="text-xl font-black tracking-tighter">JollyWitMe.<span className="text-white/40">ops</span></span>
                     </Link>
                 </div>
 

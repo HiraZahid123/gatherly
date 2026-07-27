@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:bg-white/10 focus:border-white/20 text-white font-medium transition-all"
-                                placeholder="name@gatherly.admin"
+                                placeholder="name@jollywitme.admin"
                             />
                         </div>
 
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
                 </div>
 
                 <p className="text-center text-[10px] font-black uppercase tracking-widest text-white/10">
-                    Proprietary System &copy; Gatherly Ops
+                    Proprietary System &copy; JollyWitMe Ops
                 </p>
             </div>
         </div>

@@ -1,4 +1,4 @@
-export interface ArticleSection {
+﻿export interface ArticleSection {
   id: string;
   heading: string;
   body: string; // markdown-lite: supports **bold**, `code`, [text](url), and \n for new paragraphs
@@ -43,7 +43,7 @@ export const helpCategories: HelpCategory[] = [
     slug: "getting-started",
     emoji: "🎉",
     title: "Getting Started",
-    description: "New to Gatherly? Start here.",
+    description: "New to JollyWitMe? Start here.",
     sections: [
       {
         title: "The Basics",
@@ -51,14 +51,14 @@ export const helpCategories: HelpCategory[] = [
           {
             slug: "signing-up",
             title: "Signing up & logging in",
-            description: "How to create your Gatherly account and log in.",
+            description: "How to create your JollyWitMe account and log in.",
             sections: [
               {
                 id: "create-account",
                 heading: "Creating your account",
-                body: "You can sign up for Gatherly using your **email address** or by continuing with **Google**. The registration process is designed to be quick and straightforward.",
+                body: "You can sign up for JollyWitMe using your **email address** or by continuing with **Google**. The registration process is designed to be quick and straightforward.",
                 steps: [
-                  "Visit the Gatherly homepage at `localhost:3000`.",
+                  "Visit the JollyWitMe homepage at `localhost:3000`.",
                   "Look for the bright **Sign Up** button located in the top-right corner of the main navigation bar.",
                   "On the registration page, you'll see a central card. You can choose to enter your name, email, and a secure password manually.",
                   "Alternatively, click the large **Continue with Google** button for a one-click signup experience.",
@@ -80,12 +80,12 @@ export const helpCategories: HelpCategory[] = [
           {
             slug: "your-dashboard",
             title: "Navigating your dashboard",
-            description: "A quick tour of the Gatherly dashboard layout.",
+            description: "A quick tour of the JollyWitMe dashboard layout.",
             sections: [
               {
                 id: "dashboard-overview",
                 heading: "Your home base",
-                body: "The **Dashboard** is your central hub for all activity on Gatherly. It is organized into two main areas:\n\n1. **The Sidebar (Left)**: Contains navigation links for your events, your calendar, and your profile settings. This sidebar is always visible on large screens for easy access.\n\n2. **The Main View (Center)**: This area displays a list of your **Upcoming Events**. Each event is shown as a neat card with the date, time, and event name prominently displayed.",
+                body: "The **Dashboard** is your central hub for all activity on JollyWitMe. It is organized into two main areas:\n\n1. **The Sidebar (Left)**: Contains navigation links for your events, your calendar, and your profile settings. This sidebar is always visible on large screens for easy access.\n\n2. **The Main View (Center)**: This area displays a list of your **Upcoming Events**. Each event is shown as a neat card with the date, time, and event name prominently displayed.",
               },
               {
                 id: "create-from-dashboard",
@@ -197,7 +197,7 @@ export const helpCategories: HelpCategory[] = [
                 ],
                 callout: {
                   type: "note",
-                  text: "Staff members must have a Gatherly account to access the Check-In Terminal.",
+                  text: "Staff members must have a JollyWitMe account to access the Check-In Terminal.",
                 },
               },
             ],
@@ -212,7 +212,7 @@ export const helpCategories: HelpCategory[] = [
                 heading: "The Host Sidebar",
                 body: "If you are the creator (owner) of an event, you will see a unique **Host Sidebar** on the right side of the screen when viewing the event page. This sidebar is your control center.",
                 steps: [
-                  "Log in to your Gatherly account.",
+                  "Log in to your JollyWitMe account.",
                   "Navigate to your event page from the dashboard.",
                   "Look for the translucent bar on the far right edge of the screen.",
                   "Use the icons to **Edit**, **Broadcast** messages, **Invite** guests, or open **Advanced Settings**.",
@@ -232,7 +232,7 @@ export const helpCategories: HelpCategory[] = [
               {
                 id: "qr-terminal",
                 heading: "The Check-In Terminal",
-                body: "Gatherly provides a built-in terminal that uses your device's camera to verify guest tickets. Each guest receives a unique QR code in their ticket after they RSVP.",
+                body: "JollyWitMe provides a built-in terminal that uses your device's camera to verify guest tickets. Each guest receives a unique QR code in their ticket after they RSVP.",
                 steps: [
                   "Open the **Event Settings** as described in the 'Adding a check-in team' guide.",
                   "Click the **Check-In Terminal** tab in the settings menu.",
@@ -281,7 +281,7 @@ export const helpCategories: HelpCategory[] = [
               {
                 id: "share-link",
                 heading: "The Share Dialog",
-                body: "Sharing is easy on Gatherly. On your event page, locate the **Share** button at the top. Clicking it opens a 'Share Your Event' popup that gives you several options:\n\n- **Copy Link**: A single click to copy your unique event URL to your clipboard.\n- **Direct Share**: Buttons for quick-sharing to WhatsApp, Instagram, or Facebook.\n- **Invite via Email**: A field to enter guest email addresses directly.",
+                body: "Sharing is easy on JollyWitMe. On your event page, locate the **Share** button at the top. Clicking it opens a 'Share Your Event' popup that gives you several options:\n\n- **Copy Link**: A single click to copy your unique event URL to your clipboard.\n- **Direct Share**: Buttons for quick-sharing to WhatsApp, Instagram, or Facebook.\n- **Invite via Email**: A field to enter guest email addresses directly.",
               },
             ],
           },
@@ -355,12 +355,12 @@ export const helpCategories: HelpCategory[] = [
           {
             slug: "how-to-rsvp",
             title: "How to RSVP to an event",
-            description: "Step-by-step for guests attending a Gatherly event.",
+            description: "Step-by-step for guests attending a JollyWitMe event.",
             sections: [
               {
                 id: "rsvp-steps",
                 heading: "The RSVP Process",
-                body: "When you receive a Gatherly link, follow these steps to secure your spot:",
+                body: "When you receive a JollyWitMe link, follow these steps to secure your spot:",
                 steps: [
                   "Open the link in any modern web browser.",
                   "Review the event details (time, location, host) on the main landing page.",
@@ -426,7 +426,7 @@ export const helpCategories: HelpCategory[] = [
               {
                 id: "what-is-a-card",
                 heading: "What are Greeting Cards?",
-                body: "Gatherly Greeting Cards are beautiful, animated digital cards that you can send to anyone for any occasion — birthdays, weddings, or just to say 'Thank you'. Unlike typical emails, these cards feature full-screen animations and premium typography designed to WOW the recipient.",
+                body: "JollyWitMe Greeting Cards are beautiful, animated digital cards that you can send to anyone for any occasion — birthdays, weddings, or just to say 'Thank you'. Unlike typical emails, these cards feature full-screen animations and premium typography designed to WOW the recipient.",
               },
               {
                 id: "open-card-creator",
@@ -458,7 +458,7 @@ export const helpCategories: HelpCategory[] = [
                 body: "Once you are happy with the card, click the **Send Card** button at the bottom of the editor panel. You will be prompted to enter the recipient's **email address**. Type their email and confirm. The card is delivered instantly to their inbox with a link to view it in full, with animations.",
                 callout: {
                   type: "note",
-                  text: "The recipient does not need a Gatherly account to open and read the card.",
+                  text: "The recipient does not need a JollyWitMe account to open and read the card.",
                 },
               },
             ],
@@ -493,7 +493,7 @@ export const helpCategories: HelpCategory[] = [
                   "Open **Settings** (or click 'Connect Stripe' from the warning banner on your event edit page).",
                   "In the Stripe Settings panel, click **Connect Stripe Account**.",
                   "You will be securely redirected to Stripe onboarding. Follow the instructions to link your banking details.",
-                  "Once completed, you will be redirected back to Gatherly with your payouts fully active and enabled!"
+                  "Once completed, you will be redirected back to JollyWitMe with your payouts fully active and enabled!"
                 ],
                 callout: {
                   type: "tip",

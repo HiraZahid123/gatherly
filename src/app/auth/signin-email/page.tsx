@@ -1,4 +1,4 @@
-
+﻿
 "use client";
 
 import { signIn } from "next-auth/react";
@@ -57,13 +57,13 @@ export default function SignInEmailPage() {
                         <div className="relative w-16 h-16">
                             <Image
                                 src="/logo/logo-white.svg"
-                                alt="Gatherly Logo"
+                                alt="JollyWitMe Logo"
                                 fill
                                 className="object-contain"
                                 priority
                             />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">Gatherly</h1>
+                        <h1 className="text-4xl font-extrabold text-white tracking-tight">JollyWitMe</h1>
                     </div>
                     <p className="text-gray-400 mt-4 text-xl font-medium">
                         Welcome back!

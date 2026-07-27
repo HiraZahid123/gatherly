@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter, Playfair_Display, Great_Vibes, JetBrains_Mono, Montserrat, Cinzel, Caveat, Oswald, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
@@ -16,7 +16,7 @@ const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat", display: 
 const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald", display: "swap" });
 const dancingScript = Dancing_Script({ subsets: ["latin"], variable: "--font-dancing-script", display: "swap" });
 export const metadata: Metadata = {
-  title: "Gatherly - Create Amazing Events",
+  title: "JollyWitMe - Create Amazing Events",
   description: "Create events, invite guests, and manage RSVPs all in one place",
 };
 

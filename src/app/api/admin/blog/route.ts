@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
                 title,
                 excerpt: excerpt || "",
                 category: category || "General",
-                authorName: authorName || "Gatherly Team",
+                authorName: authorName || "JollyWitMe Team",
                 authorRole: authorRole || "Editor",
                 authorAvatar: authorAvatar || "GT",
                 publishedAt: publishedAt ? new Date(publishedAt) : new Date(),

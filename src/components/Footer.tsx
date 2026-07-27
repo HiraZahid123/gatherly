@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -23,12 +23,12 @@ export default function Footer() {
                             <div className="relative w-12 h-12 mr-3">
                                 <Image
                                     src="/logo/logo-white.svg"
-                                    alt="Gatherly Logo"
+                                    alt="JollyWitMe Logo"
                                     fill
                                     className="object-contain"
                                 />
                             </div>
-                            <span className="text-2xl font-bold tracking-tight">Gatherly</span>
+                            <span className="text-2xl font-bold tracking-tight">JollyWitMe</span>
                         </Link>
                         <p className="text-white/60 text-sm mb-6 max-w-xs">
                             The easiest way to get your guests on the same page. Start planning your next memorable event today.
@@ -68,7 +68,7 @@ export default function Footer() {
                 </div>
 
                 <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-white/40">
-                    <p>&copy; {new Date().getFullYear()} Gatherly. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} JollyWitMe. All rights reserved.</p>
                 </div>
             </div>
         </footer>

@@ -1,6 +1,6 @@
 -- =============================================================
 -- SAFE MIGRATION SCRIPT FOR PRODUCTION
--- Run this in phpPgAdmin on your ranafdnl_gatherly database.
+-- Run this in phpPgAdmin on your ranafdnl_jollywitme database.
 -- 100% safe: uses IF NOT EXISTS everywhere.
 -- WhatsAppSession data is NEVER touched.
 -- =============================================================

@@ -58,29 +58,29 @@ export default function Loader() {
 
     return (
         <div
-            className="gatherly-loader-root"
+            className="jollywitme-loader-root"
             style={{ opacity: exiting ? 0 : 1 }}
-            aria-label="Loading Gatherly"
+            aria-label="Loading JollyWitMe"
             role="status"
         >
             {/* Ambient background blobs */}
-            <div className="gatherly-blob gatherly-blob-1" />
-            <div className="gatherly-blob gatherly-blob-2" />
-            <div className="gatherly-blob gatherly-blob-3" />
+            <div className="jollywitme-blob jollywitme-blob-1" />
+            <div className="jollywitme-blob jollywitme-blob-2" />
+            <div className="jollywitme-blob jollywitme-blob-3" />
 
             {/* Central card */}
-            <div className="gatherly-card" style={{ opacity: exiting ? 0 : 1, transform: exiting ? "scale(0.94) translateY(12px)" : "scale(1) translateY(0)" }}>
+            <div className="jollywitme-card" style={{ opacity: exiting ? 0 : 1, transform: exiting ? "scale(0.94) translateY(12px)" : "scale(1) translateY(0)" }}>
 
                 {/* Spinning ring */}
-                <div className="gatherly-ring-wrap">
-                    <div className="gatherly-ring" />
-                    <div className="gatherly-ring-inner" />
+                <div className="jollywitme-ring-wrap">
+                    <div className="jollywitme-ring" />
+                    <div className="jollywitme-ring-inner" />
 
                     {/* Orbiting particles */}
                     {PARTICLES.map(p => (
                         <span
                             key={p.id}
-                            className="gatherly-particle"
+                            className="jollywitme-particle"
                             style={{
                                 width: p.size,
                                 height: p.size,
@@ -93,12 +93,12 @@ export default function Loader() {
                     ))}
 
                     {/* Logo */}
-                    <div className="gatherly-logo-container">
-                        <div className="gatherly-logo-glow" />
-                        <div className="gatherly-logo-img-wrap">
+                    <div className="jollywitme-logo-container">
+                        <div className="jollywitme-logo-glow" />
+                        <div className="jollywitme-logo-img-wrap">
                             <Image
                                 src="/logo/logo-white.svg"
-                                alt="Gatherly"
+                                alt="JollyWitMe"
                                 fill
                                 className="object-contain"
                                 priority
@@ -108,11 +108,11 @@ export default function Loader() {
                 </div>
 
                 {/* Brand name */}
-                <div className="gatherly-name-wrap">
-                    {"Gatherly".split("").map((char, i) => (
+                <div className="jollywitme-name-wrap">
+                    {"JollyWitMe".split("").map((char, i) => (
                         <span
                             key={i}
-                            className="gatherly-char"
+                            className="jollywitme-char"
                             style={{ animationDelay: `${i * 0.07}s` }}
                         >
                             {char}
@@ -121,14 +121,14 @@ export default function Loader() {
                 </div>
 
                 {/* Tagline */}
-                <p className="gatherly-tagline">Creating moments that matter</p>
+                <p className="jollywitme-tagline">Creating moments that matter</p>
 
                 {/* Dots */}
-                <div className="gatherly-dots">
+                <div className="jollywitme-dots">
                     {[0, 1, 2, 3, 4].map(i => (
                         <div
                             key={i}
-                            className="gatherly-dot"
+                            className="jollywitme-dot"
                             style={{ animationDelay: `${i * 0.15}s` }}
                         />
                     ))}
@@ -136,9 +136,9 @@ export default function Loader() {
             </div>
 
             {/* Progress bar */}
-            <div className="gatherly-progress-wrap">
+            <div className="jollywitme-progress-wrap">
                 <div
-                    className="gatherly-progress-bar"
+                    className="jollywitme-progress-bar"
                     style={{ width: `${progress}%` }}
                 />
             </div>

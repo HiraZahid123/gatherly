@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft } from "lucide-react";
 import { VIBE_THEMES } from "@/lib/theme";
 import { format } from "date-fns";
@@ -97,7 +97,7 @@ export default function ReadonlyEventSummary({ event }: ReadonlyEventSummaryProp
                     <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-0.5">Hosted by</span>
                         <span className="text-xl font-bold tracking-tight text-white">
-                            {event.host?.name || "Gatherly Host"}
+                            {event.host?.name || "JollyWitMe Host"}
                             {event.theme?.hostNickname && <span className="text-white/40 ml-2 font-medium">({event.theme.hostNickname})</span>}
                         </span>
                     </div>

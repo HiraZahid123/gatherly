@@ -64,7 +64,7 @@ export async function POST(
                         View Event →
                     </a>
                     <p style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:32px">
-                        You're receiving this because you're on the guest list for this event on Gatherly.
+                        You're receiving this because you're on the guest list for this event on jollywitme.
                     </p>
                 </div>
             `,

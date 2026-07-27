@@ -561,7 +561,7 @@ model Blog {
   title         String
   excerpt       String   @db.Text
   category      String   @default("General")
-  authorName    String   @default("Gatherly Team")
+  authorName    String   @default("JollyWitMe Team")
   authorRole    String   @default("Editor")
   authorAvatar  String   @default("GT") // initials
   publishedAt   DateTime @default(now())
