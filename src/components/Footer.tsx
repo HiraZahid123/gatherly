@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import Logo from "./Logo";
 
 export default function Footer() {
     const pathname = usePathname();
@@ -19,16 +20,8 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/" className="flex items-center mb-6">
-                            <div className="relative w-12 h-12 mr-3">
-                                <Image
-                                    src="/logo/logo-white.svg"
-                                    alt="Gatherly Logo"
-                                    fill
-                                    className="object-contain"
-                                />
-                            </div>
-                            <span className="text-2xl font-bold tracking-tight">Gatherly</span>
+                        <Link href="/" className="inline-block mb-6 transition-transform hover:scale-105">
+                            <Logo variant="neon" />
                         </Link>
                         <p className="text-white/60 text-sm mb-6 max-w-xs">
                             The easiest way to get your guests on the same page. Start planning your next memorable event today.
@@ -68,7 +61,7 @@ export default function Footer() {
                 </div>
 
                 <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-white/40">
-                    <p>&copy; {new Date().getFullYear()} Gatherly. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} JollyWitMe. All rights reserved.</p>
                 </div>
             </div>
         </footer>

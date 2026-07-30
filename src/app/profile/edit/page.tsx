@@ -38,11 +38,22 @@ export default function EditProfilePage() {
         });
     };
 
-    const handleImageChange = (imageUrl: string) => {
+    const handleImageChange = async (imageUrl: string) => {
         setFormData({
             ...formData,
             image: imageUrl,
         });
+        
+        // Auto-update session instantly when avatar uploads
+        if (session) {
+            await update({
+                ...session,
+                user: {
+                    ...session.user,
+                    image: imageUrl,
+                },
+            });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

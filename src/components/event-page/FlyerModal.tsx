@@ -117,12 +117,12 @@ export default function FlyerModal({ isOpen, onClose, event }: FlyerModalProps) 
                             {/* Side Strips */}
                             <div className="absolute left-0 top-0 bottom-0 w-8 bg-black/40 backdrop-blur-sm border-r border-white/10 flex flex-col items-center justify-center z-20">
                                 <span className="text-[10px] font-black text-white/40 tracking-[0.2em] transform -rotate-180 whitespace-nowrap" style={{ writingMode: 'vertical-rl' }}>
-                                    RSVP ON GATHERLY • RSVP ON GATHERLY • RSVP
+                                    RSVP ON JollyWitMe • RSVP ON JollyWitMe • RSVP
                                 </span>
                             </div>
                             <div className="absolute right-0 top-0 bottom-0 w-8 bg-black/40 backdrop-blur-sm border-l border-white/10 flex flex-col items-center justify-center z-20">
                                 <span className="text-[10px] font-black text-white/40 tracking-[0.2em] transform -rotate-180 whitespace-nowrap" style={{ writingMode: 'vertical-rl' }}>
-                                    RSVP ON GATHERLY • RSVP ON GATHERLY • RSVP
+                                    RSVP ON JollyWitMe • RSVP ON JollyWitMe • RSVP
                                 </span>
                             </div>
 
@@ -161,14 +161,14 @@ export default function FlyerModal({ isOpen, onClose, event }: FlyerModalProps) 
                                 {/* Footer Logo */}
                                 <div className="absolute bottom-6 flex items-center gap-1.5 opacity-80">
                                     <div className="w-4 h-4 rounded-full border-2 border-white"></div>
-                                    <span className="text-[10px] font-bold text-white tracking-widest lowercase">gatherly</span>
+                                    <span className="text-[10px] font-bold text-white tracking-widest lowercase">jollywitme</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <p className="text-center text-white/40 text-sm max-w-sm">
-                        Post this flyer on your socials and tag Gatherly to get featured!
+                        Post this flyer on your socials and tag JollyWitMe to get featured!
                     </p>
                 </div>
 

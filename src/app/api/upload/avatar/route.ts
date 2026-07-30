@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
+import { prisma } from "@/lib/prisma";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -64,6 +65,12 @@ export async function POST(request: NextRequest) {
 
         // Generate URL
         const imageUrl = `/uploads/avatars/${filename}`;
+
+        // Auto-save to database
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { image: imageUrl }
+        });
 
         return NextResponse.json({
             success: true,

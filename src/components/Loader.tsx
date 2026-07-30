@@ -60,7 +60,7 @@ export default function Loader() {
         <div
             className="gatherly-loader-root"
             style={{ opacity: exiting ? 0 : 1 }}
-            aria-label="Loading Gatherly"
+            aria-label="Loading JollyWitMe"
             role="status"
         >
             {/* Ambient background blobs */}
@@ -98,7 +98,7 @@ export default function Loader() {
                         <div className="gatherly-logo-img-wrap">
                             <Image
                                 src="/logo/logo-white.svg"
-                                alt="Gatherly"
+                                alt="JollyWitMe"
                                 fill
                                 className="object-contain"
                                 priority
@@ -109,7 +109,7 @@ export default function Loader() {
 
                 {/* Brand name */}
                 <div className="gatherly-name-wrap">
-                    {"Gatherly".split("").map((char, i) => (
+                    {"JollyWitMe".split("").map((char, i) => (
                         <span
                             key={i}
                             className="gatherly-char"

@@ -8,6 +8,15 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
+    if (!process.env.MAIL_USERNAME) {
+        console.log("================ MOCK EMAIL ================");
+        console.log(`To: ${to}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`[Email body omitted - Configure SMTP in .env to send real emails]`);
+        console.log("============================================");
+        return { success: true, messageId: "mock-id-" + Date.now() };
+    }
+
     const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST || "smtp.gmail.com",
         port: parseInt(process.env.MAIL_PORT || "587"),

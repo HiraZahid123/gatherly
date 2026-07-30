@@ -121,13 +121,13 @@ export default function CompleteProfilePage() {
                         <div className="relative w-16 h-16">
                             <Image
                                 src="/logo/logo-white.svg"
-                                alt="Gatherly Logo"
+                                alt="JollyWitMe Logo"
                                 fill
                                 className="object-contain"
                                 priority
                             />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">Gatherly</h1>
+                        <h1 className="text-4xl font-extrabold text-white tracking-tight">JollyWitMe</h1>
                     </div>
                     <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">One Last Step</h1>
                     <p className="text-gray-400">Please verify your WhatsApp to continue</p>

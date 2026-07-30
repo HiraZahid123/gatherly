@@ -318,7 +318,7 @@ export default function WhatsAppScanPage() {
                 transition={{ delay: 1 }}
                 className="mt-12 text-slate-600 text-xs tracking-widest uppercase font-bold"
             >
-                Powered by Gatherly Engine v4.0
+                Powered by JollyWitMe Engine v4.0
             </motion.p>
         </div>
     );
