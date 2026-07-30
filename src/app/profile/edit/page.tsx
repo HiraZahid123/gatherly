@@ -7,7 +7,7 @@ import Link from "next/link";
 import AvatarUpload from "@/components/AvatarUpload";
 
 export default function EditProfilePage() {
-    const { data: session, update } = useSession();
+    const { data: session, status, update } = useSession();
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -19,17 +19,19 @@ export default function EditProfilePage() {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        if (!session) {
+        if (status === "unauthenticated") {
             router.push("/auth/signin");
             return;
         }
 
-        setFormData({
-            name: session.user.name || "",
-            phone: (session.user as any).phone || "",
-            image: session.user.image || "",
-        });
-    }, [session, router]);
+        if (session?.user) {
+            setFormData({
+                name: session.user.name || "",
+                phone: (session.user as any).phone || "",
+                image: session.user.image || "",
+            });
+        }
+    }, [session, status, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
