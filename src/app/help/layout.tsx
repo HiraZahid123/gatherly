@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Gatherly Help Center",
+  title: "JollyWitMe Help Center",
   description:
-    "Get help with Gatherly — creating events, inviting guests, messaging, and more.",
+    "Get help with JollyWitMe — creating events, inviting guests, messaging, and more.",
 };
 
 export default function HelpLayout({

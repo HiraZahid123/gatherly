@@ -79,47 +79,47 @@
   --animate-bounce-subtle: bounce-subtle 3s ease-in-out infinite;
   --animate-pulse-slow: pulse-slow 4s ease-in-out infinite;
 
-  @keyframes gatherly-orbit {
+  @keyframes jollywitme-orbit {
     from { transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-r, 80px)) rotate(calc(-1 * var(--start-angle, 0deg))); }
     to   { transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(var(--orbit-r, 80px)) rotate(calc(-1 * (var(--start-angle, 0deg) + 360deg))); }
   }
 
-  @keyframes gatherly-spin {
+  @keyframes jollywitme-spin {
     to { transform: rotate(360deg); }
   }
 
-  @keyframes gatherly-spin-reverse {
+  @keyframes jollywitme-spin-reverse {
     to { transform: rotate(-360deg); }
   }
 
-  @keyframes gatherly-char-in {
+  @keyframes jollywitme-char-in {
     0%   { opacity: 0; transform: translateY(14px) scale(0.85); filter: blur(4px); }
     60%  { opacity: 1; transform: translateY(-3px) scale(1.04); filter: blur(0); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
-  @keyframes gatherly-blob-drift {
+  @keyframes jollywitme-blob-drift {
     0%, 100% { transform: translate(0, 0) scale(1); }
     33%       { transform: translate(30px, -20px) scale(1.08); }
     66%       { transform: translate(-20px, 18px) scale(0.96); }
   }
 
-  @keyframes gatherly-dot-wave {
+  @keyframes jollywitme-dot-wave {
     0%, 80%, 100% { transform: scaleY(0.4); opacity: 0.3; }
     40%            { transform: scaleY(1);   opacity: 1; }
   }
 
-  @keyframes gatherly-logo-breathe {
+  @keyframes jollywitme-logo-breathe {
     0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 16px rgba(16,185,129,0.6)); }
     50%       { transform: scale(1.06); filter: drop-shadow(0 0 32px rgba(251,191,36,0.8)); }
   }
 
-  @keyframes gatherly-progress {
+  @keyframes jollywitme-progress {
     0%   { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
   }
 
-  @keyframes gatherly-glow-pulse {
+  @keyframes jollywitme-glow-pulse {
     0%, 100% { opacity: 0.35; transform: scale(1); }
     50%       { opacity: 0.65; transform: scale(1.18); }
   }
@@ -158,10 +158,10 @@ body {
 }
 
 /* ============================================================
-   GATHERLY LOADER
+   JollyWitMe LOADER
    ============================================================ */
 
-.gatherly-loader-root {
+.jollywitme-loader-root {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -175,33 +175,33 @@ body {
 }
 
 /* Ambient blobs */
-.gatherly-blob {
+.jollywitme-blob {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
   pointer-events: none;
 }
-.gatherly-blob-1 {
+.jollywitme-blob-1 {
   width: 480px; height: 420px;
   background: radial-gradient(circle, rgba(0,135,81,0.35), transparent 70%);
   top: -80px; left: -100px;
-  animation: gatherly-blob-drift 14s ease-in-out infinite;
+  animation: jollywitme-blob-drift 14s ease-in-out infinite;
 }
-.gatherly-blob-2 {
+.jollywitme-blob-2 {
   width: 340px; height: 380px;
   background: radial-gradient(circle, rgba(251,191,36,0.28), transparent 70%);
   bottom: -60px; right: -80px;
-  animation: gatherly-blob-drift 18s ease-in-out infinite reverse;
+  animation: jollywitme-blob-drift 18s ease-in-out infinite reverse;
 }
-.gatherly-blob-3 {
+.jollywitme-blob-3 {
   width: 280px; height: 260px;
   background: radial-gradient(circle, rgba(52,211,153,0.18), transparent 70%);
   bottom: 30%; left: 10%;
-  animation: gatherly-blob-drift 22s ease-in-out infinite 3s;
+  animation: jollywitme-blob-drift 22s ease-in-out infinite 3s;
 }
 
 /* Card */
-.gatherly-card {
+.jollywitme-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -217,7 +217,7 @@ body {
 }
 
 /* Ring wrapper */
-.gatherly-ring-wrap {
+.jollywitme-ring-wrap {
   position: relative;
   width: 180px;
   height: 180px;
@@ -227,7 +227,7 @@ body {
 }
 
 /* Outer spinning gradient ring */
-.gatherly-ring {
+.jollywitme-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -240,13 +240,13 @@ body {
     transparent 85%,
     transparent 100%
   );
-  animation: gatherly-spin 2s linear infinite;
+  animation: jollywitme-spin 2s linear infinite;
   -webkit-mask: radial-gradient(circle at center, transparent 72%, black 72%);
   mask: radial-gradient(circle at center, transparent 72%, black 72%);
 }
 
 /* Inner slower reverse ring */
-.gatherly-ring-inner {
+.jollywitme-ring-inner {
   position: absolute;
   inset: 10px;
   border-radius: 50%;
@@ -259,13 +259,13 @@ body {
     transparent 90%,
     transparent 100%
   );
-  animation: gatherly-spin-reverse 3.5s linear infinite;
+  animation: jollywitme-spin-reverse 3.5s linear infinite;
   -webkit-mask: radial-gradient(circle at center, transparent 78%, black 78%);
   mask: radial-gradient(circle at center, transparent 78%, black 78%);
 }
 
 /* Orbiting particles */
-.gatherly-particle {
+.jollywitme-particle {
   position: absolute;
   top: 50%; left: 50%;
   margin-top: calc(var(--size, 4px) / -2);
@@ -273,12 +273,12 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle, #fcd34d, #008751);
   box-shadow: 0 0 6px 2px rgba(16,185,129,0.7);
-  animation: gatherly-orbit 3s linear infinite;
+  animation: jollywitme-orbit 3s linear infinite;
   transform-origin: 0 0;
 }
 
 /* Logo container */
-.gatherly-logo-container {
+.jollywitme-logo-container {
   position: relative;
   width: 76px;
   height: 76px;
@@ -287,29 +287,29 @@ body {
   justify-content: center;
 }
 
-.gatherly-logo-glow {
+.jollywitme-logo-glow {
   position: absolute;
   inset: -16px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(16,185,129,0.5), rgba(251,191,36,0.3), transparent 70%);
-  animation: gatherly-glow-pulse 2.5s ease-in-out infinite;
+  animation: jollywitme-glow-pulse 2.5s ease-in-out infinite;
 }
 
-.gatherly-logo-img-wrap {
+.jollywitme-logo-img-wrap {
   position: relative;
   width: 100%;
   height: 100%;
-  animation: gatherly-logo-breathe 3s ease-in-out infinite;
+  animation: jollywitme-logo-breathe 3s ease-in-out infinite;
 }
 
 /* Brand name letters */
-.gatherly-name-wrap {
+.jollywitme-name-wrap {
   display: flex;
   align-items: baseline;
   gap: 0.5px;
 }
 
-.gatherly-char {
+.jollywitme-char {
   font-family: var(--font-playfair), serif;
   font-size: 2.25rem;
   font-weight: 700;
@@ -320,11 +320,11 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   opacity: 0;
-  animation: gatherly-char-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: jollywitme-char-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* Tagline */
-.gatherly-tagline {
+.jollywitme-tagline {
   font-size: 0.78rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -334,24 +334,24 @@ body {
 }
 
 /* Wave dots */
-.gatherly-dots {
+.jollywitme-dots {
   display: flex;
   align-items: center;
   gap: 5px;
   height: 24px;
 }
 
-.gatherly-dot {
+.jollywitme-dot {
   width: 4px;
   height: 20px;
   border-radius: 999px;
   background: linear-gradient(to top, #008751, #fcd34d);
-  animation: gatherly-dot-wave 1.2s ease-in-out infinite;
+  animation: jollywitme-dot-wave 1.2s ease-in-out infinite;
   transform-origin: center bottom;
 }
 
 /* Progress bar */
-.gatherly-progress-wrap {
+.jollywitme-progress-wrap {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -361,11 +361,11 @@ body {
   overflow: hidden;
 }
 
-.gatherly-progress-bar {
+.jollywitme-progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #008751, #10b981, #f59e0b, #10b981, #008751);
   background-size: 200% 100%;
-  animation: gatherly-progress 1.8s linear infinite;
+  animation: jollywitme-progress 1.8s linear infinite;
   transition: width 0.25s ease-out;
   box-shadow: 0 0 12px rgba(16,185,129,0.8);
 }

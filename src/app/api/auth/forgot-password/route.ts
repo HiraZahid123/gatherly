@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createPasswordResetToken } from "@/lib/tokens";
 import { sendEmail } from "@/lib/mail";
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
         const emailResult = await sendEmail({
             to: email,
-            subject: "Reset Your Password - Gatherly",
+            subject: "Reset Your Password - JollyWitMe",
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                     <h1 style="color: #6d28d9;">Reset Your Password</h1>

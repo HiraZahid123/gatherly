@@ -1,7 +1,7 @@
-import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
 
 export const metadata = {
-    title: "Housewarming Invitations - Gatherly",
+    title: "Housewarming Invitations - JollyWitMe",
     description: "Create and send beautiful housewarming invitations.",
 };
 

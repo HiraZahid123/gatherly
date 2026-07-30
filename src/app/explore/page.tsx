@@ -1,10 +1,10 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
 
 export const metadata = {
-    title: "Explore — Gatherly",
+    title: "Explore — JollyWitMe",
     description: "Find the best events and the communities behind them.",
 };
 

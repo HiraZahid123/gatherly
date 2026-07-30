@@ -1,7 +1,7 @@
-import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
 
 export const metadata = {
-    title: "Birthday Invitations - Gatherly",
+    title: "Birthday Invitations - JollyWitMe",
     description: "Create and send beautiful birthday invitations.",
 };
 

@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft } from "lucide-react";
 import { VIBE_THEMES } from "@/lib/theme";
 import { format } from "date-fns";

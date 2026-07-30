@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -17,7 +17,7 @@ export async function GET() {
                 role: "ADMIN",
                 password: hashedPassword,
                 // Ensure name and phone exist for the auth provider check
-                name: existingUser?.name || "Gatherly Admin",
+                name: existingUser?.name || "JollyWitMe Admin",
                 phone: existingUser?.phone || "0000000000" 
             },
             select: { name: true, role: true, email: true, phone: true }

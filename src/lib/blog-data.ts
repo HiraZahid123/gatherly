@@ -1,4 +1,4 @@
-export interface BlogPost {
+﻿export interface BlogPost {
     slug: string;
     title: string;
     excerpt: string;
@@ -50,7 +50,7 @@ export const STATIC_BLOG_POSTS: BlogPost[] = [
 
 <p>Send your invitations exactly <strong>72 hours before your RSVP deadline</strong> — not weeks in advance. Here's why: the longer the window, the more people procrastinate. A shorter window creates urgency without pressure.</p>
 
-<p>Follow up once, 24 hours before the deadline, with a personal nudge. Not a mass blast — a targeted message to people who haven't responded yet. Gatherly's broadcast feature lets you message pending guests specifically, so you're not annoying the people who already said yes.</p>
+<p>Follow up once, 24 hours before the deadline, with a personal nudge. Not a mass blast — a targeted message to people who haven't responded yet. JollyWitMe's broadcast feature lets you message pending guests specifically, so you're not annoying the people who already said yes.</p>
 
 <h2>Build social proof early</h2>
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -64,7 +64,7 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
         slug: "",
         excerpt: "",
         category: "General",
-        authorName: "Gatherly Team",
+        authorName: "JollyWitMe Team",
         authorRole: "Editor",
         authorAvatar: "GT",
         readingTime: 5,

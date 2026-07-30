@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -67,8 +67,20 @@ export default function Navbar() {
         <nav className={finalNavClasses}>
             <div className="container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
-                <Link href="/" className="flex items-center group transition-transform hover:scale-105">
-                    <Logo variant="neon" lightMode={!finalLogoWhite} />
+                <Link href="/" className="flex items-center group">
+                    <div className="relative w-16 h-16 mr-3 transition-transform group-hover:scale-110">
+                        <Image
+                            src={finalLogoWhite ? "/logo/logo-white.svg" : "/logo/logo.svg"}
+                            alt="JollyWitMe Logo"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+                    <span className={`text-2xl font-bold tracking-tight transition-colors ${finalLogoWhite ? "text-white" : "bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
+                        }`}>
+                        JollyWitMe
+                    </span>
                 </Link>
 
                 {/* Desktop Navigation */}

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
             )}&countrycodes=ng&addressdetails=1&limit=5`,
             {
                 headers: {
-                    "User-Agent": "Gatherly Event App (contact@gatherly.com)",
+                    "User-Agent": "JollyWitMe Event App (contact@JollyWitMe.com)",
                 },
             }
         );

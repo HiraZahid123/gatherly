@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -20,8 +20,16 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/" className="inline-block mb-6 transition-transform hover:scale-105">
-                            <Logo variant="neon" />
+                        <Link href="/" className="flex items-center mb-6">
+                            <div className="relative w-12 h-12 mr-3">
+                                <Image
+                                    src="/logo/logo-white.svg"
+                                    alt="JollyWitMe Logo"
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
+                            <span className="text-2xl font-bold tracking-tight">JollyWitMe</span>
                         </Link>
                         <p className="text-white/60 text-sm mb-6 max-w-xs">
                             The easiest way to get your guests on the same page. Start planning your next memorable event today.
