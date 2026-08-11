@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+import InstagramProvider from "next-auth/providers/instagram";
 import { authConfig } from "@/lib/auth.config";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
@@ -90,6 +92,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         GoogleProvider({
             clientId: process.env["GOOGLE_CLIENT_ID"] as string,
             clientSecret: process.env["GOOGLE_CLIENT_SECRET"] as string,
+            allowDangerousEmailAccountLinking: true,
+        }),
+        FacebookProvider({
+            clientId: process.env["FACEBOOK_CLIENT_ID"] || "mock_fb_id",
+            clientSecret: process.env["FACEBOOK_CLIENT_SECRET"] || "mock_fb_secret",
+            authorization: {
+                params: {
+                    scope: "public_profile email",
+                },
+            },
+            allowDangerousEmailAccountLinking: true,
+        }),
+        InstagramProvider({
+            clientId: process.env["INSTAGRAM_CLIENT_ID"] || "mock_ig_id",
+            clientSecret: process.env["INSTAGRAM_CLIENT_SECRET"] || "mock_ig_secret",
             allowDangerousEmailAccountLinking: true,
         }),
         // Phone/OTP Authentication

@@ -66,15 +66,15 @@ export default function Home() {
             <div className="glass-card absolute top-10 left-0 w-80 p-6 rounded-3xl animate-[float_6s_ease-in-out_infinite] transform -rotate-6 z-10">
               {/* Card Header */}
               <div className="mb-4">
-                <h3 className="text-black font-bold text-lg mb-1">Event Invite</h3>
+                <h3 className="text-black font-bold text-lg mb-1">Grand Owambe Invite</h3>
                 <p className="text-gray-800 text-xs font-medium">
-                  We&apos;re invited Class of 2026
+                  Chief &amp; Chief Mrs. Balogun&apos;s 50th Owambe
                 </p>
               </div>
               {/* Event Details */}
               <div className="space-y-1 mb-6">
-                <p className="text-gray-900 text-xs">5:00 pm - 5:30 pm</p>
-                <p className="text-gray-900 text-xs">You&apos;re invited!</p>
+                <p className="text-gray-900 text-xs font-semibold">Sat, 5:00 PM • Victoria Island, Lagos</p>
+                <p className="text-gray-900 text-xs">Dress Code: Emerald &amp; Gold Aso-Ebi</p>
               </div>
               {/* Card Buttons */}
               <div className="flex gap-3 mt-2">

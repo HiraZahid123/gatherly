@@ -139,11 +139,11 @@ export default function InteractiveShowcase() {
                         {/* Text Content */}
                         <div className={`space-y-6 ${activeFont} text-white`}>
                             <h3 className="text-5xl md:text-6xl font-extrabold leading-tight">
-                                26th Birthday Bash
+                                Lagos Owambe Bash
                             </h3>
                             <div className="space-y-1 text-white/80">
-                                <p className="font-bold text-lg">Friday, April 5</p>
-                                <p>6:00pm</p>
+                                <p className="font-bold text-lg">Saturday, April 5</p>
+                                <p>5:00pm</p>
                             </div>
                             
                             <div className="pt-4 space-y-4">
@@ -151,19 +151,19 @@ export default function InteractiveShowcase() {
                                     <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden relative border border-white/20">
                                          <Image src="/assets/b-1.avif" alt="Host" fill className="object-cover" sizes="32px" />
                                     </div>
-                                    <span className="text-sm text-white/80">Hosted by <span className="font-bold text-white">You</span></span>
+                                    <span className="text-sm text-white/80">Hosted by <span className="font-bold text-white">Chief Balogun</span></span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-white/80">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
-                                    RSVP to see location
+                                    Victoria Island, Lagos (RSVP for venue)
                                 </div>
                             </div>
 
                             <p className="text-sm pt-4 text-white/60">
-                                Celebrate the end of being on my parents health insurance!
+                                Aso-Ebi, live band performance, Jollof rice, and spraying money! Dress in Emerald & Gold.
                             </p>
 
                             {/* Guest List Preview */}

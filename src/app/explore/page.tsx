@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
@@ -81,9 +81,20 @@ export default async function ExplorePage() {
                     <p className="text-xl md:text-2xl text-white/90 font-medium mb-8 max-w-xl">
                         Find the best events and the communities behind them
                     </p>
-                    <button className="bg-white text-black font-bold text-sm px-6 py-3.5 rounded-lg hover:bg-white/90 transition-colors">
-                        See more on the app
-                    </button>
+                    <div className="flex flex-wrap gap-3 mt-6">
+                        <Link href="/wedding" className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:scale-105">
+                            💍 Wedding
+                        </Link>
+                        <Link href="/birthdays" className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:scale-105">
+                            🎂 Birthdays
+                        </Link>
+                        <Link href="/concerts" className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:scale-105">
+                            🎸 Concerts
+                        </Link>
+                        <Link href="/housewarmings" className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:scale-105">
+                            🏡 Housewarmings
+                        </Link>
+                    </div>
                 </div>
             </section>
 

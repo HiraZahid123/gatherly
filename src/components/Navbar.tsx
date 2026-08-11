@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -92,10 +92,10 @@ export default function Navbar() {
                         How it Works
                     </Link> */}
                     <Link
-                        href="/summer-parties"
+                        href="/wedding"
                         className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
                     >
-                        Summer Parties
+                        Wedding
                     </Link>
                     <Link
                         href="/birthdays"
@@ -104,10 +104,10 @@ export default function Navbar() {
                         Birthdays
                     </Link>
                     <Link
-                        href="/dinners"
+                        href="/concerts"
                         className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
                     >
-                        Dinners
+                        Concerts
                     </Link>
                     <Link
                         href="/housewarmings"

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -40,9 +40,9 @@ export default function Footer() {
                     <div>
                         <h4 className="font-semibold text-lg mb-4">Explore</h4>
                         <ul className="space-y-3 text-sm text-white/70">
-                            <li><Link href="/summer-parties" className="hover:text-white transition-colors">Summer Parties</Link></li>
+                            <li><Link href="/wedding" className="hover:text-white transition-colors">Wedding</Link></li>
                             <li><Link href="/birthdays" className="hover:text-white transition-colors">Birthdays</Link></li>
-                            <li><Link href="/dinners" className="hover:text-white transition-colors">Dinners</Link></li>
+                            <li><Link href="/concerts" className="hover:text-white transition-colors">Concerts</Link></li>
                             <li><Link href="/housewarmings" className="hover:text-white transition-colors">Housewarmings</Link></li>
                         </ul>
                     </div>
