@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Inter, Playfair_Display, Great_Vibes, JetBrains_Mono, Montserrat, Cinzel, Caveat, Oswald, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
@@ -18,6 +18,16 @@ const dancingScript = Dancing_Script({ subsets: ["latin"], variable: "--font-dan
 export const metadata: Metadata = {
   title: "JollyWitMe - Create Amazing Events",
   description: "Create events, invite guests, and manage RSVPs all in one place",
+  icons: {
+    icon: [
+      { url: "/logo/favicon.ico" },
+      { url: "/logo/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    shortcut: "/logo/favicon.ico",
+    apple: "/logo/apple-touch-icon.png",
+  },
+  manifest: "/logo/site.webmanifest",
 };
 
 export default function RootLayout({
