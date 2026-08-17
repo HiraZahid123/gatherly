@@ -20,11 +20,12 @@ export const metadata: Metadata = {
   description: "Create events, invite guests, and manage RSVPs all in one place",
   icons: {
     icon: [
+      { url: "/logo/favicon.svg", type: "image/svg+xml" },
       { url: "/logo/favicon.ico" },
       { url: "/logo/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
-    shortcut: "/logo/favicon.ico",
+    shortcut: "/logo/favicon.svg",
     apple: "/logo/apple-touch-icon.png",
   },
   manifest: "/logo/site.webmanifest",
