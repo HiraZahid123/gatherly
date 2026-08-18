@@ -466,9 +466,11 @@ function RSVPItem({ item, mounted }: { item: RSVPActivity; mounted: boolean }) {
         <div className="flex gap-3 py-1">
             <div className="flex-shrink-0 mt-1">
                 {img ? (
-                    <div className="relative">
-                        <NextImage src={img} alt={name} width={40} height={40} className="rounded-full border border-white/10 object-cover" unoptimized referrerPolicy="no-referrer" />
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#0a0a0b] flex items-center justify-center text-[7px] font-black text-white ${getStatusColor(item.status)}`}>
+                    <div className="relative w-10 h-10">
+                        <div className="w-10 h-10 rounded-full overflow-hidden relative border border-white/10 bg-white/10">
+                            <NextImage src={img} alt={name} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
+                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#0a0a0b] flex items-center justify-center text-[7px] font-black text-white z-10 ${getStatusColor(item.status)}`}>
                             {getStatusInitial(item.status)}
                         </div>
                     </div>
@@ -495,8 +497,11 @@ function UserAvatar({ user, size = "md" }: { user?: { name?: string | null; imag
     const dim = size === "sm" ? "w-7 h-7" : "w-9 h-9";
     const text = size === "sm" ? "text-[10px]" : "text-xs";
     if (user?.image) {
-        const px = size === "sm" ? 28 : 36;
-        return <NextImage src={user.image} alt={user.name || ""} width={px} height={px} className={`${dim} rounded-full border border-white/10 object-cover flex-shrink-0`} unoptimized referrerPolicy="no-referrer" />;
+        return (
+            <div className={`${dim} rounded-full overflow-hidden relative border border-white/10 flex-shrink-0 bg-white/10`}>
+                <NextImage src={user.image} alt={user.name || ""} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
+            </div>
+        );
     }
     return (
         <div className={`${dim} rounded-full bg-gradient-to-br from-yellow-500/80 to-teal-600/80 flex items-center justify-center text-white font-bold ${text} flex-shrink-0 border border-white/10`}>

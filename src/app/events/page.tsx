@@ -6,37 +6,37 @@ import { X, Sparkles, Pencil } from "lucide-react";
 import PublicEventClient from "@/components/event-page/PublicEventClient";
 
 // ---------------------------------------------------------------------------
-// Hardcoded example event — no database required
+// Hardcoded example event — Nigerian Owambe Lagos Celebration
 // ---------------------------------------------------------------------------
 const EXAMPLE_EVENT = {
     id: "example-demo-event-000",
-    title: "Tech Innovators Summit 2026",
+    title: "Chief & Chief Mrs. Balogun's 50th Grand Owambe",
     slug: "example",
     description:
-        "Join the brightest minds in tech for an evening of keynotes, networking, and bold ideas that will shape the next decade. Expect live demos, panel discussions, and the kind of energy you only get when innovators collide.\n\nDress code: Smart casual. Drinks and canapés provided.",
-    startDate: new Date("2026-06-14T18:00:00").toISOString(),
-    endDate: new Date("2026-06-14T22:00:00").toISOString(),
-    location: "The Ritz-Carlton, San Francisco, CA",
+        "Join us for an unforgettable evening of high-energy celebration, live Fuji & Afrobeats music, gourmet Nigerian cuisine, and vibrant cultural elegance as we celebrate 50 glorious years in grand style!\n\nDress Code: Emerald & Gold Aso-Ebi / Traditional Luxe. Drinks, small chops, and banquet provided.",
+    startDate: new Date("2026-11-28T17:00:00").toISOString(),
+    endDate: new Date("2026-11-28T23:30:00").toISOString(),
+    location: "Landmark Event Centre, Victoria Island, Lagos",
     locationType: "PHYSICAL",
     hostId: "example-host-id-000",
     visibility: "PUBLIC",
     status: "PUBLISHED",
     coverImage:
-        "/partiful/bitchy-shrek-sophia.avif",
+        "/partiful/awards-night.avif",
     guestListHidden: false,
-    capacity: 200,
+    capacity: 350,
     isPrivate: false,
     theme: {
-        primaryColor: "#6366f1",
-        backgroundTheme: "default",
-        effect: "particles",
-        vibeId: "futuristic",
+        primaryColor: "#10b981",
+        backgroundTheme: "meadow",
+        effect: "glow",
+        vibeId: "royal",
         showRSVP: true,
         settings: {
             rsvp: {
                 requireApproval: false,
-                capacity: 200,
-                plusOnes: 0,
+                capacity: 350,
+                plusOnes: 1,
                 allowMutuals: true,
                 allowMaybe: true,
             },
@@ -53,52 +53,52 @@ const EXAMPLE_EVENT = {
     },
     host: {
         id: "example-host-id-000",
-        name: "Alex Rivera",
-        email: "alex@example.com",
-        image: null,
+        name: "Chief & Chief Mrs. Balogun",
+        email: "balogun.owambe@jollywitme.com",
+        image: "/guests/ng-b3.webp",
     },
     staff: [],
-    _count: { rsvps: 47 },
+    _count: { rsvps: 184 },
 };
 
 const EXAMPLE_GUESTS = [
-    { id: "g1", rsvpId: "r1", name: "Sarah Chen", email: "sarah@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g2", rsvpId: "r2", name: "Marcus Johnson", email: "marcus@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g3", rsvpId: "r3", name: "Priya Patel", email: "priya@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g4", rsvpId: "r4", name: "David Kim", email: "david@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g5", rsvpId: "r5", name: "Emma Wilson", email: "emma@example.com", image: null, status: "MAYBE", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g6", rsvpId: "r6", name: "Liam Torres", email: "liam@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g7", rsvpId: "r7", name: "Olivia Zhang", email: "olivia@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
-    { id: "g8", rsvpId: "r8", name: "Noah Adams", email: "noah@example.com", image: null, status: "ACCEPTED", qrToken: null, updatedAt: new Date().toISOString() },
+    { id: "g1", rsvpId: "r1", name: "Ola", email: "ola@example.com", image: "/guests/ng-b2.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:00:00.000Z" },
+    { id: "g2", rsvpId: "r2", name: "Semilore", email: "semilore@example.com", image: "/guests/ng-g1.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:05:00.000Z" },
+    { id: "g3", rsvpId: "r3", name: "Babatunde", email: "babatunde@example.com", image: "/guests/ng-b3.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:10:00.000Z" },
+    { id: "g4", rsvpId: "r4", name: "Ifeoma", email: "ifeoma@example.com", image: "/guests/ng-g2.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:15:00.000Z" },
+    { id: "g5", rsvpId: "r5", name: "Shegzy", email: "shegzy@example.com", image: "/guests/ng-b4.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:20:00.000Z" },
+    { id: "g6", rsvpId: "r6", name: "Chigozie", email: "chigozie@example.com", image: "/guests/ng-b1.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:25:00.000Z" },
+    { id: "g7", rsvpId: "r7", name: "Folake Adebayo", email: "folake@example.com", image: "/guests/ng-g1.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:30:00.000Z" },
+    { id: "g8", rsvpId: "r8", name: "Tunde Bakare", email: "tunde@example.com", image: "/guests/ng-b2.webp", status: "ACCEPTED", qrToken: null, updatedAt: "2026-11-20T10:35:00.000Z" },
 ];
 
 const EXAMPLE_COMMENTS = [
     {
         id: "c1",
         eventId: "example-demo-event-000",
-        content: "So excited for this! The lineup looks incredible 🚀",
+        content: "Aso-Ebi fabric is ready! Can't wait for this celebration 🎉✨",
         type: "TEXT",
         mediaUrl: null,
-        createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-        user: { id: "g1", name: "Sarah Chen", image: null },
+        createdAt: "2026-11-20T12:00:00.000Z",
+        user: { id: "g1", name: "Semilore", image: "/guests/ng-g1.webp" },
     },
     {
         id: "c2",
         eventId: "example-demo-event-000",
-        content: "Can't wait to see the live demos. See everyone there!",
+        content: "Counting down the days! Lagos Owambe is about to be legendary 🔥",
         type: "TEXT",
         mediaUrl: null,
-        createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-        user: { id: "g2", name: "Marcus Johnson", image: null },
+        createdAt: "2026-11-20T11:00:00.000Z",
+        user: { id: "g2", name: "Babatunde", image: "/guests/ng-b3.webp" },
     },
     {
         id: "c3",
         eventId: "example-demo-event-000",
-        content: "Will there be recordings available for those who can't make it?",
+        content: "Will the live band be starting promptly at 5 PM? We are ready!",
         type: "TEXT",
         mediaUrl: null,
-        createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-        user: { id: "g5", name: "Emma Wilson", image: null },
+        createdAt: "2026-11-20T09:00:00.000Z",
+        user: { id: "g3", name: "Ifeoma", image: "/guests/ng-g2.webp" },
     },
 ];
 

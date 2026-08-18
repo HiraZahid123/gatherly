@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft } from "lucide-react";
 import { VIBE_THEMES } from "@/lib/theme";
 import { format } from "date-fns";
@@ -73,22 +73,23 @@ export default function ReadonlyEventSummary({ event }: ReadonlyEventSummaryProp
                 {/* Host */}
                 <div className="flex items-center gap-4 px-6 py-5 group">
                     <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#FD0BD7] to-[#9D00FF] p-0.5 shadow-xl ring-2 ring-white/10 overflow-hidden">
-                            {event.host?.image || (session?.user?.id === event.hostId ? session?.user?.image : null) ? (
-                                <Image
-                                    src={event.host?.image || (session?.user?.id === event.hostId ? session?.user?.image : "")}
-                                    alt={event.host?.name || ""}
-                                    width={48}
-                                    height={48}
-                                    className="rounded-full object-cover border-2 border-black"
-                                    unoptimized
-                                    referrerPolicy="no-referrer"
-                                />
-                            ) : (
-                                <div className="w-full h-full rounded-full bg-neutral-900 flex items-center justify-center text-lg font-bold border-2 border-black">
-                                    {event.host?.name?.charAt(0).toUpperCase() || "H"}
-                                </div>
-                            )}
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-500 to-green-500 p-0.5 shadow-xl ring-2 ring-white/10 flex items-center justify-center">
+                            <div className="w-full h-full rounded-full overflow-hidden relative border-2 border-black bg-neutral-900">
+                                {event.host?.image || (session?.user?.id === event.hostId ? session?.user?.image : null) ? (
+                                    <Image
+                                        src={event.host?.image || (session?.user?.id === event.hostId ? session?.user?.image : "")}
+                                        alt={event.host?.name || ""}
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                        referrerPolicy="no-referrer"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full rounded-full bg-neutral-900 flex items-center justify-center text-lg font-bold">
+                                        {event.host?.name?.charAt(0).toUpperCase() || "H"}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-black">
                             <Crown className="w-3 h-3 text-black" fill="currentColor" />

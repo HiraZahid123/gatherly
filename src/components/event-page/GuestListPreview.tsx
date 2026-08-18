@@ -70,10 +70,10 @@ export default function GuestListPreview({ guests, totalCount, onViewAll, onSele
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => onSelectGuest?.(guest)}
-                            className="inline-block h-14 w-14 rounded-full ring-4 ring-[#0a0a0b] relative z-0 hover:z-10 hover:scale-110 transition-transform duration-300 cursor-pointer"
+                            className="inline-block h-14 w-14 rounded-full ring-4 ring-[#0a0a0b] relative z-0 hover:z-10 hover:scale-110 transition-transform duration-300 cursor-pointer overflow-hidden bg-white/10"
                         >
                             {guest.image ? (
-                                <Image src={guest.image} alt={guest.name} width={56} height={56} className="rounded-full object-cover" unoptimized referrerPolicy="no-referrer" />
+                                <Image src={guest.image} alt={guest.name} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
                             ) : (
                                 <div className="h-full w-full rounded-full bg-gradient-to-br from-emerald-500/30 to-green-500/30 flex items-center justify-center text-white font-black text-sm border border-white/10">
                                     {guest.name?.[0]?.toUpperCase() || <User className="w-5 h-5" />}
