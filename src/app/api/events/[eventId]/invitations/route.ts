@@ -109,11 +109,12 @@ export async function POST(
                 const invitation = await (prisma as any).invitation.create({
                     data: { eventId, email, token, expiresAt, status: "PENDING" }
                 });
-                const inviteLink = `${process.env.NEXTAUTH_URL}/e/${event.slug}?invite=${token}`;
+                const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+                const inviteLink = `${baseUrl}/e/${event.slug}?invite=${token}`;
                 const emailResult = await sendEmail({
                     to: email,
-                    subject: `You're invited to ${event.title}!`,
-                    html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto"><h2>You're invited!</h2><p>You have been invited to attend <strong>${event.title}</strong>.</p><p>Click the button below to view the event and RSVP:</p><div style="margin:30px 0"><a href="${inviteLink}" style="background-color:#7c3aed;color:#fff;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold">View Invitation</a></div><p style="color:#666;font-size:12px">This invitation was sent to ${email}.</p></div>`
+                    subject: `You're invited to ${event.title}! 🎉`,
+                    html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;"><div style="text-align: center; margin-bottom: 24px;"><h1 style="color: #059669; font-size: 24px; font-weight: 800; margin: 0 0 8px 0;">JollyWitMe</h1><p style="color: #6b7280; font-size: 14px; margin: 0;">You're Invited!</p></div><div style="padding: 20px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6;"><p style="color: #111827; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">You have been invited to attend <strong>${event.title}</strong>.</p><div style="text-align: center; margin: 28px 0;"><a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 9999px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">View Invitation & RSVP →</a></div></div><p style="color: #9ca3af; font-size: 12px; margin-top: 20px; text-align: center;">This invitation was sent to ${email}.</p></div>`
                 });
                 if (emailResult.success) {
                     await prisma.invitation.update({ where: { id: invitation.id }, data: { sentAt: new Date() } });

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createPasswordResetToken } from "@/lib/tokens";
 import { sendEmail } from "@/lib/mail";
@@ -60,18 +60,33 @@ export async function POST(request: NextRequest) {
         const token = await createPasswordResetToken(email);
 
         // Send reset email
-        const resetLink = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+        const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+        const resetLink = `${baseUrl}/auth/reset-password?token=${token}`;
 
         const emailResult = await sendEmail({
             to: email,
-            subject: "Reset Your Password - JollyWitMe",
+            subject: "Reset Your Password — JollyWitMe",
             html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #6d28d9;">Reset Your Password</h1>
-                    <p>You requested to reset your password. Click the link below to proceed:</p>
-                    <a href="${resetLink}" style="display: inline-block; background-color: #6d28d9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Reset Password</a>
-                    <p>If you didn't request this, you can safely ignore this email.</p>
-                    <p style="font-size: 12px; color: #666;">This link expires in 1 hour.</p>
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <h1 style="color: #059669; font-size: 26px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px;">JollyWitMe</h1>
+                        <p style="color: #6b7280; font-size: 14px; margin: 0;">Password Reset Request</p>
+                    </div>
+                    <div style="padding: 24px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6;">
+                        <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                            We received a request to reset your password. Click the button below to choose a new password:
+                        </p>
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 9999px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+                                Reset Password →
+                            </a>
+                        </div>
+                        <p style="color: #6b7280; font-size: 13px; margin: 0 0 8px 0;">If you didn't request a password reset, you can safely ignore this email.</p>
+                        <p style="color: #9ca3af; font-size: 12px; margin: 0;">This reset link will expire in 1 hour.</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 24px; color: #9ca3af; font-size: 12px;">
+                        <p style="margin: 0;">© ${new Date().getFullYear()} JollyWitMe. All rights reserved.</p>
+                    </div>
                 </div>
             `,
         });

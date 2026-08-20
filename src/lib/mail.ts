@@ -17,10 +17,13 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
         return { success: true, messageId: "mock-id-" + Date.now() };
     }
 
+    const port = parseInt(process.env.MAIL_PORT || "465");
+    const isSecure = port === 465 || process.env.MAIL_ENCRYPTION === "ssl" || process.env.MAIL_ENCRYPTION === "tls_ssl";
+
     const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.MAIL_PORT || "587"),
-        secure: false, // true for 465, false for other ports
+        host: process.env.MAIL_HOST || "smtp.hostinger.com",
+        port,
+        secure: isSecure,
         auth: {
             user: process.env.MAIL_USERNAME,
             pass: process.env.MAIL_PASSWORD,

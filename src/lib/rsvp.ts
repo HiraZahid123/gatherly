@@ -65,7 +65,8 @@ export async function promoteNextFromWaitlist(eventId: string) {
             });
 
             if (nextInLine.guestEmail) {
-                const qrUrl = `${process.env.NEXTAUTH_URL}/e/${event.slug}?ticket=${qrToken}`;
+                const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+                const qrUrl = `${baseUrl}/e/${event.slug}?ticket=${qrToken}`;
 
                 sendEmail({
                     to: nextInLine.guestEmail,
