@@ -17,7 +17,7 @@ import EffectSelector from "@/components/EffectSelector";
 import FloatingParticles from "@/components/FloatingParticles";
 import InteractiveBackground from "@/components/InteractiveBackground";
 import VfxCanvas from "@/components/vfx/VfxCanvas";
-import { VIBE_THEMES } from "@/lib/theme";
+import { VIBE_THEMES, normalizeThemeId, normalizeEffectId } from "@/lib/theme";
 import EventSettingsModal from "@/components/EventSettingsModal";
 import { ChevronLeft, Palette, Sparkles, Settings, CheckCircle, LogIn, Loader2 } from "lucide-react";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
@@ -114,8 +114,10 @@ function CreateEventContent() {
         let finalPoster = "/partiful/Aquarius.avif";
         let finalVibeId = "classic";
 
+        const hasUrlParams = !!(searchParams.get("theme") || searchParams.get("effect") || searchParams.get("poster") || searchParams.get("vibeId"));
+
         const savedData = localStorage.getItem("pending_event_data");
-        if (savedData) {
+        if (savedData && !hasUrlParams) {
             try {
                 const parsed = JSON.parse(savedData);
                 setPendingData(parsed);
@@ -133,8 +135,8 @@ function CreateEventContent() {
         }
 
         // URL Params OVERRIDE local storage
-        if (searchParams.get("theme")) finalTheme = searchParams.get("theme")!;
-        if (searchParams.get("effect")) finalEffect = searchParams.get("effect")!;
+        if (searchParams.get("theme")) finalTheme = normalizeThemeId(searchParams.get("theme")!);
+        if (searchParams.get("effect")) finalEffect = normalizeEffectId(searchParams.get("effect")!);
         if (searchParams.get("poster")) finalPoster = searchParams.get("poster")!;
         if (searchParams.get("vibeId")) finalVibeId = searchParams.get("vibeId")!;
 
@@ -142,6 +144,23 @@ function CreateEventContent() {
         setEffect(finalEffect);
         setCoverImage(finalPoster);
         setVibeId(finalVibeId);
+
+        // If URL params exist, populate pendingData so EventForm immediately syncs on first render!
+        if (hasUrlParams) {
+            setPendingData((prev: any) => ({
+                ...(prev || {}),
+                coverImage: finalPoster,
+                vibeId: finalVibeId,
+                selectedTheme: finalTheme,
+                effect: finalEffect,
+                theme: {
+                    ...(prev?.theme || {}),
+                    vibeId: finalVibeId,
+                    backgroundTheme: finalTheme,
+                    effect: finalEffect,
+                }
+            }));
+        }
 
         setIsLoaded(true);
     }, [searchParams]);
@@ -319,9 +338,10 @@ function CreateEventContent() {
 
     // Background style using selected Color Palette (independent of Vibe)
     const has3DTheme = selectedTheme && INTERACTIVE_THEMES.includes(selectedTheme);
+    const hasVideoTheme = selectedTheme && (selectedTheme.startsWith('preset-video:') || ANIMATED_THEME_PRESETS.some(p => p.id === selectedTheme));
     const primaryColor = pendingData?.theme?.primaryColor || "#3b82f6"; // Default to blue
 
-    let bgStyle = has3DTheme ? {} : {
+    let bgStyle: React.CSSProperties = (has3DTheme || hasVideoTheme) ? { background: '#0a0a0b' } : {
         background: `radial-gradient(circle at 50% 50%, ${primaryColor} 0%, #000000 100%)`
     };
 
@@ -348,8 +368,8 @@ function CreateEventContent() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/5 blur-[150px] rounded-full"></div>
                 
                 {/* Preset Video Theme Background */}
-                {selectedTheme?.startsWith('preset-video:') && (() => {
-                    const presetId = selectedTheme.split(':')[1];
+                {(selectedTheme?.startsWith('preset-video:') || ANIMATED_THEME_PRESETS.some(p => p.id === selectedTheme)) && (() => {
+                    const presetId = selectedTheme?.startsWith('preset-video:') ? selectedTheme.split(':')[1] : selectedTheme;
                     const preset = ANIMATED_THEME_PRESETS.find(p => p.id === presetId);
                     if (preset) {
                         if (preset.type === 'video') {
@@ -425,8 +445,8 @@ function CreateEventContent() {
                     <CustomFloatingVfx imageUrl={effect.split(':')[1]} />
                 )}
                 {/* Preset Image FX */}
-                {effect?.startsWith('preset-image:') && (() => {
-                    const presetId = effect.split(':')[1];
+                {(effect?.startsWith('preset-image:') || IMAGE_VFX_PRESETS.some(p => p.id === effect)) && (() => {
+                    const presetId = effect?.startsWith('preset-image:') ? effect.split(':')[1] : effect;
                     const preset = IMAGE_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
                         return <CustomFloatingVfx imageUrl={preset.imageUrl} />;
@@ -435,8 +455,8 @@ function CreateEventContent() {
                 })()}
 
                 {/* Preset WebM Video FX / Lottie */}
-                {effect?.startsWith('preset-webm:') && (() => {
-                    const presetId = effect.split(':')[1];
+                {(effect?.startsWith('preset-webm:') || VIDEO_VFX_PRESETS.some(p => p.id === effect)) && (() => {
+                    const presetId = effect?.startsWith('preset-webm:') ? effect.split(':')[1] : effect;
                     const preset = VIDEO_VFX_PRESETS.find(p => p.id === presetId);
                     if (preset) {
                         if ((preset as any).type === 'lottie') {

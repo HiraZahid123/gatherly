@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -12,12 +12,14 @@ import {
     LogOut,
     ExternalLink,
     BookOpen,
+    Sparkles,
 } from "lucide-react";
 
 const NAV = [
     { href: "/admin",            label: "Overview",    icon: LayoutDashboard },
     { href: "/admin/users",      label: "Users",       icon: Users },
     { href: "/admin/events",     label: "Events",      icon: Calendar },
+    { href: "/admin/templates",  label: "Templates",   icon: Sparkles },
     { href: "/admin/moderation", label: "Moderation",  icon: ShieldAlert },
     { href: "/admin/blog",       label: "Blog",        icon: BookOpen },
 ];

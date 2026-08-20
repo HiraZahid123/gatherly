@@ -578,3 +578,30 @@ model Blog {
   @@index([publishedAt])
   @@map("blogs")
 }
+
+// ============================================
+// EVENT TEMPLATES MODULE
+// ============================================
+
+model EventTemplate {
+  id           String   @id @default(cuid())
+  title        String
+  category     String   @default("General") // Birthday, Wedding, Concert, Dinner, Party, etc.
+  previewImage String   // Card preview image path or uploaded URL
+  bgClass      String   @default("bg-emerald-900") // Background style / gradient class
+  theme        String   @default("meadow") // meadow, dark, streak, etc.
+  effect       String   @default("particles") // particles, glow, aurora, confetti, etc.
+  poster       String   // Poster media path or uploaded URL
+  vibeId       String   @default("fancy") // fancy, digital, classic, royal, etc.
+  isTrending   Boolean  @default(true) // Show in Trending Templates on homepage
+  order        Int      @default(0) // Sorting order
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isTrending, published])
+  @@index([order])
+  @@index([category])
+  @@map("event_templates")
+}
+

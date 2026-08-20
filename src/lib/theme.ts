@@ -104,3 +104,49 @@ export function getThemeGradient(theme: EventTheme): string {
     const sanitized = sanitizeTheme(theme);
     return `linear-gradient(to right, ${sanitized.primaryColor}, ${sanitized.secondaryColor})`;
 }
+
+/**
+ * Normalizes a theme string so presets ("beer", "champagne") are properly converted to "preset-video:beer"
+ */
+export function normalizeThemeId(themeId?: string | null): string {
+    if (!themeId) return "dark";
+    if (
+        themeId === "dark" ||
+        ["streak", "meadow", "crystal", "waves"].includes(themeId) ||
+        themeId.startsWith("preset-video:") ||
+        themeId.startsWith("custom-gradient:")
+    ) {
+        return themeId;
+    }
+    return `preset-video:${themeId}`;
+}
+
+/**
+ * Normalizes an effect string so video and image presets are properly formatted
+ */
+export function normalizeEffectId(effectId?: string | null): string {
+    if (!effectId || effectId === "none") return "none";
+    if (
+        [
+            "particles",
+            "confetti",
+            "aurora",
+            "glow",
+            "rain",
+            "grid",
+            "vignette",
+            "skiing",
+            "grain"
+        ].includes(effectId) ||
+        effectId.startsWith("preset-webm:") ||
+        effectId.startsWith("preset-image:") ||
+        effectId.startsWith("custom-uploaded:")
+    ) {
+        return effectId;
+    }
+    if (effectId === "snow" || effectId === "star") {
+        return `preset-image:${effectId}`;
+    }
+    return `preset-webm:${effectId}`;
+}
+
