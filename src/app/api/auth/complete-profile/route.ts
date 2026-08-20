@@ -17,8 +17,16 @@ export async function POST(req: Request) {
 
         const formattedPhone = formatPhone(phone);
 
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
+        const trimmedOtp = otp.toString().trim();
+
+        // Robust user lookup by id or email
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    ...(session.user.id ? [{ id: session.user.id }] : []),
+                    ...(session.user.email ? [{ email: session.user.email }] : [])
+                ]
+            },
         });
 
         if (!user || !user.otpCode || !user.otpExpires) {
@@ -27,17 +35,17 @@ export async function POST(req: Request) {
 
         // Check expiry
         if (new Date() > user.otpExpires) {
-            return NextResponse.json({ error: 'Verification code expired' }, { status: 400 });
+            return NextResponse.json({ error: 'Verification code expired. Please request a new one.' }, { status: 400 });
         }
 
         // Verify OTP
-        if (user.otpCode !== otp) {
+        if (user.otpCode.trim() !== trimmedOtp) {
             return NextResponse.json({ error: 'Incorrect verification code' }, { status: 400 });
         }
 
         // Update user
         await prisma.user.update({
-            where: { id: session.user.id },
+            where: { id: user.id },
             data: {
                 phone: formattedPhone,
                 otpCode: null,

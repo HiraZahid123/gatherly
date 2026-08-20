@@ -16,7 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async jwt({ token, user, trigger, session, account }) {
             // Initial sign-in: capture all user fields
             if (user) {
-                token.id = user.id;
+                token.id = user.id || token.sub;
                 token.role = (user as any).role || "GUEST";
                 token.phone = (user as any).phone;
                 token.name = user.name;
@@ -30,12 +30,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token = { ...token, ...session };
             }
 
-            // Fresh check from DB if ID exists
-            if (token.id) {
+            // Fresh check from DB if ID or email exists
+            const lookupId = (token.id || token.sub) as string;
+            if (lookupId || token.email) {
                 try {
-                    const dbUser = await prisma.user.findUnique({
-                        where: { id: token.id as string },
+                    const dbUser = await prisma.user.findFirst({
+                        where: {
+                            OR: [
+                                ...(lookupId ? [{ id: lookupId }] : []),
+                                ...(token.email ? [{ email: token.email as string }] : [])
+                            ]
+                        },
                         select: { 
+                            id: true,
                             phone: true, 
                             role: true, 
                             email: true, 
@@ -48,6 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     });
 
                     if (dbUser) {
+                        token.id = dbUser.id;
                         token.phone = dbUser.phone || token.phone;
                         token.role = dbUser.role || token.role;
                         token.email = dbUser.email || token.email;
@@ -62,7 +70,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         // Sync image to DB if missing
                         if (token.picture && !dbUser.image) {
                             await prisma.user.update({
-                                where: { id: token.id as string },
+                                where: { id: dbUser.id },
                                 data: { image: token.picture as string },
                             });
                         }

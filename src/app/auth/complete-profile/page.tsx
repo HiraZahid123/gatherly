@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +19,6 @@ export default function CompleteProfilePage() {
     const [step, setStep] = useState<"phone" | "otp">("phone");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const [mockCode, setMockCode] = useState(""); // For testing mode
 
     // If session loads and user already has a phone, redirect to dashboard
     useEffect(() => {
@@ -47,9 +46,7 @@ export default function CompleteProfilePage() {
 
             if (res.ok) {
                 setStep("otp");
-                if (data.debug) {
-                    setMockCode(data.debug);
-                }
+                setOtp("");
             } else {
                 setError(data.error || "Failed to send code");
             }
@@ -73,7 +70,7 @@ export default function CompleteProfilePage() {
             const res = await fetch("/api/auth/complete-profile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone: fullPhone, otp }),
+                body: JSON.stringify({ phone: fullPhone, otp: otp.trim() }),
             });
 
             const data = await res.json();
@@ -118,50 +115,50 @@ export default function CompleteProfilePage() {
             <div className="w-full max-w-md z-10 m-10">
                 <div className="text-center mb-10">
                     <div className="flex items-center justify-center gap-4 mb-6">
-                        <div className="relative w-16 h-16">
+                        <Link href="/" className="flex items-center">
                             <Image
-                                src="/logo/logo-white.svg"
-                                alt="JollyWitMe Logo"
-                                fill
-                                className="object-contain"
-                                priority
+                                src="/logo/favicon.svg"
+                                alt="JollyWitMe"
+                                width={48}
+                                height={48}
+                                className="w-12 h-12 rounded-xl"
                             />
-                        </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">JollyWitMe</h1>
+                        </Link>
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">One Last Step</h1>
-                    <p className="text-gray-400">Please verify your WhatsApp to continue</p>
+                    <h1 className="text-3xl font-black text-white tracking-tight">
+                        Complete Your Profile
+                    </h1>
+                    <p className="text-gray-400 mt-2 text-sm">
+                        Please add your phone number to continue
+                    </p>
                 </div>
 
-                <div className="bg-[#161618] backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl p-8 sm:p-10">
+                <div className="bg-[#141416]/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
                     {step === "phone" ? (
-                        <form onSubmit={handleSendOTP} className="space-y-8">
-                            <div className="space-y-3">
-                                <label htmlFor="phone" className="block text-sm font-semibold text-gray-300 ml-1">
-                                    WhatsApp Number
+                        <form onSubmit={handleSendOTP} className="space-y-6">
+                            <div className="space-y-2">
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
+                                    Phone Number
                                 </label>
-                                <div className="flex gap-3">
-                                    <div className="relative w-[40%]">
-                                        <select
-                                            value={selectedCountry}
-                                            onChange={(e) => setSelectedCountry(e.target.value)}
-                                            aria-label="Select Country Code"
-                                            className="w-full appearance-none bg-[#1e1e20] border border-white/10 text-white px-4 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none text-sm font-medium cursor-pointer"
-                                        >
-                                            {countries.map((c) => (
-                                                <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#161618]">
-                                                    {c.code} {c.dial}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                <div className="flex gap-2">
+                                    <select
+                                        value={selectedCountry}
+                                        onChange={(e) => setSelectedCountry(e.target.value)}
+                                        className="bg-[#1e1e20] border border-white/10 text-white px-3 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 outline-none w-[110px] text-sm"
+                                    >
+                                        {countries.map((c) => (
+                                            <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#1e1e20]">
+                                                {c.code} ({c.dial})
+                                            </option>
+                                        ))}
+                                    </select>
                                     <input
                                         id="phone"
                                         type="tel"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         required
-                                        className="flex-1 bg-[#1e1e20] border border-white/10 text-white px-5 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-600 font-mono tracking-wider text-lg"
+                                        className="flex-1 bg-[#1e1e20] border border-white/10 text-white px-5 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 outline-none text-base"
                                         placeholder="300 1234567"
                                     />
                                 </div>
@@ -181,14 +178,14 @@ export default function CompleteProfilePage() {
                                 disabled={isLoading}
                                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-[0.98] disabled:opacity-50"
                             >
-                                {isLoading ? "Sending..." : "Get Verification Code"}
+                                {isLoading ? "Sending Code..." : "Get Verification Code"}
                             </button>
                         </form>
                     ) : (
                         <form onSubmit={handleVerifyOTP} className="space-y-8">
                             <div className="space-y-3 text-center">
                                 <label htmlFor="otp" className="block text-sm font-semibold text-gray-300">
-                                    6-Digit Code
+                                    6-Digit Verification Code
                                 </label>
                                 <input
                                     id="otp"
@@ -200,13 +197,11 @@ export default function CompleteProfilePage() {
                                     className="w-full bg-[#1e1e20] border border-white/10 text-white px-5 py-5 rounded-2xl tracking-[0.8em] text-center text-3xl font-bold focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 outline-none"
                                     placeholder="000000"
                                 />
-                                <p className="text-xs text-gray-500">Sent to your WhatsApp</p>
-                                {mockCode && (
-                                    <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl animate-in fade-in zoom-in duration-300">
-                                        <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">Testing Mode</p>
-                                        <p className="text-white text-sm">Enter code: <span className="text-xl font-mono font-black text-green-400 ml-1">{mockCode}</span></p>
-                                    </div>
-                                )}
+                                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mt-3 text-left">
+                                    <p className="text-xs text-emerald-400 font-semibold">📧 Code sent to:</p>
+                                    <p className="text-white text-sm font-medium mt-0.5">{session?.user?.email || "your registered email"}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Please check your inbox (and spam folder) for the 6-digit code.</p>
+                                </div>
                             </div>
 
                             {error && (
@@ -218,21 +213,32 @@ export default function CompleteProfilePage() {
                                 </div>
                             )}
 
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-3">
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
-                                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                                    disabled={isLoading || otp.length < 6}
+                                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50 transition-all active:scale-[0.98]"
                                 >
                                     {isLoading ? "Verifying..." : "Verify & Complete"}
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setStep("phone")}
-                                    className="text-sm text-gray-400 hover:text-green-400 font-medium transition-colors"
-                                >
-                                    Back to phone
-                                </button>
+                                
+                                <div className="flex justify-between items-center px-1 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={handleSendOTP}
+                                        disabled={isLoading}
+                                        className="text-xs text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+                                    >
+                                        Resend Code
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep("phone")}
+                                        className="text-xs text-gray-400 hover:text-gray-300 font-medium transition-colors"
+                                    >
+                                        Change Phone Number
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     )}
