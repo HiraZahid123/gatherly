@@ -95,12 +95,12 @@ export default function Loader() {
                     {/* Logo */}
                     <div className="jollywitme-logo-container">
                         <div className="jollywitme-logo-glow" />
-                        <div className="jollywitme-logo-img-wrap">
+                        <div className="jollywitme-logo-img-wrap rounded-full overflow-hidden">
                             <Image
-                                src="/logo/logo-white.svg"
+                                src="/logo/apple-touch-icon.png"
                                 alt="JollyWitMe"
                                 fill
-                                className="object-contain"
+                                className="object-cover rounded-full"
                                 priority
                             />
                         </div>

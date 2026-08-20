@@ -21,15 +21,15 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-1">
                         <Link href="/" className="flex items-center mb-6">
-                            <div className="relative w-12 h-12 mr-3">
+                            <div className="relative w-10 h-10 mr-3 rounded-full overflow-hidden shadow-[0_0_12px_rgba(16,185,129,0.3)]">
                                 <Image
-                                    src="/logo/logo-white.svg"
+                                    src="/logo/apple-touch-icon.png"
                                     alt="JollyWitMe Logo"
                                     fill
-                                    className="object-contain"
+                                    className="object-cover"
                                 />
                             </div>
-                            <span className="text-2xl font-bold tracking-tight">JollyWitMe</span>
+                            <span className="text-2xl font-bold tracking-tight text-white">JollyWitMe</span>
                         </Link>
                         <p className="text-white/60 text-sm mb-6 max-w-xs">
                             The easiest way to get your guests on the same page. Start planning your next memorable event today.

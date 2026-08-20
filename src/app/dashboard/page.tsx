@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -126,8 +126,8 @@ export default function DashboardPage() {
             <header className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/5 shadow-2xl">
                 <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="relative w-10 h-10 transition-transform group-hover:scale-110">
-                            <Image src="/logo/logo-white.svg" alt="JollyWitMe Logo" fill className="object-contain" />
+                        <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-[0_0_12px_rgba(16,185,129,0.3)] transition-transform group-hover:scale-105">
+                            <Image src="/logo/apple-touch-icon.png" alt="JollyWitMe Logo" fill className="object-cover" />
                         </div>
                         <span className="text-2xl font-black tracking-tighter text-white">JollyWitMe</span>
                     </Link>

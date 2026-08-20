@@ -117,11 +117,11 @@ export default function CompleteProfilePage() {
                     <div className="flex items-center justify-center gap-4 mb-6">
                         <Link href="/" className="flex items-center">
                             <Image
-                                src="/logo/favicon.svg"
+                                src="/logo/apple-touch-icon.png"
                                 alt="JollyWitMe"
-                                width={48}
-                                height={48}
-                                className="w-12 h-12 rounded-xl"
+                                width={52}
+                                height={52}
+                                className="w-13 h-13 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]"
                             />
                         </Link>
                     </div>

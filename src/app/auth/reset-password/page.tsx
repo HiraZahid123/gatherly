@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -92,18 +92,18 @@ function ResetPasswordContent() {
             <div className="w-full max-w-md z-10 m-10">
                 {/* Logo/Brand */}
                 <div className="text-center mb-8">
-                    <div className="flex items-center justify-center gap-4 mb-6">
-                        <div className="relative w-16 h-16">
+                    <Link href="/" className="inline-flex items-center justify-center gap-3 mb-6 group">
+                        <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-transform group-hover:scale-105">
                             <Image
-                                src="/logo/logo-white.svg"
+                                src="/logo/apple-touch-icon.png"
                                 alt="JollyWitMe Logo"
                                 fill
-                                className="object-contain"
+                                className="object-cover"
                                 priority
                             />
                         </div>
-                        <h1 className="text-4xl font-extrabold text-white tracking-tight">JollyWitMe</h1>
-                    </div>
+                        <span className="text-3xl font-extrabold text-white tracking-tight">JollyWitMe</span>
+                    </Link>
                 </div>
 
                 {/* Reset Password Card */}
