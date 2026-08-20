@@ -114,15 +114,17 @@ export default function CompleteProfilePage() {
 
             <div className="w-full max-w-md z-10 m-10">
                 <div className="text-center mb-10">
-                    <div className="flex items-center justify-center gap-4 mb-6">
-                        <Link href="/" className="flex items-center">
-                            <Image
-                                src="/logo/apple-touch-icon.png"
-                                alt="JollyWitMe"
-                                width={52}
-                                height={52}
-                                className="w-13 h-13 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]"
-                            />
+                    <div className="flex items-center justify-center mb-6">
+                        <Link href="/" className="inline-block group">
+                            <div className="relative h-14 w-56 transition-transform group-hover:scale-105">
+                                <Image
+                                    src="/logo/logo-full.webp"
+                                    alt="JollyWitMe"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
                         </Link>
                     </div>
                     <h1 className="text-3xl font-black text-white tracking-tight">

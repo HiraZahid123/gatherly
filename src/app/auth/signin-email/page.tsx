@@ -53,17 +53,16 @@ export default function SignInEmailPage() {
 
             <div className="w-full max-w-md z-10">
                 <div className="text-center mb-10">
-                    <Link href="/" className="inline-flex items-center justify-center gap-3 mb-6 group">
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-transform group-hover:scale-105">
+                    <Link href="/" className="inline-block mb-6 group">
+                        <div className="relative h-14 w-56 transition-transform group-hover:scale-105">
                             <Image
-                                src="/logo/apple-touch-icon.png"
+                                src="/logo/logo-full.webp"
                                 alt="JollyWitMe Logo"
                                 fill
-                                className="object-cover"
+                                className="object-contain"
                                 priority
                             />
                         </div>
-                        <span className="text-3xl font-extrabold text-white tracking-tight">JollyWitMe</span>
                     </Link>
                     <p className="text-gray-400 mt-4 text-xl font-medium">
                         Welcome back!

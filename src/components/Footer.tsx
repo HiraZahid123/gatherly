@@ -20,16 +20,15 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/" className="flex items-center mb-6">
-                            <div className="relative w-10 h-10 mr-3 rounded-full overflow-hidden shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                        <Link href="/" className="inline-block mb-6 group">
+                            <div className="relative h-11 w-44 transition-transform group-hover:scale-105">
                                 <Image
-                                    src="/logo/apple-touch-icon.png"
+                                    src="/logo/logo-full.webp"
                                     alt="JollyWitMe Logo"
                                     fill
-                                    className="object-cover"
+                                    className="object-contain"
                                 />
                             </div>
-                            <span className="text-2xl font-bold tracking-tight text-white">JollyWitMe</span>
                         </Link>
                         <p className="text-white/60 text-sm mb-6 max-w-xs">
                             The easiest way to get your guests on the same page. Start planning your next memorable event today.
