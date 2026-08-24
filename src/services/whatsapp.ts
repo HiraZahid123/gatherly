@@ -173,18 +173,41 @@ class WhatsAppService {
     }
 
     public async requestPairingCode(phone: string): Promise<string> {
+        const cleanDigits = phone.replace(/\D/g, '').replace(/^0+/, '');
+        if (!cleanDigits) {
+            throw new Error('Invalid phone number for pairing. Please include country code (e.g. +923164904321).');
+        }
+
         if (!this.sock) {
             await this.init();
         }
 
-        const cleanDigits = phone.replace(/\D/g, '').replace(/^0+/, '');
-        if (!cleanDigits) {
-            throw new Error('Invalid phone number for pairing');
+        // Wait for socket to be ready
+        let retries = 0;
+        while (!this.sock && retries < 10) {
+            await new Promise((r) => setTimeout(r, 500));
+            retries++;
+        }
+
+        if (!this.sock || typeof this.sock.requestPairingCode !== 'function') {
+            throw new Error('WhatsApp service is initializing. Please wait a few seconds and try again.');
         }
 
         console.log(`[WhatsAppService] Requesting pairing code for phone ${cleanDigits}...`);
-        const code = await this.sock.requestPairingCode(cleanDigits);
-        return code;
+        try {
+            const code = await this.sock.requestPairingCode(cleanDigits);
+            return code;
+        } catch (err: any) {
+            console.error('[WhatsAppService] requestPairingCode initial attempt error:', err);
+            // Re-init and retry once
+            await this.init();
+            await new Promise((r) => setTimeout(r, 1500));
+            if (this.sock?.requestPairingCode) {
+                const code = await this.sock.requestPairingCode(cleanDigits);
+                return code;
+            }
+            throw new Error(err?.message || 'Connection closed. Please scan the QR code instead.');
+        }
     }
 
     public async logout(): Promise<void> {

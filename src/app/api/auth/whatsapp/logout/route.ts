@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getWhatsAppService } from '@/services/whatsapp';
 import { purgeWhatsAppSessions } from '@/lib/whatsapp-store';
+import { isAdmin } from '@/lib/admin';
 
 export async function POST() {
+    if (!(await isAdmin())) {
+        return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 403 });
+    }
+
     try {
         console.log('[API] Manual WhatsApp Logout requested');
         await getWhatsAppService().logout();

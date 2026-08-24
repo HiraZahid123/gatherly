@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -21,7 +22,7 @@ const NAV = [
     { href: "/admin/users",           label: "Users",        icon: Users },
     { href: "/admin/events",          label: "Events",       icon: Calendar },
     { href: "/admin/templates",       label: "Templates",    icon: Sparkles },
-    { href: "/auth/whatsapp/scan",    label: "WhatsApp Bot", icon: Smartphone },
+    { href: "/admin/whatsapp",        label: "WhatsApp Bot", icon: Smartphone },
     { href: "/admin/moderation",      label: "Moderation",   icon: ShieldAlert },
     { href: "/admin/blog",            label: "Blog",         icon: BookOpen },
 ];
@@ -36,10 +37,20 @@ export default function AdminLayout({
         <div className="min-h-screen bg-[#050505] text-white flex font-sans antialiased">
             {/* Sidebar */}
             <aside className="w-72 border-r border-white/5 bg-[#0a0a0b] flex flex-col fixed inset-y-0 z-50">
-                <div className="p-8 pb-12">
+                <div className="p-8 pb-10">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-black font-black text-xs">G</div>
-                        <span className="text-xl font-black tracking-tighter">JollyWitMe.<span className="text-white/40">ops</span></span>
+                        <div className="relative h-9 w-36 transition-transform group-hover:scale-105">
+                            <Image
+                                src="/logo/logo-full.webp"
+                                alt="JollyWitMe"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest uppercase bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                            OPS
+                        </span>
                     </Link>
                 </div>
 

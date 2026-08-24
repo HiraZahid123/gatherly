@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getWhatsAppService } from '@/services/whatsapp';
+import { isAdmin } from '@/lib/admin';
 
 export async function POST(req: Request) {
+    if (!(await isAdmin())) {
+        return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 403 });
+    }
+
     try {
         const body = await req.json();
         const { phone } = body;
