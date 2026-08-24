@@ -63,8 +63,9 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ 
             success: true, 
-            message: 'OTP sent successfully',
-            debug: otpCode // Included for Testing Mode
+            message: sent ? 'OTP sent to your WhatsApp number' : 'OTP code generated.',
+            debug: sent ? undefined : otpCode,
+            isDeliveredViaWhatsApp: sent
         });
 
     } catch (error: any) {

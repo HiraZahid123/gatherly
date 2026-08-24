@@ -5,7 +5,7 @@ export async function POST() {
     console.log('[API] Force restarting WhatsApp Service...');
 
     try {
-        const service = getWhatsAppService();
+        const service = getWhatsAppService(true);
         await service.logout();
         await service.init();
 

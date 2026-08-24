@@ -460,7 +460,7 @@ function SignInContent() {
                             Continue with Google
                         </button>
 
-                        {/* Facebook Login Button */}
+                        {/* Facebook & Instagram Login Buttons (Commented out until Meta Business Verification is complete)
                         <button
                             type="button"
                             onClick={() => {
@@ -475,7 +475,6 @@ function SignInContent() {
                             Continue with Facebook
                         </button>
 
-                        {/* Instagram Login Button */}
                         <button
                             type="button"
                             onClick={() => {
@@ -489,6 +488,7 @@ function SignInContent() {
                             </svg>
                             Continue with Instagram
                         </button>
+                        */}
                     </div>
 
                     <div className="mt-6 text-center">

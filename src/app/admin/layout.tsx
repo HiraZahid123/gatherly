@@ -13,15 +13,17 @@ import {
     ExternalLink,
     BookOpen,
     Sparkles,
+    Smartphone,
 } from "lucide-react";
 
 const NAV = [
-    { href: "/admin",            label: "Overview",    icon: LayoutDashboard },
-    { href: "/admin/users",      label: "Users",       icon: Users },
-    { href: "/admin/events",     label: "Events",      icon: Calendar },
-    { href: "/admin/templates",  label: "Templates",   icon: Sparkles },
-    { href: "/admin/moderation", label: "Moderation",  icon: ShieldAlert },
-    { href: "/admin/blog",       label: "Blog",        icon: BookOpen },
+    { href: "/admin",                 label: "Overview",     icon: LayoutDashboard },
+    { href: "/admin/users",           label: "Users",        icon: Users },
+    { href: "/admin/events",          label: "Events",       icon: Calendar },
+    { href: "/admin/templates",       label: "Templates",    icon: Sparkles },
+    { href: "/auth/whatsapp/scan",    label: "WhatsApp Bot", icon: Smartphone },
+    { href: "/admin/moderation",      label: "Moderation",   icon: ShieldAlert },
+    { href: "/admin/blog",            label: "Blog",         icon: BookOpen },
 ];
 
 export default function AdminLayout({

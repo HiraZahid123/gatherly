@@ -328,7 +328,7 @@ export default function SignUpPage() {
                             Sign up with Google
                         </button>
 
-                        {/* Facebook Sign Up */}
+                        {/* Facebook & Instagram Sign Up (Commented out until Meta Business Verification is complete)
                         <button
                             type="button"
                             onClick={() => {
@@ -343,7 +343,6 @@ export default function SignUpPage() {
                             Sign up with Facebook
                         </button>
 
-                        {/* Instagram Sign Up */}
                         <button
                             type="button"
                             onClick={() => {
@@ -357,6 +356,7 @@ export default function SignUpPage() {
                             </svg>
                             Sign up with Instagram
                         </button>
+                        */}
                     </div>
 
                     {/* Sign In Link */}
