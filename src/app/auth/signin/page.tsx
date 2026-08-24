@@ -7,9 +7,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLoader } from "@/lib/contexts/LoaderContext";
 import { countries } from "@/lib/countries";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MessageSquare, ArrowLeft, RefreshCw } from "lucide-react";
+import PhoneInputWithCountry from "@/components/auth/PhoneInputWithCountry";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 function SignInContent() {
     const router = useRouter();
@@ -24,7 +25,7 @@ function SignInContent() {
 
     // Phone Auth State
     const [phone, setPhone] = useState("");
-    const [selectedCountry, setSelectedCountry] = useState("+92");
+    const [selectedCountry, setSelectedCountry] = useState("+234"); // Default to Nigeria
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState<"phone" | "otp">("phone");
     const [mockCode, setMockCode] = useState(""); // For testing mode
@@ -179,67 +180,64 @@ function SignInContent() {
                 {/* Sign In Card */}
                 <div className="bg-[#161618] backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl p-8 sm:p-10">
 
-                    {/* Method Toggle (Commented out for now to only show Email)
-                    <div className="flex bg-[#1e1e20] p-1 rounded-xl mb-8">
+                    {/* Method Toggle */}
+                    <div className="flex bg-[#1e1e20] p-1.5 rounded-2xl mb-8 border border-white/5">
                         <button
-                            onClick={() => setSignInMethod("phone")}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${signInMethod === "phone"
-                                ? "bg-[#2d2d30] text-white shadow-sm"
-                                : "text-gray-400 hover:text-gray-200"
-                                }`}
-                        >
-                            WhatsApp / Phone
-                        </button>
-                        <button
-                            onClick={() => setSignInMethod("email")}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${signInMethod === "email"
-                                ? "bg-[#2d2d30] text-white shadow-sm"
-                                : "text-gray-400 hover:text-gray-200"
-                                }`}
+                            type="button"
+                            onClick={() => {
+                                setSignInMethod("email");
+                                setError("");
+                            }}
+                            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                                signInMethod === "email"
+                                    ? "bg-white/10 text-white shadow-md shadow-black/40 border border-white/10"
+                                    : "text-gray-400 hover:text-gray-200"
+                            }`}
                         >
                             Email / Password
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSignInMethod("phone");
+                                setError("");
+                            }}
+                            className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                                signInMethod === "phone"
+                                    ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md shadow-green-600/30 border border-green-500/30"
+                                    : "text-gray-400 hover:text-gray-200"
+                            }`}
+                        >
+                            <span>WhatsApp / Phone</span>
+                        </button>
                     </div>
-                    */}
 
                     {signInMethod === "phone" ? (
                         step === "phone" ? (
-                            <form onSubmit={handleSendOTP} className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-3">
-                                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-300 ml-1">
-                                        WhatsApp Number
-                                    </label>
-                                    <div className="flex gap-3">
-                                        <div className="relative w-[40%]">
-                                            <select
-                                                value={selectedCountry}
-                                                onChange={(e) => setSelectedCountry(e.target.value)}
-                                                aria-label="Select Country Code"
-                                                className="w-full appearance-none bg-[#1e1e20] border border-white/10 text-white px-4 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none text-sm font-medium cursor-pointer"
-                                            >
-                                                {countries.map((c) => (
-                                                    <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#161618]">
-                                                        {c.code} {c.dial}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                        <input
-                                            id="phone"
-                                            type="tel"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            required
-                                            className="flex-1 bg-[#1e1e20] border border-white/10 text-white px-5 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-600 font-mono tracking-wider text-lg"
-                                            placeholder="300 1234567"
-                                        />
+                            <form onSubmit={handleSendOTP} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                                            WhatsApp Phone Number
+                                        </label>
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                            <MessageSquare className="w-3 h-3" />
+                                            Instant Code
+                                        </span>
                                     </div>
-                                    <p className="text-xs text-gray-500 ml-1">Select country and enter digits (e.g., 300xxxxxxx)</p>
+
+                                    <PhoneInputWithCountry
+                                        value={phone}
+                                        onChange={setPhone}
+                                        selectedDial={selectedCountry}
+                                        onDialChange={setSelectedCountry}
+                                        placeholder="300 1234567"
+                                        disabled={isLoading}
+                                    />
+
+                                    <p className="text-xs text-gray-500 flex items-center gap-1.5 pt-1">
+                                        <span>Select your country flag and enter your mobile number.</span>
+                                    </p>
                                 </div>
 
                                 {error && (
@@ -253,8 +251,8 @@ function SignInContent() {
 
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
-                                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                                    disabled={isLoading || !phone.trim()}
+                                    className="w-full bg-gradient-to-r from-green-600 via-emerald-600 to-green-500 hover:from-green-500 hover:to-emerald-500 text-white py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-green-600/20 hover:shadow-green-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center justify-center gap-2">
                                         {isLoading ? (
@@ -263,36 +261,57 @@ function SignInContent() {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
-                                                Sending...
+                                                Sending Verification Code...
                                             </>
                                         ) : (
                                             "Get Verification Code"
                                         )}
                                     </span>
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                 </button>
                             </form>
                         ) : (
-                            <form onSubmit={handleVerifyOTP} className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <form onSubmit={handleVerifyOTP} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                                 <div className="space-y-3 text-center">
-                                    <label htmlFor="otp" className="block text-sm font-semibold text-gray-300">
-                                        6-Digit Code
+                                    <div className="flex items-center justify-between pb-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setStep("phone");
+                                                setError("");
+                                            }}
+                                            className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            <ArrowLeft className="w-3.5 h-3.5" />
+                                            Change Number
+                                        </button>
+                                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                            {selectedCountry} {phone}
+                                        </span>
+                                    </div>
+
+                                    <label htmlFor="otp" className="block text-xs font-bold uppercase tracking-wider text-gray-400">
+                                        Enter 6-Digit Verification Code
                                     </label>
                                     <input
                                         id="otp"
                                         type="text"
+                                        inputMode="numeric"
                                         value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                                         required
                                         maxLength={6}
-                                        className="w-full bg-[#1e1e20] border border-white/10 text-white px-5 py-5 rounded-2xl tracking-[0.8em] text-center text-3xl font-bold focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-800"
-                                        placeholder="000000"
+                                        autoFocus
+                                        className="w-full bg-[#1e1e20] border border-white/10 text-white px-5 py-4 rounded-2xl tracking-[0.5em] text-center text-3xl font-mono font-bold focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-700"
+                                        placeholder="······"
                                     />
-                                    <p className="text-xs text-gray-500">Sent to your WhatsApp</p>
+                                    <p className="text-xs text-gray-500">
+                                        Check your WhatsApp messages for the code.
+                                    </p>
+                                    
                                     {mockCode && (
-                                        <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl animate-in fade-in zoom-in duration-300">
-                                            <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">Testing Mode</p>
-                                            <p className="text-white text-sm">Enter code: <span className="text-xl font-mono font-black text-green-400 ml-1">{mockCode}</span></p>
+                                        <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-in fade-in zoom-in duration-300">
+                                            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-0.5">Testing Mode</p>
+                                            <p className="text-white text-xs">Enter code: <span className="text-lg font-mono font-black text-emerald-400 ml-1">{mockCode}</span></p>
                                         </div>
                                     )}
                                 </div>
@@ -306,20 +325,23 @@ function SignInContent() {
                                     </div>
                                 )}
 
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-3">
                                     <button
                                         type="submit"
-                                        disabled={isLoading}
-                                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={isLoading || otp.length < 6}
+                                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-bold text-base sm:text-lg shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isLoading ? "Verifying..." : "Verify & Sign In"}
                                     </button>
+
                                     <button
                                         type="button"
-                                        onClick={() => setStep("phone")}
-                                        className="text-sm text-gray-400 hover:text-green-400 font-medium transition-colors py-2"
+                                        onClick={handleSendOTP}
+                                        disabled={isLoading}
+                                        className="inline-flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-emerald-400 font-medium transition-colors py-2"
                                     >
-                                        Back to Login
+                                        <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                                        Resend Verification Code
                                     </button>
                                 </div>
                             </form>

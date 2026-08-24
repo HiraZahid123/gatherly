@@ -2,7 +2,52 @@ export interface Country {
     name: string;
     code: string;
     dial: string;
+    flag?: string;
 }
+
+export const COUNTRY_FLAGS: Record<string, string> = {
+    AFG: "🇦🇫", ALB: "🇦🇱", DZA: "🇩🇿", ASM: "🇦🇸", AND: "🇦🇩", AGO: "🇦🇴", AIA: "🇦🇮",
+    ATA: "🇦🇶", ATG: "🇦🇬", ARG: "🇦🇷", ARM: "🇦🇲", ABW: "🇦🇼", AUS: "🇦🇺", AUT: "🇦🇹",
+    AZE: "🇦🇿", BHS: "🇧🇸", BHR: "🇧🇭", BGD: "🇧🇩", BRB: "🇧🇧", BLR: "🇧🇾", BEL: "🇧🇪",
+    BLZ: "🇧🇿", BEN: "🇧🇯", BMU: "🇧🇲", BTN: "🇧🇹", BOL: "🇧🇴", BIH: "🇧🇦", BWA: "🇧🇼",
+    BRA: "🇧🇷", VGB: "🇻🇬", BRN: "🇧🇳", BGR: "🇧🇬", BFA: "🇧🇫", BDI: "🇧🇮", KHM: "🇰🇭",
+    CMR: "🇨🇲", CAN: "🇨🇦", CPV: "🇨🇻", CYM: "🇰🇾", CAF: "🇨🇫", TCD: "🇹🇩", CHL: "🇨🇱",
+    CHN: "🇨🇳", CXR: "🇨🇽", CCK: "🇨🇨", COL: "🇨🇴", COM: "🇰🇲", COG: "🇨🇬", COD: "🇨🇩",
+    COK: "🇨🇰", CRI: "🇨🇷", HRV: "🇭🇷", CUB: "🇨🇺", CYP: "🇨🇾", CZE: "🇨🇿", DNK: "🇩🇰",
+    DJI: "🇩🇯", DMA: "🇩🇲", DOM: "🇩🇴", ECU: "🇪🇨", EGY: "🇪🇬", SLV: "🇸🇻", GNQ: "🇬🇶",
+    ERI: "🇪🇷", EST: "🇪🇪", ETH: "🇪🇹", FLK: "🇫🇰", FRO: "🇫🇴", FJI: "🇫🇯", FIN: "🇫🇮",
+    FRA: "🇫🇷", GUF: "🇬🇫", PYF: "🇵🇫", GAB: "🇬🇦", GMB: "🇬🇲", GEO: "🇬🇪", DEU: "🇩🇪",
+    GHA: "🇬🇭", GIB: "🇬🇮", GRC: "🇬🇷", GRL: "🇬🇱", GRD: "🇬🇩", GLP: "🇬🇵", GUM: "🇬🇺",
+    GTM: "🇬🇹", GGY: "🇬🇬", GIN: "🇬🇳", GNB: "🇬🇼", GUY: "🇬🇾", HTI: "🇭🇹", HND: "🇭🇳",
+    HKG: "🇭🇰", HUN: "🇭🇺", ISL: "🇮🇸", IND: "🇮🇳", IDN: "🇮🇩", IRN: "🇮🇷", IRQ: "🇮🇶",
+    IRL: "🇮🇪", IMN: "🇮🇲", ISR: "🇮🇱", ITA: "🇮🇹", CIV: "🇨🇮", JAM: "🇯🇲", JPN: "🇯🇵",
+    JEY: "🇯🇪", JOR: "🇯🇴", KAZ: "🇰🇿", KEN: "🇰🇪", KIR: "🇰🇮", KWT: "🇰🇼", KGZ: "🇰🇬",
+    LAO: "🇱🇦", LVA: "🇱🇻", LBN: "🇱🇧", LSO: "🇱🇸", LBR: "🇱🇷", LBY: "🇱🇾", LIE: "🇱🇮",
+    LTU: "🇱🇹", LUX: "🇱🇺", MAC: "🇲🇴", MKD: "🇲🇰", MDG: "🇲🇬", MWI: "🇲🇼", MYS: "🇲🇾",
+    MDV: "🇲🇻", MLI: "🇲🇱", MLT: "🇲🇹", MHL: "🇲🇭", MTQ: "🇲🇶", MRT: "🇲🇷", MUS: "🇲🇺",
+    MYT: "🇾🇹", MEX: "🇲🇽", FSM: "🇫🇲", MDA: "🇲🇩", MCO: "🇲🇨", MNG: "🇲🇳", MNE: "🇲🇪",
+    MSR: "🇲🇸", MAR: "🇲🇦", MOZ: "🇲🇿", MMR: "🇲🇲", NAM: "🇳🇦", NRU: "🇳🇷", NPL: "🇳🇵",
+    NLD: "🇳🇱", NCL: "🇳🇨", NZL: "🇳🇿", NIC: "🇳🇮", NER: "🇳🇪", NGA: "🇳🇬", NIU: "🇳🇺",
+    PRK: "🇰🇵", MNP: "🇲🇵", NOR: "🇳🇴", OMN: "🇴🇲", PAK: "🇵🇰", PLW: "🇵🇼", PSE: "🇵🇸",
+    PAN: "🇵🇦", PNG: "🇵🇬", PRY: "🇵🇾", PER: "🇵🇪", PHL: "🇵🇭", POL: "🇵🇱", PRT: "🇵🇹",
+    PRI: "🇵🇷", QAT: "🇶🇦", REU: "🇷🇪", ROU: "🇷🇴", RUS: "🇷🇺", RWA: "🇷🇼", BLM: "🇧🇱",
+    SHN: "🇸🇭", KNA: "🇰🇳", LCA: "🇱🇨", MAF: "🇲🇫", SPM: "🇵🇲", VCT: "🇻🇨", WSM: "🇼🇸",
+    SMR: "🇸🇲", STP: "🇸🇹", SAU: "🇸🇦", SEN: "🇸🇳", SRB: "🇷🇸", SYC: "🇸🇨", SLE: "🇸🇱",
+    SGP: "🇸🇬", SXM: "🇸🇽", SVK: "🇸🇰", SVN: "🇸🇮", SLB: "🇸🇧", SOM: "🇸🇴", ZAF: "🇿🇦",
+    KOR: "🇰🇷", SSD: "🇸🇸", ESP: "🇪🇸", LKA: "🇱🇰", SDN: "🇸🇩", SUR: "🇸🇷", SJM: "🇸🇯",
+    SWZ: "🇸🇿", SWE: "🇸🇪", CHE: "🇨🇭", SYR: "🇸🇾", TWN: "🇹🇼", TJK: "🇹🇯", TZA: "🇹🇿",
+    THA: "🇹🇭", TLS: "🇹🇱", TGO: "🇹🇬", TKL: "🇹🇰", TON: "🇹🇴", TTO: "🇹🇹", TUN: "🇹🇳",
+    TUR: "🇹🇷", TKM: "🇹🇲", TCA: "🇹🇨", TUV: "🇹🇻", UGA: "🇺🇬", UKR: "🇺🇦", ARE: "🇦🇪",
+    GBR: "🇬🇧", USA: "🇺🇸", URY: "🇺🇾", UZB: "🇺🇿", VUT: "🇻🇺", VAT: "🇻🇦", VEN: "🇻🇪",
+    VNM: "🇻🇳", WLF: "🇼🇫", YEM: "🇾🇪", ZMB: "🇿🇲", ZWE: "🇿🇼"
+};
+
+export function getCountryFlag(code?: string): string {
+    if (!code) return "🌐";
+    return COUNTRY_FLAGS[code.toUpperCase()] || "🌐";
+}
+
+export const POPULAR_COUNTRY_CODES = ["NGA", "USA", "GBR", "CAN", "ARE", "SAU", "ZAF", "GHA", "PAK", "IND"];
 
 export const countries: Country[] = [
     { name: "Afghanistan", code: "AFG", dial: "+93" },

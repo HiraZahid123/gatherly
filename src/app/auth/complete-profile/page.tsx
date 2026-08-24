@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useLoader } from "@/lib/contexts/LoaderContext";
 import { countries } from "@/lib/countries";
+import PhoneInputWithCountry from "@/components/auth/PhoneInputWithCountry";
 
 export default function CompleteProfilePage() {
     const router = useRouter();
@@ -14,7 +15,7 @@ export default function CompleteProfilePage() {
     const { showLoader, hideLoader } = useLoader();
 
     const [phone, setPhone] = useState("");
-    const [selectedCountry, setSelectedCountry] = useState("+92");
+    const [selectedCountry, setSelectedCountry] = useState("+234"); // Default to Nigeria
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState<"phone" | "otp">("phone");
     const [isLoading, setIsLoading] = useState(false);
@@ -140,30 +141,16 @@ export default function CompleteProfilePage() {
                         <form onSubmit={handleSendOTP} className="space-y-6">
                             <div className="space-y-2">
                                 <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
-                                    Phone Number
+                                    Phone Number (WhatsApp)
                                 </label>
-                                <div className="flex gap-2">
-                                    <select
-                                        value={selectedCountry}
-                                        onChange={(e) => setSelectedCountry(e.target.value)}
-                                        className="bg-[#1e1e20] border border-white/10 text-white px-3 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 outline-none w-[110px] text-sm"
-                                    >
-                                        {countries.map((c) => (
-                                            <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#1e1e20]">
-                                                {c.code} ({c.dial})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        id="phone"
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        required
-                                        className="flex-1 bg-[#1e1e20] border border-white/10 text-white px-5 py-4 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 outline-none text-base"
-                                        placeholder="300 1234567"
-                                    />
-                                </div>
+                                <PhoneInputWithCountry
+                                    value={phone}
+                                    onChange={setPhone}
+                                    selectedDial={selectedCountry}
+                                    onDialChange={setSelectedCountry}
+                                    placeholder="802 345 6789"
+                                    disabled={isLoading}
+                                />
                             </div>
 
                             {error && (

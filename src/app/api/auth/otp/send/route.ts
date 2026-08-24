@@ -15,9 +15,18 @@ export async function POST(req: Request) {
         const otpCode = generateOTP();
         const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
+        const rawPhone = phone.trim();
+
         // Enforce existing user only for Login
-        const existingUser = await prisma.user.findUnique({
-            where: { phone: formattedPhone },
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { phone: formattedPhone },
+                    { phone: rawPhone },
+                    { phone: rawPhone.replace(/^\+/, '') },
+                    { phone: formattedPhone.replace(/^\+/, '') },
+                ],
+            },
         });
 
         if (!existingUser) {

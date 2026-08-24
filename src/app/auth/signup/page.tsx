@@ -9,7 +9,8 @@ import { useLoader } from "@/lib/contexts/LoaderContext";
 import { countries } from "@/lib/countries";
 import AvatarUpload from "@/components/AvatarUpload";
 import { passwordSchema } from "@/lib/validation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MessageSquare } from "lucide-react";
+import PhoneInputWithCountry from "@/components/auth/PhoneInputWithCountry";
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -20,7 +21,7 @@ export default function SignUpPage() {
         password: "",
         confirmPassword: "",
     });
-    const [selectedCountry, setSelectedCountry] = useState("+92"); // Default to Pakistan
+    const [selectedCountry, setSelectedCountry] = useState("+234"); // Default to Nigeria
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { showLoader, hideLoader } = useLoader();
@@ -194,40 +195,24 @@ export default function SignUpPage() {
 
                         {/* Phone Input */}
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
-                                Phone Number (WhatsApp)
-                            </label>
-                            <div className="flex gap-3">
-                                <div className="relative w-[40%]">
-                                    <select
-                                        value={selectedCountry}
-                                        onChange={(e) => setSelectedCountry(e.target.value)}
-                                        aria-label="Select Country Code"
-                                        className="w-full appearance-none bg-[#1e1e20] border border-white/10 text-white px-4 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none text-sm font-medium cursor-pointer"
-                                    >
-                                        {countries.map((c) => (
-                                            <option key={`${c.code}-${c.dial}`} value={c.dial} className="bg-[#161618]">
-                                                {c.code} {c.dial}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    required
-                                    className="flex-1 min-w-0 bg-[#1e1e20] border border-white/10 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all outline-none placeholder:text-gray-600 font-mono tracking-wider"
-                                    placeholder="300 1234567"
-                                />
+                            <div className="flex items-center justify-between mb-2">
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
+                                    Phone Number (WhatsApp)
+                                </label>
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                    <MessageSquare className="w-3 h-3" />
+                                    WhatsApp
+                                </span>
                             </div>
+
+                            <PhoneInputWithCountry
+                                value={formData.phone}
+                                onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
+                                selectedDial={selectedCountry}
+                                onDialChange={setSelectedCountry}
+                                placeholder="300 1234567"
+                                disabled={isLoading}
+                            />
                         </div>
 
                         {/* Password Input */}

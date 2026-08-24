@@ -131,9 +131,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
 
                 const formattedPhone = formatPhone(credentials.phone as string);
+                const rawPhone = (credentials.phone as string).trim();
 
-                const user = await prisma.user.findUnique({
-                    where: { phone: formattedPhone },
+                const user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            { phone: formattedPhone },
+                            { phone: rawPhone },
+                            { phone: rawPhone.replace(/^\+/, '') },
+                            { phone: formattedPhone.replace(/^\+/, '') },
+                        ],
+                    },
                 });
 
                 if (!user || !user.otpCode || !user.otpExpires) {

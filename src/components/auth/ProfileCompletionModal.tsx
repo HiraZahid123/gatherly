@@ -109,7 +109,7 @@ export default function ProfileCompletionModal() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 className="w-full bg-[#1e1e20] border border-white/10 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500/50 outline-none"
-                                placeholder="+92 300 1234567"
+                                placeholder="+234 802 345 6789"
                                 required
                             />
                         </div>
