@@ -5,13 +5,16 @@ interface SendEmailParams {
     to: string;
     subject: string;
     html: string;
+    replyTo?: string;
+    from?: string;
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, replyTo, from }: SendEmailParams) {
     if (!process.env.MAIL_USERNAME) {
         console.log("================ MOCK EMAIL ================");
         console.log(`To: ${to}`);
         console.log(`Subject: ${subject}`);
+        if (replyTo) console.log(`Reply-To: ${replyTo}`);
         console.log(`[Email body omitted - Configure SMTP in .env to send real emails]`);
         console.log("============================================");
         return { success: true, messageId: "mock-id-" + Date.now() };
@@ -32,8 +35,9 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
 
     try {
         const info = await transporter.sendMail({
-            from: `"${process.env.MAIL_FROM_NAME || 'Event Platform'}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            from: from || `"${process.env.MAIL_FROM_NAME || 'JollyWitMe'}" <${process.env.MAIL_FROM_ADDRESS || 'support@jollywitme.com'}>`,
             to,
+            replyTo,
             subject,
             html,
         });
