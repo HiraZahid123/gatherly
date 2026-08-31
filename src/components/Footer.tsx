@@ -56,12 +56,13 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Legal */}
+                    {/* Legal & Company */}
                     <div>
-                        <h4 className="font-semibold text-lg mb-4">Company</h4>
+                        <h4 className="font-semibold text-lg mb-4">Legal & Company</h4>
                         <ul className="space-y-3 text-sm text-white/70">
-                            <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/community-guidelines" className="hover:text-white transition-colors">Community Guidelines</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
                         </ul>
                     </div>
