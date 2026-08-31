@@ -20,10 +20,11 @@ import FlyerModal from "@/components/event-page/FlyerModal";
 import AnnouncementsSection from "@/components/event-page/AnnouncementsSection";
 import RSVPModal from "@/components/RSVPModal";
 import TicketCheckoutDrawer from "@/components/TicketCheckoutDrawer";
+import ShareEventModal from "@/components/event-page/ShareEventModal";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
 import { BackgroundVideo } from "@/components/BackgroundVideo";
-import { QrCode, Ticket, Calendar } from "lucide-react";
+import { QrCode, Ticket, Calendar, Share2, Sparkles, Settings } from "lucide-react";
 import { getCalendarLinks } from "@/lib/calendar";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
@@ -89,6 +90,7 @@ export default function PublicEventClient({
     const [selectedGuestForChat, setSelectedGuestForChat] = useState<any>(null);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isCalendarDropdownOpen, setIsCalendarDropdownOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const [ticketTiers] = useState(initialTicketTiers);
     const [announceFocusTrigger, setAnnounceFocusTrigger] = useState(0);
     const isHost = session?.user?.id === event.hostId;
@@ -98,6 +100,13 @@ export default function PublicEventClient({
     );
     const isStaff = event.staff?.some((s: any) => s.userId === session?.user?.id);
     const hasAdminAccess = isHost || isCoHost;
+
+    // Auto-open Share Sheet if URL contains created=true or share=true
+    useEffect(() => {
+        if (searchParams.get("created") === "true" || searchParams.get("share") === "true") {
+            setIsShareOpen(true);
+        }
+    }, [searchParams]);
 
     // Apply theme on mount
     useEffect(() => {
@@ -359,17 +368,8 @@ export default function PublicEventClient({
         }
     };
 
-    const handleInvite = async () => {
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            setToastMessage("Event link copied to clipboard!");
-            setShowToast(true);
-            setTimeout(() => setShowToast(false), 3000);
-        } catch (err) {
-            setToastMessage("Failed to copy link");
-            setShowToast(true);
-            setTimeout(() => setShowToast(false), 3000);
-        }
+    const handleInvite = () => {
+        setIsShareOpen(true);
     };
 
     const handleClone = async () => {
@@ -611,7 +611,7 @@ export default function PublicEventClient({
 
             <main className="relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 grid grid-cols-1 lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center transition-all duration-700">
                 <div className="space-y-12">
-                    <ReadonlyEventSummary event={event} />
+                    <ReadonlyEventSummary event={event} onShare={() => setIsShareOpen(true)} />
 
                     <div className="w-full pt-8 border-t border-white/10">
                         <AnnouncementsSection
@@ -846,10 +846,58 @@ export default function PublicEventClient({
                                     )}
                                 </>
                             )}
+
+                            {/* Share Event Button */}
+                            <button
+                                onClick={() => setIsShareOpen(true)}
+                                className="w-full mt-4 py-3.5 bg-gradient-to-r from-emerald-500/15 via-emerald-500/25 to-teal-500/15 hover:from-emerald-500/25 hover:to-teal-500/25 border border-emerald-500/30 hover:border-emerald-500/50 rounded-xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-400 hover:text-emerald-300 transition-all shadow-lg active:scale-95 group"
+                            >
+                                <Share2 className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                                <span>Share Event (WhatsApp, Email, Link)</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* Mobile Sticky Floating Action Bar */}
+            <div className="fixed bottom-4 left-4 right-4 z-40 lg:hidden flex items-center gap-2.5 p-2 bg-[#121216]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom-4">
+                <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="flex-1 py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
+                >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Event</span>
+                </button>
+                {event.isPaid ? (
+                    <button
+                        onClick={() => setIsCheckoutOpen(true)}
+                        className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                    >
+                        <Ticket className="w-4 h-4 text-emerald-400" />
+                        <span>Tickets</span>
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => {
+                            setIsRSVPModalOpen(true);
+                        }}
+                        className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                    >
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                        <span>RSVP</span>
+                    </button>
+                )}
+                {isHost && (
+                    <button
+                        onClick={() => { setSettingsTab("Hosts"); setIsSettingsOpen(true); }}
+                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+                        title="Event Settings"
+                    >
+                        <Settings className="w-4 h-4 text-gray-300" />
+                    </button>
+                )}
+            </div>
 
             <EventSettingsModal
                 isOpen={isSettingsOpen}
@@ -880,6 +928,12 @@ export default function PublicEventClient({
                         setTimeout(() => setSelectedGuestForChat(null), 100);
                     }
                 }}
+            />
+
+            <ShareEventModal
+                isOpen={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+                event={event}
             />
 
             <FlyerModal

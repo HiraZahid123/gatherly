@@ -4,14 +4,15 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "avif", "gif", "svg", "heic", "heif"];
 
 export async function POST(request: NextRequest) {
     try {
         // Check authentication
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user?.id && (session?.user as any)?.role !== "ADMIN") {
             return NextResponse.json(
                 { error: "Unauthorized. Please sign in." },
                 { status: 401 }
@@ -28,10 +29,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate file type
-        if (!ALLOWED_TYPES.includes(file.type)) {
+        // Validate file extension / mime type
+        const extension = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const isAllowedType =
+            file.type.startsWith("image/") ||
+            ALLOWED_EXTENSIONS.includes(extension);
+
+        if (!isAllowedType) {
             return NextResponse.json(
-                { error: "Invalid file type. Only JPEG, PNG, and WebP images are allowed." },
+                { error: "Invalid file type. Only image files (JPEG, PNG, WebP, AVIF, GIF, SVG) are allowed." },
                 { status: 400 }
             );
         }
@@ -39,41 +45,50 @@ export async function POST(request: NextRequest) {
         // Validate file size
         if (file.size > MAX_FILE_SIZE) {
             return NextResponse.json(
-                { error: "File size must be less than 5MB." },
+                { error: "File size exceeds the 15MB limit." },
                 { status: 400 }
             );
         }
 
-        // Generate unique filename
-        const timestamp = Date.now();
-        const randomString = Math.random().toString(36).substring(2, 15);
-        const extension = file.name.split(".").pop();
-        const filename = `cover-${session.user.id}-${timestamp}-${randomString}.${extension}`;
-
-        // Create upload directory if it doesn't exist
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "covers");
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
-        }
-
-        // Convert file to buffer and save
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const filepath = path.join(uploadDir, filename);
-        await writeFile(filepath, buffer);
+        const userId = session?.user?.id || "admin";
+        const timestamp = Date.now();
+        const randomString = Math.random().toString(36).substring(2, 10);
+        const filename = `cover-${userId}-${timestamp}-${randomString}.${extension}`;
 
-        // Generate URL
-        const imageUrl = `/uploads/covers/${filename}`;
+        // Attempt to save to public/uploads/covers if filesystem is writable
+        try {
+            const uploadDir = path.join(process.cwd(), "public", "uploads", "covers");
+            if (!existsSync(uploadDir)) {
+                await mkdir(uploadDir, { recursive: true });
+            }
+            const filepath = path.join(uploadDir, filename);
+            await writeFile(filepath, buffer);
 
-        return NextResponse.json({
-            success: true,
-            message: "Cover image uploaded successfully.",
-            imageUrl,
-        });
-    } catch (error) {
+            const imageUrl = `/uploads/covers/${filename}`;
+            return NextResponse.json({
+                success: true,
+                message: "Cover image uploaded successfully.",
+                imageUrl,
+            });
+        } catch (fsError) {
+            console.warn("Filesystem write not available, falling back to data URL:", fsError);
+            // Fallback for read-only / serverless deployment (Vercel)
+            const mimeType = file.type || `image/${extension === "jpg" ? "jpeg" : extension}`;
+            const base64Data = buffer.toString("base64");
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+            return NextResponse.json({
+                success: true,
+                message: "Image processed successfully.",
+                imageUrl: dataUrl,
+            });
+        }
+    } catch (error: any) {
         console.error("Cover upload error:", error);
         return NextResponse.json(
-            { error: "An error occurred while uploading the file." },
+            { error: error?.message || "An error occurred while uploading the file." },
             { status: 500 }
         );
     }

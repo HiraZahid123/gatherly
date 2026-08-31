@@ -347,7 +347,7 @@ export default function SignUpPage() {
                             type="button"
                             onClick={() => {
                                 showLoader();
-                                signIn("facebook", { callbackUrl: "/dashboard" });
+                                signIn("instagram", { callbackUrl: "/dashboard" });
                             }}
                             className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border border-pink-500/30 bg-gradient-to-r from-[#833ab4]/20 via-[#fd1d1d]/20 to-[#fcb045]/20 rounded-2xl hover:opacity-90 transition-all font-medium text-white"
                         >

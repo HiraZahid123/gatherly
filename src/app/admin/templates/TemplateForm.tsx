@@ -128,6 +128,16 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
         setIsUploading(true);
         setError("");
 
+        // Function to read as base64 data URL
+        const readAsBase64 = (f: File): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(f);
+            });
+        };
+
         try {
             const uploadFormData = new FormData();
             uploadFormData.append("file", file);
@@ -138,19 +148,38 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
             });
 
             const data = await res.json();
-            if (!res.ok || !data.imageUrl) {
-                throw new Error(data.error || "Failed to upload image");
+            if (res.ok && data.imageUrl) {
+                setFormData((prev) => ({
+                    ...prev,
+                    previewImage: data.imageUrl,
+                    poster: data.imageUrl,
+                }));
+                setSuccessMessage("Custom image uploaded successfully!");
+            } else {
+                // Fallback to local base64 preview
+                const base64Url = await readAsBase64(file);
+                setFormData((prev) => ({
+                    ...prev,
+                    previewImage: base64Url,
+                    poster: base64Url,
+                }));
+                setSuccessMessage("Image loaded successfully!");
             }
-
-            setFormData((prev) => ({
-                ...prev,
-                previewImage: data.imageUrl,
-                poster: data.imageUrl,
-            }));
-            setSuccessMessage("Custom image uploaded successfully!");
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to upload image");
+            console.warn("Upload API failed, falling back to base64:", err);
+            try {
+                const base64Url = await readAsBase64(file);
+                setFormData((prev) => ({
+                    ...prev,
+                    previewImage: base64Url,
+                    poster: base64Url,
+                }));
+                setSuccessMessage("Image loaded successfully!");
+                setTimeout(() => setSuccessMessage(""), 3000);
+            } catch (readErr) {
+                setError("Failed to read image file. Please try another image.");
+            }
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
@@ -329,7 +358,7 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                accept="image/*"
                                 onChange={handleFileUpload}
                                 className="hidden"
                             />

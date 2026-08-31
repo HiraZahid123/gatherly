@@ -253,8 +253,8 @@ function CreateEventContent() {
             localStorage.removeItem("event_effect_id");
             localStorage.removeItem("event_cover_image");
 
-            // Redirect to the event page
-            router.push(`/e/${result.event.slug}`);
+            // Redirect to the event page and trigger instant Share Sheet
+            router.push(`/e/${result.event.slug}?created=true&share=true`);
         } catch (error: any) {
             console.error("Failed to create event:", error);
             throw error;

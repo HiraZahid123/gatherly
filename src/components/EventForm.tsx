@@ -877,20 +877,20 @@ export default function EventForm({
             }
 
             {/* Quick Actions for Hosts */}
-            <div className="pt-8 space-y-6">
+            <div className="pt-8 space-y-4">
                 <h4 className="text-sm font-bold text-white/60">Quick actions for hosts</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
-                    <button type="button" className="flex items-center gap-3 px-5 py-4 bg-white/5 border border-white/10 rounded-[1.2rem] hover:bg-white/10 transition-all text-left group">
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white/40 group-hover:text-white transition-colors">
+                <div className="flex flex-wrap gap-2.5 sm:gap-3">
+                    <button type="button" className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white/40 group-hover:text-white transition-colors">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                         </svg>
-                        <span className="text-xs font-bold whitespace-nowrap">Collect Info</span>
+                        <span className="text-xs font-bold text-white/80 group-hover:text-white">Collect Info</span>
                     </button>
-                    <button type="button" className="flex items-center gap-3 px-5 py-4 bg-white/5 border border-white/10 rounded-[1.2rem] hover:bg-white/10 transition-all text-left group">
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white/40 group-hover:text-white transition-colors">
+                    <button type="button" className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white/40 group-hover:text-white transition-colors">
                             <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-8h4V7h-4v5zm-3 7h1v-4H9v3a1 1 0 0 0 1 1z" />
                         </svg>
-                        <span className="text-xs font-bold whitespace-nowrap">Reminders</span>
+                        <span className="text-xs font-bold text-white/80 group-hover:text-white">Reminders</span>
                     </button>
                     <button
                         type="button"
@@ -900,19 +900,21 @@ export default function EventForm({
                             setFormData(newData);
                             onDataChange?.(newData);
                         }}
-                        className={`flex items-center gap-3 px-5 py-4 border rounded-[1.2rem] transition-all text-left group ${formData.requireApproval
-                            ? "bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                        className={`flex items-center gap-2.5 px-4 sm:px-5 py-3.5 border rounded-2xl transition-all text-left group shrink-0 ${formData.requireApproval
+                            ? "bg-white/15 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
                             : "bg-white/5 border-white/10 hover:bg-white/10"
                             }`}
                     >
-                        <svg viewBox="0 0 24 24" fill="currentColor" className={`w-5 h-5 transition-colors ${formData.requireApproval ? "text-white" : "text-white/40 group-hover:text-white"}`}>
+                        <svg viewBox="0 0 24 24" fill="currentColor" className={`w-4 h-4 transition-colors ${formData.requireApproval ? "text-emerald-400" : "text-white/40 group-hover:text-white"}`}>
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" />
                         </svg>
-                        <span className={`text-xs font-bold whitespace-nowrap ${formData.requireApproval ? "text-white" : "text-white/60"}`}>Require Guest Approval</span>
+                        <span className={`text-xs font-bold ${formData.requireApproval ? "text-white" : "text-white/80 group-hover:text-white"}`}>
+                            Require Guest Approval
+                        </span>
                     </button>
-                    <button type="button" className="flex items-center gap-3 px-5 py-4 bg-white/5 border border-white/10 rounded-[1.2rem] hover:bg-white/10 transition-all text-left group">
-                        <span className="text-white/40 font-black text-lg group-hover:text-white transition-colors">...</span>
-                        <span className="text-xs font-bold whitespace-nowrap">More</span>
+                    <button type="button" className="flex items-center gap-2 px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                        <span className="text-white/40 font-black text-sm group-hover:text-white transition-colors">•••</span>
+                        <span className="text-xs font-bold text-white/80 group-hover:text-white">More</span>
                     </button>
                 </div>
             </div>

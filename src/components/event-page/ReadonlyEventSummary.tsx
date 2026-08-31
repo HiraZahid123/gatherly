@@ -1,11 +1,12 @@
 import Image from "next/image";
-import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft } from "lucide-react";
+import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft, Share2 } from "lucide-react";
 import { VIBE_THEMES } from "@/lib/theme";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 
 interface ReadonlyEventSummaryProps {
     event: any;
+    onShare?: () => void;
 }
 
 const LINK_ICONS = {
@@ -19,7 +20,7 @@ const LINK_ICONS = {
     Bed: Bed,
 };
 
-export default function ReadonlyEventSummary({ event }: ReadonlyEventSummaryProps) {
+export default function ReadonlyEventSummary({ event, onShare }: ReadonlyEventSummaryProps) {
     const { data: session } = useSession();
     const vibeId = event.theme?.vibeId || "classic";
     const currentVibe = VIBE_THEMES.find(v => v.id === vibeId) || VIBE_THEMES[0];
@@ -30,9 +31,21 @@ export default function ReadonlyEventSummary({ event }: ReadonlyEventSummaryProp
         <div className="space-y-10 text-white animate-in fade-in slide-in-from-left-4 duration-1000 max-w-xl">
             {/* Header Section (Title) - Matches Title Box Spacing */}
             <div className="p-5 pb-3">
-                <div className="flex items-center gap-4 text-white/40 mb-6 -ml-1">
-                    <ArrowLeft className="w-6 h-6 cursor-pointer hover:text-white transition-all hover:-translate-x-1" onClick={() => window.history.back()} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Event Preview</span>
+                <div className="flex items-center justify-between gap-4 text-white/40 mb-6 -ml-1">
+                    <div className="flex items-center gap-3">
+                        <ArrowLeft className="w-6 h-6 cursor-pointer hover:text-white transition-all hover:-translate-x-1" onClick={() => window.history.back()} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Event</span>
+                    </div>
+
+                    {onShare && (
+                        <button
+                            onClick={onShare}
+                            className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold transition-all shadow-sm active:scale-95"
+                        >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Share</span>
+                        </button>
+                    )}
                 </div>
 
                 <h1 className={`text-5xl md:text-7xl text-white tracking-tighter leading-[0.9] ${currentVibe.fontClass} drop-shadow-2xl`}>

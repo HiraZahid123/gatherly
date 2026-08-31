@@ -11,8 +11,9 @@ export default function Footer() {
     const isDashboard = pathname === "/dashboard";
     const isAdminPage = pathname.startsWith("/admin");
     const isCreationPage = pathname === "/events/create" || pathname === "/cards/create";
+    const isAuthPage = pathname.startsWith("/auth");
 
-    if (isDashboard || isAdminPage || isCreationPage) return null;
+    if (isDashboard || isAdminPage || isCreationPage || isAuthPage) return null;
 
     return (
         <footer className="bg-black text-white pt-20 pb-10 border-t border-white/10">

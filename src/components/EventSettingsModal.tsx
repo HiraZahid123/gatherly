@@ -213,21 +213,21 @@ export default function EventSettingsModal({
                 style={getModalStyle()}
             >
                 {/* Sidebar Navigation */}
-                <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/5 bg-black/40 flex flex-col pt-4 md:pt-10 shrink-0">
-                    <div className="px-4 md:px-6 mb-4 md:mb-6 flex items-center gap-3">
-                        <button onClick={onClose} aria-label="Close Settings" className="p-2 hover:bg-white/5 rounded-none transition-colors">
-                            <X className="w-4 h-4 text-white/40" />
+                <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/5 bg-black/40 flex flex-col pt-4 md:pt-6 shrink-0 min-h-0 h-full overflow-hidden">
+                    <div className="px-4 md:px-6 mb-3 md:mb-4 flex items-center gap-3 shrink-0">
+                        <button onClick={onClose} aria-label="Close Settings" className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+                            <X className="w-4 h-4 text-white/40 hover:text-white" />
                         </button>
                         <h2 className="text-[11px] font-black uppercase tracking-widest text-white/60">Event Settings</h2>
                     </div>
 
-                    <nav className="flex md:flex-col px-4 md:px-0 space-x-2 md:space-x-0 md:space-y-1 overflow-x-auto md:overflow-y-auto pb-4 md:pb-8 flex-nowrap scrollbar-hide shrink-0">
+                    <nav className="flex md:flex-col px-4 md:px-0 space-x-2 md:space-x-0 md:space-y-0.5 overflow-x-auto md:overflow-y-auto flex-1 min-h-0 pb-6 custom-scrollbar">
                         {navItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`flex-none md:w-full flex items-center gap-2 md:gap-3 px-4 md:px-0 md:pr-4 py-2 md:py-3 rounded-full md:rounded-none transition-all duration-300 group relative ${activeTab === item.id
-                                    ? "text-white bg-white/10 md:bg-white/5"
+                                className={`flex-none md:w-full flex items-center gap-2 md:gap-3 px-4 md:px-0 md:pr-4 py-2 md:py-2.5 rounded-full md:rounded-none transition-all duration-200 group relative ${activeTab === item.id
+                                    ? "text-white bg-white/10 md:bg-white/5 font-bold"
                                     : "text-white/40 hover:text-white/70 hover:bg-white/[0.02]"
                                     }`}
                             >
@@ -238,7 +238,7 @@ export default function EventSettingsModal({
                                     />
                                 )}
                                 <item.icon
-                                    className={`w-4 h-4 md:ml-6 transition-colors duration-300 ${activeTab === item.id ? "text-white" : "text-white/20 group-hover:text-white/40"}`}
+                                    className={`w-4 h-4 md:ml-6 transition-colors duration-200 ${activeTab === item.id ? "text-white" : "text-white/20 group-hover:text-white/40"}`}
                                     style={activeTab === item.id && selectedTheme !== 'streak' ? { color: primaryColor } : {}}
                                 />
                                 <span className="text-[12px] font-bold tracking-tight whitespace-nowrap">{item.label}</span>
@@ -248,7 +248,7 @@ export default function EventSettingsModal({
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 flex flex-col bg-white/[0.02] overflow-y-auto scrollbar-hide">
+                <div className="flex-1 flex flex-col bg-white/[0.02] overflow-y-auto custom-scrollbar min-h-0">
                     <div className="p-8 sm:p-12 max-w-2xl mx-auto w-full h-full flex flex-col">
                         {activeTab === "Invitations" && (
                             <InviteManagementPanel eventId={event?.id || ""} />

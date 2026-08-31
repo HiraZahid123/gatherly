@@ -32,12 +32,28 @@ export default function PhoneInputWithCountry({
     className = "",
 }: PhoneInputWithCountryProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [openUpwards, setOpenUpwards] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isFocused, setIsFocused] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const phoneInputRef = useRef<HTMLInputElement>(null);
+
+    const handleToggle = () => {
+        if (disabled) return;
+        if (!isOpen && dropdownRef.current) {
+            const rect = dropdownRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            // If less than 280px below and there's enough room above, open upwards
+            if (spaceBelow < 280 && rect.top > spaceBelow) {
+                setOpenUpwards(true);
+            } else {
+                setOpenUpwards(false);
+            }
+        }
+        setIsOpen(!isOpen);
+    };
 
     // Find currently selected country object
     const selectedCountry = useMemo(() => {
@@ -109,7 +125,7 @@ export default function PhoneInputWithCountry({
                 {/* Country Trigger Button */}
                 <button
                     type="button"
-                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    onClick={handleToggle}
                     disabled={disabled}
                     className="flex items-center gap-2 px-3.5 sm:px-4 py-3.5 bg-white/[0.03] hover:bg-white/[0.07] transition-colors border-r border-white/10 text-white flex-shrink-0 select-none group"
                     title={`${selectedCountry.name} (${selectedCountry.dial})`}
@@ -147,11 +163,17 @@ export default function PhoneInputWithCountry({
                 </div>
             </div>
 
-            {/* Country Selector Dropdown Popover */}
+            {/* Country Selector Dropdown Popover - Full width matching input */}
             {isOpen && (
-                <div className="absolute top-full left-0 mt-2 w-full sm:w-80 bg-[#161618] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl">
+                <div
+                    className={`absolute ${
+                        openUpwards ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+                    } left-0 w-full bg-[#161618] border border-white/15 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] z-[100] overflow-hidden animate-in fade-in ${
+                        openUpwards ? "slide-in-from-bottom-2" : "slide-in-from-top-2"
+                    } duration-150 backdrop-blur-2xl`}
+                >
                     {/* Search Header */}
-                    <div className="p-3 border-b border-white/10 bg-black/40">
+                    <div className="p-3 border-b border-white/10 bg-black/50">
                         <div className="relative">
                             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                             <input
@@ -199,7 +221,7 @@ export default function PhoneInputWithCountry({
                     </div>
 
                     {/* Scrollable Country List */}
-                    <div className="max-h-60 overflow-y-auto divide-y divide-white/5 custom-scrollbar">
+                    <div className="max-h-48 sm:max-h-52 overflow-y-auto divide-y divide-white/5 custom-scrollbar">
                         {filteredCountries.length > 0 ? (
                             filteredCountries.map((c) => {
                                 const isSelected = selectedCountry.code === c.code || selectedCountry.dial === c.dial;

@@ -108,12 +108,12 @@ export default function CompleteProfilePage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] px-4 relative overflow-hidden">
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a0b] px-4 pt-28 pb-12 relative overflow-x-hidden overflow-y-auto">
             {/* Ambient Background Effects */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-0 left-0 w-[40vw] h-[40vh] max-w-[400px] max-h-[400px] bg-green-600/15 rounded-full blur-[100px] pointer-events-none -translate-x-1/3 -translate-y-1/3"></div>
+            <div className="absolute bottom-0 right-0 w-[40vw] h-[40vh] max-w-[400px] max-h-[400px] bg-emerald-600/15 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3"></div>
 
-            <div className="w-full max-w-md z-10 m-10">
+            <div className="w-full max-w-md z-10 my-auto">
                 <div className="text-center mb-10">
                     <div className="flex items-center justify-center mb-6">
                         <Link href="/" className="inline-block group">

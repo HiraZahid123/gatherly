@@ -477,7 +477,7 @@ function SignInContent() {
                             type="button"
                             onClick={() => {
                                 showLoader();
-                                signIn("facebook", { callbackUrl: "/dashboard" });
+                                signIn("instagram", { callbackUrl: "/dashboard" });
                             }}
                             className="w-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-3 hover:opacity-90 transition-all active:scale-[0.98]"
                         >
