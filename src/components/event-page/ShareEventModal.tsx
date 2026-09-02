@@ -24,6 +24,8 @@ interface ShareEventModalProps {
         id?: string;
         title: string;
         slug: string;
+        type?: string;
+        isCard?: boolean;
         startDate?: string | Date;
         location?: string;
         hostName?: string;
@@ -37,13 +39,16 @@ export default function ShareEventModal({ isOpen, onClose, event }: ShareEventMo
     const [eventUrl, setEventUrl] = useState("");
     const [hasNativeShare, setHasNativeShare] = useState(false);
 
+    const isCard = event.type === "CARD" || (event as any).isCard;
+
     useEffect(() => {
         if (typeof window !== "undefined") {
             const origin = window.location.origin;
-            setEventUrl(`${origin}/e/${event.slug}`);
+            const path = isCard ? `/c/${event.slug}` : `/e/${event.slug}`;
+            setEventUrl(`${origin}${path}`);
             setHasNativeShare(typeof navigator !== "undefined" && !!navigator.share);
         }
-    }, [event.slug]);
+    }, [event.slug, isCard]);
 
     if (!isOpen) return null;
 
@@ -57,7 +62,9 @@ export default function ShareEventModal({ isOpen, onClose, event }: ShareEventMo
           })
         : "Date & Time TBD";
 
-    const inviteText = `🎉 You're invited to ${event.title}!\n\n📅 ${formattedDate}\n📍 ${event.location || "Location on event page"}\n\n👉 RSVP & view event details here:\n${eventUrl}`;
+    const inviteText = isCard
+        ? `💌 ${event.hostName ? `${event.hostName} sent you a special greeting card` : "You've received a special greeting card"}!\n\n"${event.title}"\n\n👉 Open your card here:\n${eventUrl}`
+        : `🎉 You're invited to ${event.title}!\n\n📅 ${formattedDate}\n📍 ${event.location || "Location on event page"}\n\n👉 RSVP & view event details here:\n${eventUrl}`;
 
     const handleCopy = async () => {
         try {
@@ -122,8 +129,8 @@ export default function ShareEventModal({ isOpen, onClose, event }: ShareEventMo
                             <Share2 className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black tracking-tight text-white">Share Event</h2>
-                            <p className="text-xs text-gray-400">Invite your guests and friends</p>
+                            <h2 className="text-xl font-black tracking-tight text-white">{isCard ? "Share Card" : "Share Event"}</h2>
+                            <p className="text-xs text-gray-400">{isCard ? "Send your card to friends & family" : "Invite your guests and friends"}</p>
                         </div>
                     </div>
 
@@ -135,19 +142,27 @@ export default function ShareEventModal({ isOpen, onClose, event }: ShareEventMo
                     </button>
                 </div>
 
-                {/* Event Snapshot Card */}
+                {/* Event / Card Snapshot Card */}
                 <div className="bg-[#18181c] border border-white/10 rounded-2xl p-4 space-y-2 relative z-10">
                     <h3 className="font-extrabold text-base text-white truncate">{event.title}</h3>
                     <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-gray-400 font-medium">
-                        <span className="flex items-center gap-1 text-emerald-400">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {formattedDate}
-                        </span>
-                        {event.location && (
-                            <span className="flex items-center gap-1 text-gray-300 truncate max-w-[200px]">
-                                <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                                {event.location}
+                        {isCard ? (
+                            <span className="flex items-center gap-1 text-emerald-400">
+                                💌 Digital Greeting Card
                             </span>
+                        ) : (
+                            <>
+                                <span className="flex items-center gap-1 text-emerald-400">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {formattedDate}
+                                </span>
+                                {event.location && (
+                                    <span className="flex items-center gap-1 text-gray-300 truncate max-w-[200px]">
+                                        <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                        {event.location}
+                                    </span>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

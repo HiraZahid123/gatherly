@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { applyTheme } from "@/lib/theme"; // Reuse theme logic
 import EnvelopeView from "@/components/cards/EnvelopeView";
+import ShareEventModal from "@/components/event-page/ShareEventModal";
+import { Share2, ArrowLeft } from "lucide-react";
 import FloatingParticles from "@/components/FloatingParticles";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
@@ -34,6 +36,7 @@ const INTERACTIVE_THEMES = ['streak', 'meadow', 'crystal', 'waves'];
 export default function CardPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: session } = useSession();
 
@@ -41,6 +44,13 @@ export default function CardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get("created") === "true" || searchParams.get("share") === "true") {
+            setIsShareOpen(true);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchCard = async () => {
@@ -96,6 +106,24 @@ export default function CardPage() {
 
     return (
         <div className="min-h-screen pt-24 text-white font-sans antialiased overflow-hidden relative flex flex-col items-center justify-center transition-colors duration-1000" style={bgStyle}>
+            {/* Top Navigation & Share Bar */}
+            <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-6 py-4 backdrop-blur-md bg-black/20 border-b border-white/5">
+                <button
+                    onClick={() => router.push("/cards/create")}
+                    className="flex items-center gap-2 text-white/60 hover:text-white text-xs font-bold transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Create Card</span>
+                </button>
+                <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs rounded-full shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Share Card</span>
+                </button>
+            </div>
+
             {/* Dark Ribbed Texture Overlay */}
             <div
                 className="absolute inset-0 pointer-events-none opacity-[0.4] z-0 mix-blend-multiply"
@@ -210,21 +238,42 @@ export default function CardPage() {
                 <div className={`mt-12 transition-opacity duration-1000 ${isEnvelopeOpen ? 'opacity-100' : 'opacity-0 delay-500'}`}>
                     <div className="flex flex-col items-center gap-4">
                         <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(window.location.href);
-                                alert("Link copied!");
-                            }}
-                            className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold tracking-widest uppercase transition-colors"
+                            onClick={() => setIsShareOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs tracking-wider uppercase rounded-full shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
                         >
-                            Share this card
+                            <Share2 className="w-4 h-4" />
+                            <span>Share this card</span>
                         </button>
-                        <div className="text-[10px] text-white/20 font-black tracking-widest uppercase">
+                        <div className="text-[10px] text-white/30 font-black tracking-widest uppercase">
                             Sent via JollyWitMe
                         </div>
                     </div>
                 </div>
 
             </main>
+
+            {/* Mobile Sticky Floating Share Bar */}
+            <div className="fixed bottom-4 left-4 right-4 z-40 sm:hidden">
+                <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(16,185,129,0.35)] active:scale-95 transition-all"
+                >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Card (WhatsApp, Link, SMS)</span>
+                </button>
+            </div>
+
+            {/* Rich Share Sheet */}
+            {card && (
+                <ShareEventModal
+                    isOpen={isShareOpen}
+                    onClose={() => setIsShareOpen(false)}
+                    event={{
+                        ...card,
+                        isCard: true,
+                    }}
+                />
+            )}
         </div>
     );
 }

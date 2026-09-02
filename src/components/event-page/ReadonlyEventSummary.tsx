@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, Crown, MapPin, Users, DollarSign, User, Link as LinkIcon, Info, Music, Gift, Shirt, Utensils, Car, Bed, ArrowLeft, Share2, Edit3 } from "lucide-react";
 import { VIBE_THEMES } from "@/lib/theme";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
@@ -7,6 +7,8 @@ import { useSession } from "next-auth/react";
 interface ReadonlyEventSummaryProps {
     event: any;
     onShare?: () => void;
+    onEdit?: () => void;
+    isHost?: boolean;
 }
 
 const LINK_ICONS = {
@@ -20,7 +22,7 @@ const LINK_ICONS = {
     Bed: Bed,
 };
 
-export default function ReadonlyEventSummary({ event, onShare }: ReadonlyEventSummaryProps) {
+export default function ReadonlyEventSummary({ event, onShare, onEdit, isHost }: ReadonlyEventSummaryProps) {
     const { data: session } = useSession();
     const vibeId = event.theme?.vibeId || "classic";
     const currentVibe = VIBE_THEMES.find(v => v.id === vibeId) || VIBE_THEMES[0];
@@ -37,15 +39,27 @@ export default function ReadonlyEventSummary({ event, onShare }: ReadonlyEventSu
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Event</span>
                     </div>
 
-                    {onShare && (
-                        <button
-                            onClick={onShare}
-                            className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold transition-all shadow-sm active:scale-95"
-                        >
-                            <Share2 className="w-3.5 h-3.5" />
-                            <span>Share</span>
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {isHost && onEdit && (
+                            <button
+                                onClick={onEdit}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/15 text-white rounded-full text-xs font-bold transition-all shadow-sm active:scale-95"
+                                title="Edit Event Details"
+                            >
+                                <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Edit</span>
+                            </button>
+                        )}
+                        {onShare && (
+                            <button
+                                onClick={onShare}
+                                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold transition-all shadow-sm active:scale-95"
+                            >
+                                <Share2 className="w-3.5 h-3.5" />
+                                <span>Share</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <h1 className={`text-5xl md:text-7xl text-white tracking-tighter leading-[0.9] ${currentVibe.fontClass} drop-shadow-2xl`}>

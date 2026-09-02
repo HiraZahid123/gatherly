@@ -24,7 +24,7 @@ import ShareEventModal from "@/components/event-page/ShareEventModal";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
 import { BackgroundVideo } from "@/components/BackgroundVideo";
-import { QrCode, Ticket, Calendar, Share2, Sparkles, Settings } from "lucide-react";
+import { QrCode, Ticket, Calendar, Share2, Sparkles, Settings, Edit3 } from "lucide-react";
 import { getCalendarLinks } from "@/lib/calendar";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
@@ -93,7 +93,12 @@ export default function PublicEventClient({
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [ticketTiers] = useState(initialTicketTiers);
     const [announceFocusTrigger, setAnnounceFocusTrigger] = useState(0);
-    const isHost = session?.user?.id === event.hostId;
+
+    const isHost = Boolean(
+        session?.user?.id && event?.hostId && session.user.id === event.hostId
+    ) || Boolean(
+        session?.user?.email && event?.host?.email && session.user.email === event.host.email
+    );
     const isCoHost = event.theme?.settings?.hosts?.cohosts?.some((c: any) => 
         (c.id && c.id === session?.user?.id) || 
         (c.email && c.email === session?.user?.email)
@@ -611,7 +616,12 @@ export default function PublicEventClient({
 
             <main className="relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 grid grid-cols-1 lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center transition-all duration-700">
                 <div className="space-y-12">
-                    <ReadonlyEventSummary event={event} onShare={() => setIsShareOpen(true)} />
+                    <ReadonlyEventSummary
+                        event={event}
+                        onShare={() => setIsShareOpen(true)}
+                        onEdit={() => router.push(`/events/${event.id}/edit`)}
+                        isHost={hasAdminAccess}
+                    />
 
                     <div className="w-full pt-8 border-t border-white/10">
                         <AnnouncementsSection
@@ -861,41 +871,60 @@ export default function PublicEventClient({
             </main>
 
             {/* Mobile Sticky Floating Action Bar */}
-            <div className="fixed bottom-4 left-4 right-4 z-40 lg:hidden flex items-center gap-2.5 p-2 bg-[#121216]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom-4">
-                <button
-                    onClick={() => setIsShareOpen(true)}
-                    className="flex-1 py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
-                >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share Event</span>
-                </button>
-                {event.isPaid ? (
-                    <button
-                        onClick={() => setIsCheckoutOpen(true)}
-                        className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
-                    >
-                        <Ticket className="w-4 h-4 text-emerald-400" />
-                        <span>Tickets</span>
-                    </button>
+            <div className="fixed bottom-4 left-4 right-4 z-40 lg:hidden flex items-center gap-2 p-2 bg-[#121216]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom-4">
+                {hasAdminAccess ? (
+                    <>
+                        <button
+                            onClick={() => router.push(`/events/${event.id}/edit`)}
+                            className="flex-1 py-3.5 px-3 bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm"
+                        >
+                            <Edit3 className="w-4 h-4 text-emerald-400" />
+                            <span>Edit Event</span>
+                        </button>
+                        <button
+                            onClick={() => setIsShareOpen(true)}
+                            className="flex-1 py-3.5 px-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
+                        >
+                            <Share2 className="w-4 h-4" />
+                            <span>Share</span>
+                        </button>
+                        <button
+                            onClick={() => { setSettingsTab("Hosts"); setIsSettingsOpen(true); }}
+                            className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+                            title="Event Settings"
+                        >
+                            <Settings className="w-4 h-4 text-gray-300" />
+                        </button>
+                    </>
                 ) : (
-                    <button
-                        onClick={() => {
-                            setIsRSVPModalOpen(true);
-                        }}
-                        className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
-                    >
-                        <Sparkles className="w-4 h-4 text-emerald-400" />
-                        <span>RSVP</span>
-                    </button>
-                )}
-                {isHost && (
-                    <button
-                        onClick={() => { setSettingsTab("Hosts"); setIsSettingsOpen(true); }}
-                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
-                        title="Event Settings"
-                    >
-                        <Settings className="w-4 h-4 text-gray-300" />
-                    </button>
+                    <>
+                        <button
+                            onClick={() => setIsShareOpen(true)}
+                            className="flex-1 py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
+                        >
+                            <Share2 className="w-4 h-4" />
+                            <span>Share Event</span>
+                        </button>
+                        {event.isPaid ? (
+                            <button
+                                onClick={() => setIsCheckoutOpen(true)}
+                                className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                                <Ticket className="w-4 h-4 text-emerald-400" />
+                                <span>Tickets</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    setIsRSVPModalOpen(true);
+                                }}
+                                className="flex-1 py-3.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                                <Sparkles className="w-4 h-4 text-emerald-400" />
+                                <span>RSVP</span>
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
 

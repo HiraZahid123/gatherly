@@ -121,7 +121,7 @@ export default function CreateCardPage() {
             }
 
             localStorage.removeItem("pending_card_data");
-            router.push(`/c/${result.event.slug}`);
+            router.push(`/c/${result.event.slug}?created=true&share=true`);
         } catch (error: any) {
             console.error("Failed to create card:", error);
             alert(error.message);

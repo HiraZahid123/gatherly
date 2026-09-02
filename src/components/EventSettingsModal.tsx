@@ -213,22 +213,22 @@ export default function EventSettingsModal({
                 style={getModalStyle()}
             >
                 {/* Sidebar Navigation */}
-                <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/5 bg-black/40 flex flex-col pt-4 md:pt-6 shrink-0 min-h-0 h-full overflow-hidden">
-                    <div className="px-4 md:px-6 mb-3 md:mb-4 flex items-center gap-3 shrink-0">
-                        <button onClick={onClose} aria-label="Close Settings" className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-                            <X className="w-4 h-4 text-white/40 hover:text-white" />
+                <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/5 bg-black/50 flex flex-col pt-3 md:pt-6 shrink-0 md:min-h-0 md:h-full overflow-hidden">
+                    <div className="px-4 md:px-6 mb-2 md:mb-4 flex items-center gap-3 shrink-0">
+                        <button onClick={onClose} aria-label="Close Settings" className="p-1.5 hover:bg-white/10 rounded-xl transition-colors">
+                            <X className="w-4 h-4 text-white/50 hover:text-white" />
                         </button>
                         <h2 className="text-[11px] font-black uppercase tracking-widest text-white/60">Event Settings</h2>
                     </div>
 
-                    <nav className="flex md:flex-col px-4 md:px-0 space-x-2 md:space-x-0 md:space-y-0.5 overflow-x-auto md:overflow-y-auto flex-1 min-h-0 pb-6 custom-scrollbar">
+                    <nav className="flex md:flex-col items-center md:items-stretch px-3 md:px-0 gap-1.5 md:gap-0 md:space-y-0.5 overflow-x-auto md:overflow-y-auto shrink-0 md:flex-1 md:min-h-0 py-1.5 md:py-0 md:pb-6 custom-scrollbar">
                         {navItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`flex-none md:w-full flex items-center gap-2 md:gap-3 px-4 md:px-0 md:pr-4 py-2 md:py-2.5 rounded-full md:rounded-none transition-all duration-200 group relative ${activeTab === item.id
-                                    ? "text-white bg-white/10 md:bg-white/5 font-bold"
-                                    : "text-white/40 hover:text-white/70 hover:bg-white/[0.02]"
+                                className={`flex-none md:w-full h-9 md:h-auto flex items-center gap-2 md:gap-3 px-3.5 md:px-0 md:pr-4 py-1.5 md:py-2.5 rounded-xl md:rounded-none transition-all duration-200 group relative ${activeTab === item.id
+                                    ? "text-white bg-white/15 md:bg-white/5 font-bold shadow-sm"
+                                    : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"
                                     }`}
                             >
                                 {activeTab === item.id && (
@@ -238,10 +238,10 @@ export default function EventSettingsModal({
                                     />
                                 )}
                                 <item.icon
-                                    className={`w-4 h-4 md:ml-6 transition-colors duration-200 ${activeTab === item.id ? "text-white" : "text-white/20 group-hover:text-white/40"}`}
+                                    className={`w-3.5 h-3.5 md:w-4 md:h-4 md:ml-6 transition-colors duration-200 ${activeTab === item.id ? "text-white" : "text-white/30 group-hover:text-white/50"}`}
                                     style={activeTab === item.id && selectedTheme !== 'streak' ? { color: primaryColor } : {}}
                                 />
-                                <span className="text-[12px] font-bold tracking-tight whitespace-nowrap">{item.label}</span>
+                                <span className="text-[11px] md:text-[12px] font-bold tracking-tight whitespace-nowrap">{item.label}</span>
                             </button>
                         ))}
                     </nav>
