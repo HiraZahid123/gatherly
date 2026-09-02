@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Palette, Type, Wand2, Image as ImageIcon } from "lucide-react";
+import Link from "next/link";
+import { Palette, Type, Wand2, Image as ImageIcon, ArrowRight } from "lucide-react";
 import InteractiveBackground from "@/components/InteractiveBackground";
 import FloatingParticles from "@/components/FloatingParticles";
 import VfxCanvas from "@/components/vfx/VfxCanvas";
@@ -64,12 +65,21 @@ export default function InteractiveShowcase() {
     return (
         <section className="relative py-24 min-h-screen flex items-center bg-[#041a10]">
             <div className="container mx-auto px-4 max-w-6xl text-center relative z-10">
-                <h2 className="text-4xl md:text-5xl font-black mb-4 text-white drop-shadow-md">
-                    Fun, modern invites in 1-click
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 text-white drop-shadow-md tracking-tight max-w-3xl mx-auto">
+                    ...Because WhatsApp groups aren&apos;t event management
                 </h2>
-                <p className="text-xl text-white/80 mb-12 drop-shadow-sm">
-                    100% free, no paywalls. Customize the perfect invite.
+                <p className="text-lg sm:text-xl text-white/80 mb-6 drop-shadow-sm font-medium">
+                    Create and customize for free
                 </p>
+                <div className="flex justify-center mb-12">
+                    <Link
+                        href="/events/create"
+                        className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-sm rounded-full shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <span>Create Your Event</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </div>
 
                 {/* Tabs */}
                 <div className="flex flex-wrap justify-center gap-4 mb-12">

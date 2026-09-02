@@ -11,7 +11,7 @@ const FeaturesSection = () => {
                 {/* Header Area */}
                 <header className="text-center mb-16 md:mb-24">
                     <h2 className="text-4xl md:text-[3.5rem] lg:text-[4rem] font-extrabold text-black tracking-tighter leading-[1.1] mb-8">
-                        We&apos;re not like other invites
+                        Your event starts before the party begins.
                     </h2>
                 </header>
 

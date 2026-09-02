@@ -35,13 +35,12 @@ export default function Home() {
           {/* Left Column (Text Content) */}
           <div className="flex flex-col space-y-8 max-w-2xl">
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[0.95] tracking-tight text-white drop-shadow-lg">
-              Make every <br /> event impossible <br /> to ignore.
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[0.95] tracking-tight text-white drop-shadow-lg">
+              Create events <br /> people actually <br /> show up for.
             </h1>
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-white/90 font-light max-w-lg leading-relaxed drop-shadow-md">
-              The easiest way to create, manage, and share stunning digital
-              invitations for any occasion.
+            <p className="text-lg md:text-xl text-white/90 font-normal max-w-lg leading-relaxed drop-shadow-md">
+              Beautiful invitations. Instant RSVPs. Guest chat. Event updates. All in one place.
             </p>
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4 pt-4">
