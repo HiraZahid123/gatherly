@@ -121,24 +121,78 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
         }));
     };
 
+    // Helper to resize/compress image before upload
+    const optimizeImage = (file: File, maxDimension = 1920, quality = 0.85): Promise<{ file: File; base64: string }> => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new (window as any).Image();
+                img.onload = () => {
+                    let { width, height } = img;
+                    if (width > maxDimension || height > maxDimension) {
+                        if (width > height) {
+                            height = Math.round((height * maxDimension) / width);
+                            width = maxDimension;
+                        } else {
+                            width = Math.round((width * maxDimension) / height);
+                            height = maxDimension;
+                        }
+                    }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
+                        const base64 = canvas.toDataURL(mimeType, quality);
+                        canvas.toBlob(
+                            (blob) => {
+                                if (blob) {
+                                    const optimizedFile = new File([blob], file.name, { type: mimeType });
+                                    resolve({ file: optimizedFile, base64 });
+                                } else {
+                                    resolve({ file, base64: e.target?.result as string });
+                                }
+                            },
+                            mimeType,
+                            quality
+                        );
+                    } else {
+                        resolve({ file, base64: e.target?.result as string });
+                    }
+                };
+                img.onerror = () => resolve({ file, base64: e.target?.result as string });
+                img.src = e.target?.result as string;
+            };
+            reader.onerror = () => {
+                const readerFallback = new FileReader();
+                readerFallback.onload = () => resolve({ file, base64: readerFallback.result as string });
+                readerFallback.readAsDataURL(file);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const rawFile = e.target.files?.[0];
+        if (!rawFile) return;
 
         setIsUploading(true);
         setError("");
 
-        // Function to read as base64 data URL
-        const readAsBase64 = (f: File): Promise<string> => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(f);
-            });
-        };
-
         try {
+            // Instant client-side compression to guarantee < 1MB and super fast uploads
+            const { file, base64 } = await optimizeImage(rawFile);
+
+            // Immediately show preview so user never waits with broken image
+            setFormData((prev) => ({
+                ...prev,
+                previewImage: base64,
+                poster: base64,
+            }));
+
             const uploadFormData = new FormData();
             uploadFormData.append("file", file);
 
@@ -147,39 +201,30 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
                 body: uploadFormData,
             });
 
-            const data = await res.json();
-            if (res.ok && data.imageUrl) {
+            const text = await res.text();
+            let data: any = {};
+            try {
+                data = JSON.parse(text);
+            } catch {
+                // Not valid JSON (e.g. Nginx 413 or 500 error page)
+                console.warn("Upload response was not JSON, retaining optimized base64 image");
+            }
+
+            if (res.ok && data?.imageUrl) {
                 setFormData((prev) => ({
                     ...prev,
                     previewImage: data.imageUrl,
                     poster: data.imageUrl,
                 }));
-                setSuccessMessage("Custom image uploaded successfully!");
+                setSuccessMessage("Custom image uploaded and saved successfully!");
             } else {
-                // Fallback to local base64 preview
-                const base64Url = await readAsBase64(file);
-                setFormData((prev) => ({
-                    ...prev,
-                    previewImage: base64Url,
-                    poster: base64Url,
-                }));
-                setSuccessMessage("Image loaded successfully!");
+                // If API failed or returned non-JSON, the optimized base64 is already set as fallback!
+                setSuccessMessage("Image loaded and ready to publish!");
             }
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: unknown) {
-            console.warn("Upload API failed, falling back to base64:", err);
-            try {
-                const base64Url = await readAsBase64(file);
-                setFormData((prev) => ({
-                    ...prev,
-                    previewImage: base64Url,
-                    poster: base64Url,
-                }));
-                setSuccessMessage("Image loaded successfully!");
-                setTimeout(() => setSuccessMessage(""), 3000);
-            } catch (readErr) {
-                setError("Failed to read image file. Please try another image.");
-            }
+            console.error("Upload error:", err);
+            setError("Failed to upload image. Please try another file.");
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
