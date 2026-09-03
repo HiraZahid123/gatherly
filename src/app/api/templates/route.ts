@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTemplateCategory } from "@/lib/templates";
 
 // GET /api/templates — public route to fetch published templates from admin-managed data only
 export async function GET(req: NextRequest) {
@@ -18,10 +19,13 @@ export async function GET(req: NextRequest) {
         }
 
         if (category && category !== "All") {
-            whereClause.category = {
-                equals: category,
-                mode: "insensitive"
-            };
+            const categoryAliases = resolveTemplateCategory(category);
+            whereClause.OR = categoryAliases.map((alias) => ({
+                category: {
+                    equals: alias,
+                    mode: "insensitive",
+                },
+            }));
         }
 
         const templates = await prisma.eventTemplate.findMany({

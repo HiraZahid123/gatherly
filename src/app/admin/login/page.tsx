@@ -25,9 +25,10 @@ export default function AdminLoginPage() {
             });
 
             if (result?.error) {
-                setError("Invalid credentials");
+                setError("Invalid credentials or admin access not found.");
             } else {
-                router.push("/admin");
+                router.refresh();
+                router.replace("/admin");
             }
         } catch (err) {
             setError("Something went wrong. Please try again.");
