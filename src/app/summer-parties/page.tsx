@@ -1,20 +1,18 @@
 ﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+import { getPublishedTemplatesByCategory } from "@/lib/templates";
 
 export const metadata = {
     title: "Summer Party Invitations - JollyWitMe",
     description: "Create and send beautiful summer party invitations.",
 };
 
-const templates: TemplateData[] = [
-    { id: "1", label: "on the water", image: "/partiful/Aquarius.avif" },
-    { id: "2", label: "warp", image: "/partiful/disco-pride.avif" },
-    { id: "3", label: "beach day", image: "/partiful/cutie-pie-blue.avif" },
-    { id: "4", label: "party time", image: "/partiful/retro-vday.avif" },
-    { id: "5", label: "darty", image: "/partiful/bitchy-shrek-sophia.avif" },
-    { id: "6", label: "backyard bbq", image: "/partiful/awards-night.avif" },
-];
+export default async function SummerPartiesPage() {
+    const templates = (await getPublishedTemplatesByCategory("Party")).map((template) => ({
+        id: template.id,
+        label: template.label,
+        image: template.image,
+    })) as TemplateData[];
 
-export default function SummerPartiesPage() {
     return (
         <CategoryLandingPage 
             title="Summer Party Invitations"

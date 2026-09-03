@@ -1,3 +1,5 @@
+import { prisma } from "@/lib/prisma";
+
 export interface EventTemplate {
     id: string;
     title: string;
@@ -11,53 +13,61 @@ export interface EventTemplate {
     };
 }
 
-export const TEMPLATES: EventTemplate[] = [
-    {
-        id: "girl-dinner",
-        title: "Girl Dinner",
-        previewImage: "/partiful/dinner-butterflies_ywle19.avif",
-        bgClass: "bg-emerald-100",
-        config: {
-            theme: "meadow",
-            effect: "particles",
-            poster: "/partiful/dinner-butterflies_ywle19.avif",
-            vibeId: "fancy"
-        }
-    },
-    {
-        id: "party",
-        title: "Party",
-        previewImage: "/partiful/disco-pride.avif",
-        bgClass: "bg-green-900",
-        config: {
-            theme: "streak",
-            effect: "glow",
-            poster: "/partiful/disco-pride.avif",
-            vibeId: "digital"
-        }
-    },
-    {
-        id: "graduation",
-        title: "Graduation",
-        previewImage: "/partiful/awardgoesto.avif",
-        bgClass: "bg-orange-100",
-        config: {
-            theme: "dark",
-            effect: "particles",
-            poster: "/partiful/awardgoesto.avif",
-            vibeId: "classic"
-        }
-    },
-    {
-        id: "movie-night",
-        title: "Movie Night",
-        previewImage: "/partiful/movie-awards-spotlight.avif",
-        bgClass: "bg-gray-900",
-        config: {
-            theme: "dark",
-            effect: "aurora",
-            poster: "/partiful/movie-awards-spotlight.avif",
-            vibeId: "royal"
-        }
+export interface PublicTemplateSummary {
+    id: string;
+    title: string;
+    label: string;
+    image: string;
+    category?: string;
+    previewImage?: string;
+    bgClass?: string;
+    theme?: string;
+    effect?: string;
+    poster?: string;
+    vibeId?: string;
+    isTrending?: boolean;
+    order?: number;
+    published?: boolean;
+}
+
+export async function getPublishedTemplatesByCategory(category: string): Promise<PublicTemplateSummary[]> {
+    const normalizedCategory = category?.trim();
+
+    if (!normalizedCategory) {
+        return [];
     }
-];
+
+    const templates = await prisma.eventTemplate.findMany({
+        where: {
+            published: true,
+            category: {
+                equals: normalizedCategory,
+                mode: "insensitive",
+            },
+        },
+        orderBy: [
+            { order: "asc" },
+            { createdAt: "desc" },
+        ],
+    });
+
+    return templates.map((template) => ({
+        id: template.id,
+        title: template.title,
+        label: template.title,
+        image: template.previewImage,
+        category: template.category,
+        previewImage: template.previewImage,
+        bgClass: template.bgClass,
+        theme: template.theme,
+        effect: template.effect,
+        poster: template.poster,
+        vibeId: template.vibeId,
+        isTrending: template.isTrending,
+        order: template.order,
+        published: template.published,
+    }));
+}
+
+export const TEMPLATES: EventTemplate[] = [];
+

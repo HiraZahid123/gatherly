@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { TEMPLATES as STATIC_TEMPLATES } from "@/lib/templates";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DisplayTemplate {
@@ -19,18 +18,7 @@ interface DisplayTemplate {
 
 export default function TrendingTemplates() {
     const scrollRef = useRef<HTMLDivElement>(null);
-    const [templates, setTemplates] = useState<DisplayTemplate[]>(
-        STATIC_TEMPLATES.map((t) => ({
-            id: t.id,
-            title: t.title,
-            previewImage: t.previewImage,
-            bgClass: t.bgClass,
-            theme: t.config.theme,
-            effect: t.config.effect,
-            poster: t.config.poster,
-            vibeId: t.config.vibeId,
-        }))
-    );
+    const [templates, setTemplates] = useState<DisplayTemplate[]>([]);
 
     useEffect(() => {
         const fetchTrending = async () => {

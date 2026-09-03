@@ -1,20 +1,18 @@
 ﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+import { getPublishedTemplatesByCategory } from "@/lib/templates";
 
 export const metadata = {
     title: "Housewarming Invitations - JollyWitMe",
     description: "Create and send beautiful housewarming invitations.",
 };
 
-const templates: TemplateData[] = [
-    { id: "1", label: "new digs", image: "/partiful/housewarming-muji.avif" },
-    { id: "2", label: "unpacking party", image: "/partiful/retro-vday.avif" },
-    { id: "3", label: "welcome home", image: "/partiful/disco-pride.avif" },
-    { id: "4", label: "open house", image: "/partiful/olympics20262.avif" },
-    { id: "5", label: "apartment crawl", image: "/partiful/mocktail-party.avif" },
-    { id: "6", label: "house vibes", image: "/partiful/cutie-pie-blue.avif" },
-];
+export default async function HousewarmingsPage() {
+    const templates = (await getPublishedTemplatesByCategory("Housewarming")).map((template) => ({
+        id: template.id,
+        label: template.label,
+        image: template.image,
+    })) as TemplateData[];
 
-export default function HousewarmingsPage() {
     return (
         <CategoryLandingPage 
             title="Housewarming Invitations"

@@ -147,7 +147,7 @@ export default function AdminTemplatesPage() {
     const trendingCount = templates.filter((t) => t.isTrending && t.published).length;
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 pb-16">
+        <div className="w-full max-w-full xl:max-w-7xl mx-auto space-y-8 pb-16">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>

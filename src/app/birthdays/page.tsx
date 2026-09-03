@@ -1,20 +1,18 @@
 ﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+import { getPublishedTemplatesByCategory } from "@/lib/templates";
 
 export const metadata = {
     title: "Birthday Invitations - JollyWitMe",
     description: "Create and send beautiful birthday invitations.",
 };
 
-const templates: TemplateData[] = [
-    { id: "1", label: "surprise!", image: "/partiful/awards-night.avif" },
-    { id: "2", label: "milestone", image: "/partiful/retro-vday.avif" },
-    { id: "3", label: "cake time", image: "/partiful/disco-pride.avif" },
-    { id: "4", label: "let's party", image: "/partiful/bitchy-shrek-sophia.avif" },
-    { id: "5", label: "another year", image: "/partiful/Aquarius.avif" },
-    { id: "6", label: "celebrate", image: "/partiful/cutie-pie-blue.avif" },
-];
+export default async function BirthdaysPage() {
+    const templates = (await getPublishedTemplatesByCategory("Birthday")).map((template) => ({
+        id: template.id,
+        label: template.label,
+        image: template.image,
+    })) as TemplateData[];
 
-export default function BirthdaysPage() {
     return (
         <CategoryLandingPage 
             title="Birthday Invitations"

@@ -1,20 +1,18 @@
 ﻿import CategoryLandingPage, { TemplateData } from "@/components/CategoryLandingPage";
+import { getPublishedTemplatesByCategory } from "@/lib/templates";
 
 export const metadata = {
     title: "Dinner Invitations - JollyWitMe",
     description: "Create and send beautiful dinner invitations.",
 };
 
-const templates: TemplateData[] = [
-    { id: "1", label: "supper club", image: "/partiful/dinner-02.avif" },
-    { id: "2", label: "dumpling night", image: "/partiful/dumplingschopsticks.avif" },
-    { id: "3", label: "pasta party", image: "/partiful/retro-vday.avif" },
-    { id: "4", label: "taco tuesday", image: "/partiful/disco-pride.avif" },
-    { id: "5", label: "fancy feast", image: "/partiful/mocktail-party.avif" },
-    { id: "6", label: "pizza night", image: "/partiful/awards-night.avif" },
-];
+export default async function DinnersPage() {
+    const templates = (await getPublishedTemplatesByCategory("Dinner")).map((template) => ({
+        id: template.id,
+        label: template.label,
+        image: template.image,
+    })) as TemplateData[];
 
-export default function DinnersPage() {
     return (
         <CategoryLandingPage 
             title="Dinner Invitations"

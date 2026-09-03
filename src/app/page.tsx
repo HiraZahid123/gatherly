@@ -159,9 +159,6 @@ export default function Home() {
       {/* Interactive Showcase Section */}
       <InteractiveShowcase />
 
-      {/* Company Reviews / Press Marquee */}
-      <CompanyReviews />
-
       {/* Trending Templates Slider */}
       <TrendingTemplates />
 
@@ -170,6 +167,9 @@ export default function Home() {
 
       {/* Customer Reviews */}
       <CustomerReviews />
+
+      {/* Company Reviews / Press Marquee */}
+      <CompanyReviews />
 
       {/* Blog Section */}
       <BlogSection />

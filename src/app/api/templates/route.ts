@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TEMPLATES as DEFAULT_TEMPLATES } from "@/lib/templates";
 
-// GET /api/templates — public route to fetch published templates
+// GET /api/templates — public route to fetch published templates from admin-managed data only
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -33,25 +32,6 @@ export async function GET(req: NextRequest) {
             ],
             take: limit,
         });
-
-        // Fallback to default static templates if no templates exist yet
-        if (templates.length === 0 && !category) {
-            const mappedDefaults = DEFAULT_TEMPLATES.map((t, idx) => ({
-                id: t.id,
-                title: t.title,
-                category: t.id === "girl-dinner" ? "Dinner" : t.id === "party" ? "Party" : t.id === "graduation" ? "Celebration" : "Night Out",
-                previewImage: t.previewImage,
-                bgClass: t.bgClass,
-                theme: t.config.theme,
-                effect: t.config.effect,
-                poster: t.config.poster,
-                vibeId: t.config.vibeId,
-                isTrending: true,
-                order: idx,
-                published: true,
-            }));
-            return NextResponse.json({ success: true, templates: mappedDefaults, isDefault: true });
-        }
 
         return NextResponse.json({ success: true, templates });
     } catch (error) {
