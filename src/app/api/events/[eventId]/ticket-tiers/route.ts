@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
-  const { name, description, price, currency = "usd", quantity, sortOrder = 0 } = body;
+  const { name, description, price, currency = "ngn", quantity, sortOrder = 0 } = body;
 
   if (!name || price == null || !quantity)
     return NextResponse.json({ error: "name, price, and quantity are required" }, { status: 400 });

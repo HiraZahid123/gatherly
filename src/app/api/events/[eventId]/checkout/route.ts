@@ -40,6 +40,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const totalAmount = tier.price * quantity;
   const platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENT);
+  const currency = "ngn";
 
   // Create order (PENDING)
   const order = await prisma.order.create({
@@ -52,14 +53,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       quantity,
       unitPrice: tier.price,
       totalAmount,
-      currency: tier.currency,
+      currency,
     },
   });
 
   // Create Stripe PaymentIntent
   const paymentIntentOptions: any = {
     amount: totalAmount,
-    currency: tier.currency,
+    currency,
     automatic_payment_methods: { enabled: true },
     metadata: { orderId: order.id, eventId, ticketTierId },
   };

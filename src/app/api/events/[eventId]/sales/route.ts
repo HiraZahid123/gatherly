@@ -64,7 +64,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       stripeBalance = {
         available: balance.available.reduce((s, b) => s + b.amount, 0),
         pending: balance.pending.reduce((s, b) => s + b.amount, 0),
-        currency: balance.available[0]?.currency ?? "usd",
+        currency: balance.available[0]?.currency ?? "ngn",
       };
     } catch (_) {}
   }

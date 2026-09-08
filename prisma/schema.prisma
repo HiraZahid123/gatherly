@@ -499,7 +499,7 @@ model TicketTier {
   name         String   // e.g. "General Admission", "VIP"
   description  String?
   price        Int      // in cents (2500 = $25.00)
-  currency     String   @default("usd")
+  currency     String   @default("ngn")
   quantity     Int      // total available
   quantitySold Int      @default(0)
   isActive     Boolean  @default(true)
@@ -531,7 +531,7 @@ model Order {
   quantity              Int         @default(1)
   unitPrice             Int         // price at purchase time (cents)
   totalAmount           Int         // quantity * unitPrice (cents)
-  currency              String      @default("usd")
+  currency              String      @default("ngn")
   status                OrderStatus @default(PENDING)
   stripePaymentIntentId String?     @unique
   stripeChargeId        String?

@@ -5,6 +5,17 @@
 -- WhatsAppSession data is NEVER touched.
 -- =============================================================
 
+-- ── CURRENCY ────────────────────────────────────────────────
+-- Existing ticketing records should use the platform currency too.
+DO $$ BEGIN
+    IF to_regclass('"ticket_tiers"') IS NOT NULL THEN
+        UPDATE "ticket_tiers" SET "currency" = 'ngn' WHERE LOWER("currency") = 'usd';
+    END IF;
+    IF to_regclass('"orders"') IS NOT NULL THEN
+        UPDATE "orders" SET "currency" = 'ngn' WHERE LOWER("currency") = 'usd';
+    END IF;
+END $$;
+
 -- ── ENUMS (skip if already exist) ────────────────────────────
 DO $$ BEGIN CREATE TYPE "UserRole" AS ENUM ('GUEST', 'HOST', 'ADMIN', 'STAFF'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE TYPE "EventType" AS ENUM ('EVENT', 'CARD'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;

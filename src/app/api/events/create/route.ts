@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
                             name: "General Admission",
                             price: priceInCents,
                             quantity: capacity || 100, // Default to capacity or 100
-                            currency: "usd",
+                            currency: "ngn",
                         },
                     });
                 }

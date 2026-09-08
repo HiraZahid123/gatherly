@@ -39,8 +39,8 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
     );
   }
 
-  const fmt = (cents: number, currency = "usd") =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+  const fmt = (cents: number) =>
+    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(cents / 100);
 
   return (
     <div className="space-y-5">
@@ -88,13 +88,13 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
             <div>
               <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Available</p>
               <p className="text-sm font-black text-green-400">
-                {fmt(data.stripeBalance.available, data.stripeBalance.currency)}
+                {fmt(data.stripeBalance.available)}
               </p>
             </div>
             <div>
               <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Pending</p>
               <p className="text-sm font-black text-white/60">
-                {fmt(data.stripeBalance.pending, data.stripeBalance.currency)}
+                {fmt(data.stripeBalance.pending)}
               </p>
             </div>
           </div>
@@ -118,10 +118,10 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white">{tier.name}</p>
                 <p className="text-[10px] text-white/30">
-                  {tier.sold}/{tier.quantity} sold · {fmt(tier.price, tier.currency)} each
+                  {tier.sold}/{tier.quantity} sold · {fmt(tier.price)} each
                 </p>
               </div>
-              <p className="text-sm font-black text-white shrink-0">{fmt(tier.revenue, tier.currency)}</p>
+              <p className="text-sm font-black text-white shrink-0">{fmt(tier.revenue)}</p>
             </div>
           ))}
         </motion.div>
@@ -155,7 +155,7 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
                   </p>
                 </div>
                 <p className="text-xs font-black text-white shrink-0">
-                  {fmt(order.totalAmount, order.currency)}
+                  {fmt(order.totalAmount)}
                 </p>
               </div>
             ))}

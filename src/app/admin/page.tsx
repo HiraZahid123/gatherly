@@ -42,7 +42,7 @@ export default function AdminDashboard() {
     }, []);
 
     const formatRevenue = (cents: number) =>
-        (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+        (cents / 100).toLocaleString("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 });
 
     const statCards = [
         { label: "Total Users", value: stats?.users || 0, icon: Users, color: "text-emerald-500", bg: "bg-emerald-500/10", format: "number" },
