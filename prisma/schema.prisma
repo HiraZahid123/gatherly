@@ -52,6 +52,7 @@ model User {
   announcements    Announcement[]
   stripeAccount    StripeAccount?
   orders           Order[]
+  notifications    Notification[]
   
   @@index([email]) // Explicit index for faster lookups
   @@map("users")
@@ -362,6 +363,23 @@ model CheckIn {
 // ============================================
 // MESSAGING & NOTIFICATIONS
 // ============================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String   @db.Text
+  type      String   @default("PLATFORM")
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
 
 enum BroadcastAudience {
   ALL

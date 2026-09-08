@@ -33,6 +33,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [showDropdown, setShowDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
     const [events, setEvents] = useState<DashboardEvent[]>([]);
     const [activeTab, setActiveTab] = useState("Hosting");
     const [isEventsLoading, setIsEventsLoading] = useState(true);
@@ -41,8 +42,32 @@ export default function DashboardPage() {
         if (status === "authenticated") {
             fetchStats();
             fetchEvents();
+            fetchNotifications();
         }
     }, [status]);
+
+    const fetchNotifications = async () => {
+        try {
+            const response = await fetch("/api/notifications", { cache: "no-store" });
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data.notifications || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+        }
+    };
+
+    const markNotificationRead = async (id: string) => {
+        await fetch("/api/notifications", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+        });
+        setNotifications((current) => current.map((notification) =>
+            notification.id === id ? { ...notification, isRead: true } : notification
+        ));
+    };
 
     const fetchStats = async () => {
         try {
@@ -159,10 +184,42 @@ export default function DashboardPage() {
                                     className="text-white/30 hover:text-white transition-colors"
                                 >
                                     <Bell className="w-5 h-5" />
+                                    {notifications.some((notification) => !notification.isRead) && (
+                                        <span className="absolute -right-1 -top-1 w-2 h-2 rounded-full bg-green-400 ring-2 ring-[#0a0a0b]" />
+                                    )}
                                 </button>
                                 {showNotifications && (
-                                    <div className="absolute right-0 top-10 w-56 rounded-xl border border-white/10 bg-[#1a1a1b] p-4 text-xs font-semibold text-white/60 shadow-2xl">
-                                        No new notifications
+                                    <div className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-[#1a1a1b] shadow-2xl overflow-hidden">
+                                        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                                            <span className="text-xs font-black uppercase tracking-widest text-white">Notifications</span>
+                                            {notifications.some((notification) => !notification.isRead) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        await fetch("/api/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: "{}" });
+                                                        setNotifications((current) => current.map((notification) => ({ ...notification, isRead: true })));
+                                                    }}
+                                                    className="text-[10px] font-bold text-green-400 hover:text-green-300"
+                                                >
+                                                    Mark all read
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="max-h-80 overflow-y-auto">
+                                            {notifications.length === 0 ? (
+                                                <p className="p-4 text-xs font-semibold text-white/50">No new notifications</p>
+                                            ) : notifications.map((notification) => (
+                                                <Link
+                                                    key={notification.id}
+                                                    href={notification.link || "/dashboard"}
+                                                    onClick={() => markNotificationRead(notification.id)}
+                                                    className={`block px-4 py-3 border-b border-white/5 hover:bg-white/5 ${notification.isRead ? "opacity-60" : ""}`}
+                                                >
+                                                    <p className="text-xs font-bold text-white">{notification.title}</p>
+                                                    <p className="mt-1 text-xs text-white/50">{notification.message}</p>
+                                                </Link>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>

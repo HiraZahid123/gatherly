@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 // GET — Fetch all announcements for an event (public)
 export async function GET(
@@ -61,6 +62,20 @@ export async function POST(
             data: { eventId, hostId: session.user.id, content: content.trim(), isPinned },
             include: { host: { select: { id: true, name: true, image: true } } },
         });
+
+        const eventWithGuests = await prisma.event.findUnique({
+            where: { id: eventId },
+            select: { title: true, slug: true, hostId: true, rsvps: { where: { userId: { not: null } }, select: { userId: true } } },
+        });
+        const guestIds = [...new Set((eventWithGuests?.rsvps || []).map((rsvp) => rsvp.userId).filter((id): id is string => Boolean(id)))];
+        await Promise.all(guestIds.filter((userId) => userId !== session.user!.id).map((userId) => createNotification({
+            userId,
+            title: `Update from ${eventWithGuests?.title || "your event"}`,
+            message: content.trim(),
+            type: "ANNOUNCEMENT",
+            link: `/e/${eventWithGuests?.slug || eventId}`,
+        })));
+
         return NextResponse.json({ success: true, announcement });
     } catch (error) {
         console.error("POST /announcements error:", error);

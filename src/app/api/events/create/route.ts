@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventCreateSchema } from "@/lib/validation";
 import { generateUniqueSlug } from "@/lib/slugify";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
     try {
@@ -101,6 +102,14 @@ export async function POST(request: NextRequest) {
                     },
                 },
             },
+        });
+
+        await createNotification({
+            userId: session.user.id,
+            title: "Event created",
+            message: `${event.title} is ready to share with your guests.`,
+            type: "EVENT",
+            link: `/e/${event.slug}`,
         });
 
         // If isPaid is true and cost is provided, create a default ticket tier

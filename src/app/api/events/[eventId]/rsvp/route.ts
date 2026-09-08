@@ -5,6 +5,7 @@ import { rsvpSubmitSchema } from "@/lib/validation";
 import { generateQRToken, promoteNextFromWaitlist } from "@/lib/rsvp";
 import { sendEmail } from "@/lib/mail";
 import { generateGoogleCalendarUrl, generateOutlookUrl } from "@/lib/calendar";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
     request: NextRequest,
@@ -172,6 +173,18 @@ export async function POST(
                 eventId
             }
         });
+
+        const notificationRecipients = [...new Set([
+            event.hostId,
+            ...(session?.user?.id ? [session.user.id] : []),
+        ])];
+        await Promise.all(notificationRecipients.map((userId) => createNotification({
+            userId,
+            title: "RSVP updated",
+            message: `${guestName} ${finalStatus === "ACCEPTED" ? "is going to" : "updated their RSVP for"} ${event.title}.`,
+            type: "RSVP",
+            link: `/e/${event.slug}`,
+        })));
 
         if ((global as any).io) {
             (global as any).io.to(`event-${eventId}`).emit('rsvp-update', { rsvpId: rsvp.id });

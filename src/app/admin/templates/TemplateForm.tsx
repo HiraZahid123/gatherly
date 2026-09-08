@@ -121,8 +121,8 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
         }));
     };
 
-    // Helper to resize/compress image before upload
-    const optimizeImage = (file: File, maxDimension = 1920, quality = 0.85): Promise<{ file: File; base64: string }> => {
+    // Keep data URLs small enough for the template JSON request.
+    const optimizeImage = (file: File, maxDimension = 1400, quality = 0.78): Promise<{ file: File; base64: string }> => {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -145,20 +145,28 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
                     const ctx = canvas.getContext("2d");
                     if (ctx) {
                         ctx.drawImage(img, 0, 0, width, height);
-                        const mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
-                        const base64 = canvas.toDataURL(mimeType, quality);
-                        canvas.toBlob(
-                            (blob) => {
-                                if (blob) {
-                                    const optimizedFile = new File([blob], file.name, { type: mimeType });
-                                    resolve({ file: optimizedFile, base64 });
-                                } else {
+                        // JPEG is substantially smaller than PNG for poster artwork.
+                        const mimeType = "image/jpeg";
+                        const createCompressed = (compressionQuality: number) => {
+                            canvas.toBlob((blob) => {
+                                if (!blob) {
                                     resolve({ file, base64: e.target?.result as string });
+                                    return;
                                 }
-                            },
-                            mimeType,
-                            quality
-                        );
+
+                                if (blob.size > 1_200_000 && compressionQuality > 0.45) {
+                                    createCompressed(compressionQuality - 0.08);
+                                    return;
+                                }
+
+                                const optimizedFile = new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: mimeType });
+                                const base64Reader = new FileReader();
+                                base64Reader.onload = () => resolve({ file: optimizedFile, base64: base64Reader.result as string });
+                                base64Reader.readAsDataURL(blob);
+                            }, mimeType, compressionQuality);
+                        };
+
+                        createCompressed(quality);
                     } else {
                         resolve({ file, base64: e.target?.result as string });
                     }
@@ -251,7 +259,17 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
                 body: JSON.stringify(formData),
             });
 
-            const data = await res.json();
+            const responseText = await res.text();
+            let data: any;
+            try {
+                data = JSON.parse(responseText);
+            } catch {
+                throw new Error(
+                    res.status === 413
+                        ? "This image is still too large. Please choose a smaller image."
+                        : "The server could not process this template. Please try again."
+                );
+            }
 
             if (!res.ok || !data.success) {
                 throw new Error(data.error || "Failed to save template");
