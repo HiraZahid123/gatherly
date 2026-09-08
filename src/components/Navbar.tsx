@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, Plus, LogIn, Menu, X, LayoutDashboard, Settings, LogOut, ChevronDown, BookOpen, Compass } from "lucide-react";
+import { User, Plus, LogIn, Menu, X, LayoutDashboard, Settings, LogOut, ChevronDown, BookOpen, Compass, ArrowLeft } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Logo from "./Logo";
 
@@ -48,6 +48,7 @@ export default function Navbar() {
     const isAdminPage = pathname.startsWith("/admin");
     const isHelpPage = pathname.startsWith("/help") || pathname.startsWith("/blog");
     const isCreationPage = pathname === "/events/create" || pathname === "/cards/create";
+    const showHomeBack = !isHomePage && !isDashboard && !isAdminPage && pathname !== "/profile/edit";
 
     if (isDashboard || isAdminPage) return null;
 
@@ -66,18 +67,31 @@ export default function Navbar() {
     return (
         <nav className={finalNavClasses}>
             <div className="container mx-auto px-6 flex justify-between items-center">
-                {/* Logo */}
-                <Link href="/" className="flex items-center group">
-                    <div className="relative h-12 w-48 transition-transform group-hover:scale-105">
-                        <Image
-                            src="/logo/logo-full.webp"
-                            alt="JollyWitMe Logo"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
-                </Link>
+                <div className="flex items-center gap-4 min-w-0">
+                    {showHomeBack && (
+                        <Link
+                            href="/"
+                            aria-label="Back to home"
+                            title="Back to home"
+                            className="inline-flex items-center gap-1.5 shrink-0 text-white/70 hover:text-white transition-colors"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span className="hidden sm:inline text-xs font-semibold">Home</span>
+                        </Link>
+                    )}
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center group">
+                        <div className="relative h-12 w-48 transition-transform group-hover:scale-105">
+                            <Image
+                                src="/logo/logo-full.webp"
+                                alt="JollyWitMe Logo"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    </Link>
+                </div>
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center space-x-8">

@@ -66,7 +66,7 @@ export default function InteractiveShowcase() {
         <section className="relative py-24 min-h-screen flex items-center bg-[#041a10]">
             <div className="container mx-auto px-4 max-w-6xl text-center relative z-10">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 text-white drop-shadow-md tracking-tight max-w-3xl mx-auto">
-                    ...Because WhatsApp groups aren&apos;t event management
+                    ...because WhatsApp groups aren&apos;t event management
                 </h2>
                 <p className="text-lg sm:text-xl text-white/80 mb-6 drop-shadow-sm font-medium">
                     Create and customize for free

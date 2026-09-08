@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
+import BackToHome from "@/components/BackToHome";
 
 export default function DashboardEventsPage() {
     const { data: session } = useSession();
@@ -72,6 +73,7 @@ export default function DashboardEventsPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
+                        <BackToHome className="mb-4 text-gray-500 hover:text-gray-900" />
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
                             My Events
                         </h1>

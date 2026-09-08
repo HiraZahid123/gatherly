@@ -159,14 +159,14 @@ export default function Home() {
       {/* Interactive Showcase Section */}
       <InteractiveShowcase />
 
-      {/* Trending Templates Slider */}
-      <TrendingTemplates />
-
       {/* Text Blast Section */}
       <TextBlastSection />
 
       {/* Customer Reviews */}
       <CustomerReviews />
+
+      {/* Trending Templates Slider */}
+      <TrendingTemplates />
 
       {/* Company Reviews / Press Marquee */}
       <CompanyReviews />

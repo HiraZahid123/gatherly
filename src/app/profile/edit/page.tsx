@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import AvatarUpload from "@/components/AvatarUpload";
+import BackToHome from "@/components/BackToHome";
 
 export default function EditProfilePage() {
     const { data: session, status, update } = useSession();
@@ -107,23 +107,15 @@ export default function EditProfilePage() {
 
     return (
 
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] px-4 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] px-4 pt-28 pb-12 relative overflow-hidden">
             {/* Ambient Background Effects */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-600/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-            <div className="w-full max-w-2xl z-10 py-12">
+            <div className="w-full max-w-2xl z-10">
                 {/* Header */}
                 <div className="mb-8 pl-2">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center text-gray-400 hover:text-white font-medium mb-4 transition-colors"
-                    >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back to Dashboard
-                    </Link>
+                    <BackToHome className="mb-4" />
                     <h1 className="text-4xl font-bold text-white mb-2">Edit Profile</h1>
                     <p className="text-gray-400">Update your personal information</p>
                 </div>

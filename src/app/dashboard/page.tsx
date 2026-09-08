@@ -32,6 +32,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [events, setEvents] = useState<DashboardEvent[]>([]);
     const [activeTab, setActiveTab] = useState("Hosting");
     const [isEventsLoading, setIsEventsLoading] = useState(true);
@@ -143,9 +144,28 @@ export default function DashboardPage() {
                         )}
                         <Link href="/blog" className="text-sm font-black text-white/50 hover:text-white transition-colors hidden md:block">Blog</Link>
                         <div className="flex items-center gap-3 sm:gap-6 border-l border-white/10 pl-3 sm:pl-8">
-                            <HelpCircle className="w-5 h-5 text-white/30 hover:text-white cursor-pointer transition-colors hidden sm:block" />
-                            <Globe className="w-5 h-5 text-white/30 hover:text-white cursor-pointer transition-colors hidden sm:block" />
-                            <Bell className="w-5 h-5 text-white/30 hover:text-white cursor-pointer transition-colors" />
+                            <Link href="/help" aria-label="Help center" title="Help center" className="hidden sm:block">
+                                <HelpCircle className="w-5 h-5 text-white/30 hover:text-white transition-colors" />
+                            </Link>
+                            <Link href="/explore" aria-label="Explore events" title="Explore events" className="hidden sm:block">
+                                <Globe className="w-5 h-5 text-white/30 hover:text-white transition-colors" />
+                            </Link>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    aria-label="Notifications"
+                                    title="Notifications"
+                                    className="text-white/30 hover:text-white transition-colors"
+                                >
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                {showNotifications && (
+                                    <div className="absolute right-0 top-10 w-56 rounded-xl border border-white/10 bg-[#1a1a1b] p-4 text-xs font-semibold text-white/60 shadow-2xl">
+                                        No new notifications
+                                    </div>
+                                )}
+                            </div>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowDropdown(!showDropdown)}
