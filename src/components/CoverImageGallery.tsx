@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Upload, Check, ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { compressImage } from "@/lib/compressImage";
@@ -83,9 +83,18 @@ const PARTIFUL_IMAGES = [
 
 export default function CoverImageGallery({ isOpen, onClose, onSelect, currentImage }: CoverImageGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string>(currentImage || "");
+    const [adminTemplates, setAdminTemplates] = useState<{ id: string; title: string; previewImage: string }[]>([]);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        fetch("/api/templates")
+            .then((response) => response.json())
+            .then((data) => setAdminTemplates(data.success ? data.templates : []))
+            .catch(() => setAdminTemplates([]));
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -112,7 +121,13 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
                 body: formData,
             });
 
-            const data = await response.json();
+            const responseText = await response.text();
+            let data: any;
+            try {
+                data = JSON.parse(responseText);
+            } catch {
+                throw new Error(response.status === 413 ? "Image is too large. Please choose a smaller image." : "Image upload failed. Please try again.");
+            }
 
             if (!response.ok) {
                 throw new Error(data.error || "Upload failed");
@@ -215,6 +230,18 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
                                         <Check className="w-2.5 h-2.5" />
                                     </div>
                                 )}
+                            </div>
+                        ))}
+
+                        {adminTemplates.map((template) => (
+                            <div
+                                key={`admin-${template.id}`}
+                                className={`aspect-square rounded-none overflow-hidden relative group cursor-pointer border transition-all ${selectedImage === template.previewImage ? "border-emerald-400" : "border-white/5 hover:border-white/20"}`}
+                                onClick={() => handleSelectImage(template.previewImage)}
+                            >
+                                <Image src={template.previewImage} alt={template.title} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" unoptimized />
+                                <span className="absolute bottom-0 inset-x-0 bg-black/70 px-2 py-1 text-[9px] font-bold text-white truncate">{template.title}</span>
+                                {selectedImage === template.previewImage && <div className="absolute top-2 right-2 bg-emerald-400 text-black p-0.5"><Check className="w-2.5 h-2.5" /></div>}
                             </div>
                         ))}
                     </div>

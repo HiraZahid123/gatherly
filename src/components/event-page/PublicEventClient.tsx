@@ -673,13 +673,23 @@ export default function PublicEventClient({
                         <div className="w-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-video lg:aspect-square relative group">
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                             {event.coverImage ? (
-                                <Image
-                                    src={event.coverImage}
-                                    alt={event.title}
-                                    fill
-                                    className="object-cover transform group-hover:scale-105 transition-transform duration-700"
-                                    unoptimized
-                                />
+                                <>
+                                    <Image
+                                        src={event.coverImage}
+                                        alt={event.title}
+                                        fill
+                                        className="object-cover transform group-hover:scale-105 transition-transform duration-700"
+                                        unoptimized
+                                    />
+                                    <div className="absolute inset-x-5 bottom-5 z-20 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                                        <p className="text-xl font-black leading-tight">{event.title}</p>
+                                        <p className="mt-1 text-xs font-semibold text-white/90">
+                                            {event.startDate ? new Date(event.startDate).toLocaleDateString("en-NG", { dateStyle: "medium" }) : "Date to be announced"}
+                                            {event.startDate ? ` · ${new Date(event.startDate).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}` : ""}
+                                        </p>
+                                        {event.location && <p className="mt-0.5 text-xs text-white/80">{event.location}</p>}
+                                    </div>
+                                </>
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-yellow-500/20 flex items-center justify-center">
                                     <span className="text-white/40 font-black text-4xl uppercase tracking-widest">{event.title?.[0]}</span>

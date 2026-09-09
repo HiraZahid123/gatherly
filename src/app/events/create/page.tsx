@@ -1196,6 +1196,20 @@ function CreateEventContent() {
                                 fill
                                 className="object-cover group-hover:scale-105 transition-all duration-1000"
                             />
+                            <div className="absolute inset-x-6 bottom-6 z-[5] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] pointer-events-none">
+                                <p className="text-2xl font-black leading-tight">
+                                    {pendingData?.title || "Your event title"}
+                                </p>
+                                <p className="mt-1 text-sm font-semibold text-white/90">
+                                    {pendingData?.startDate
+                                        ? new Date(pendingData.startDate).toLocaleDateString("en-NG", { dateStyle: "medium" })
+                                        : "Date and time"}
+                                    {pendingData?.startDate
+                                        ? ` · ${new Date(pendingData.startDate).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}`
+                                        : ""}
+                                </p>
+                                {pendingData?.location && <p className="mt-0.5 text-sm text-white/80">{pendingData.location}</p>}
+                            </div>
                             {/* Edit Button */}
                             {!isPreviewMode && (
                                 <button

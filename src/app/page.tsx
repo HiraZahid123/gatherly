@@ -8,6 +8,7 @@ import CompanyReviews from "@/components/CompanyReviews";
 import TrendingTemplates from "@/components/TrendingTemplates";
 import CustomerReviews from "@/components/CustomerReviews";
 import BlogSection from "@/components/BlogSection";
+import TicketSalesSection from "@/components/TicketSalesSection";
 
 export default function Home() {
   return (
@@ -161,6 +162,9 @@ export default function Home() {
 
       {/* Text Blast Section */}
       <TextBlastSection />
+
+      {/* Ticket Sales Section */}
+      <TicketSalesSection />
 
       {/* Customer Reviews */}
       <CustomerReviews />

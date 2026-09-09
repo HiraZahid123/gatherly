@@ -107,7 +107,7 @@ export default function CompanyReviews() {
                                 {vendor.location}
                             </span>
                             <span className="text-emerald-600 font-bold hover:underline cursor-pointer">
-                                Explore &rarr;
+                                Coming soon
                             </span>
                         </div>
                     </div>
