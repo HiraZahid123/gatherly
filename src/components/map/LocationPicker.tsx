@@ -31,6 +31,8 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
     const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
     const [zoom, setZoom] = useState(6);
     const searchRef = useRef<HTMLDivElement>(null);
+    const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const searchRequestRef = useRef<AbortController | null>(null);
 
     // Initial center if value exists
     useEffect(() => {
@@ -47,7 +49,11 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+            searchRequestRef.current?.abort();
+        };
     }, []);
 
     const handleSearch = async (query: string, silent = false) => {
@@ -57,8 +63,13 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
         }
 
         if (!silent) setIsLoading(true);
+        searchRequestRef.current?.abort();
+        const controller = new AbortController();
+        searchRequestRef.current = controller;
         try {
-            const response = await fetch(`/api/location/search?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`/api/location/search?q=${encodeURIComponent(query.trim())}`, {
+                signal: controller.signal,
+            });
             if (!response.ok) throw new Error("Search failed");
             
             const data = await response.json();
@@ -74,11 +85,25 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
                 }
             }
         } catch (error) {
-            console.error("Geocoding error:", error);
-            setSuggestions([]);
+            if (!(error instanceof DOMException && error.name === "AbortError")) {
+                console.error("Geocoding error:", error);
+                setSuggestions([]);
+            }
         } finally {
-            if (!silent) setIsLoading(false);
+            if (!controller.signal.aborted && !silent) setIsLoading(false);
         }
+    };
+
+    const scheduleSearch = (query: string) => {
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+        if (query.trim().length < 3) {
+            searchRequestRef.current?.abort();
+            setSuggestions([]);
+            setIsLoading(false);
+            return;
+        }
+        setIsLoading(true);
+        searchTimerRef.current = setTimeout(() => handleSearch(query), 350);
     };
 
     const handleSelectSuggestion = (suggestion: Suggestion) => {
@@ -129,7 +154,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
                         value={searchQuery}
                         onChange={(e) => {
                             setSearchQuery(e.target.value);
-                            handleSearch(e.target.value);
+                            scheduleSearch(e.target.value);
                             onChange(e.target.value);
                         }}
                         placeholder="Location"

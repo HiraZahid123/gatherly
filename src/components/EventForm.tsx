@@ -50,6 +50,7 @@ interface EventFormProps {
     hostName?: string;
     hostImage?: string;
     onAddCohosts?: () => void;
+    onOpenSettings?: () => void;
     onCancel?: () => void;
     submitLabel?: string;
     isLoading?: boolean;
@@ -83,6 +84,7 @@ export default function EventForm({
     hostName,
     hostImage,
     onAddCohosts,
+    onOpenSettings,
 }: EventFormProps) {
     const [formData, setFormData] = useState({
         title: initialData?.title || "",
@@ -137,6 +139,11 @@ export default function EventForm({
 
     // Quick Add Actions State
     const [showAllQuickActions, setShowAllQuickActions] = useState(false);
+
+    const addSection = (title: string, content: string) => {
+        setTempSection({ title, content });
+        setIsSectionEditorOpen(true);
+    };
 
     const visibleQuickActions = useMemo(
         () => showAllQuickActions ? QUICK_ACTIONS : QUICK_ACTIONS.slice(0, 3),
@@ -880,13 +887,21 @@ export default function EventForm({
             <div className="pt-8 space-y-4">
                 <h4 className="text-sm font-bold text-white/60">Quick actions for hosts</h4>
                 <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                    <button type="button" className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => addSection("Guest information", "Add the information you need from guests before they RSVP.")}
+                        className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0"
+                    >
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white/40 group-hover:text-white transition-colors">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                         </svg>
                         <span className="text-xs font-bold text-white/80 group-hover:text-white">Collect Info</span>
                     </button>
-                    <button type="button" className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => addSection("Reminders", "Add useful reminders for your guests here.")}
+                        className="flex items-center gap-2.5 px-4 sm:px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0"
+                    >
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white/40 group-hover:text-white transition-colors">
                             <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-8h4V7h-4v5zm-3 7h1v-4H9v3a1 1 0 0 0 1 1z" />
                         </svg>
@@ -912,7 +927,11 @@ export default function EventForm({
                             Require Guest Approval
                         </span>
                     </button>
-                    <button type="button" className="flex items-center gap-2 px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0">
+                    <button
+                        type="button"
+                        onClick={onOpenSettings}
+                        className="flex items-center gap-2 px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left group shrink-0"
+                    >
                         <span className="text-white/40 font-black text-sm group-hover:text-white transition-colors">•••</span>
                         <span className="text-xs font-bold text-white/80 group-hover:text-white">More</span>
                     </button>

@@ -538,6 +538,7 @@ function CreateEventContent() {
                             hostName={session?.user?.name || ""}
                             hostImage={session?.user?.image || ""}
                             onAddCohosts={() => setIsSettingsOpen(true)}
+                            onOpenSettings={() => setIsSettingsOpen(true)}
                             effect={effect}
                         />
                     </div>

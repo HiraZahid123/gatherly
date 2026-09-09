@@ -11,11 +11,12 @@ export async function GET(request: Request) {
     try {
         const response = await fetch(
             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                q
-            )}&countrycodes=ng&addressdetails=1&limit=5`,
+                q.trim()
+            )}&addressdetails=1&limit=8`,
             {
                 headers: {
                     "User-Agent": "JollyWitMe Event App (contact@JollyWitMe.com)",
+                    "Accept-Language": "en",
                 },
             }
         );

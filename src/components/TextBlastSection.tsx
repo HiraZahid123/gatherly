@@ -3,14 +3,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, Mic, Megaphone, Send } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TextBlastSection = () => {
     return (
-        <section className="relative w-full py-24 bg-gradient-to-br from-[#E0F7FA] to-[#FCE4EC] overflow-hidden">
+        <motion.section
+            initial={{ opacity: 0, y: 48 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full py-24 bg-gradient-to-br from-[#E0F7FA] to-[#FCE4EC] overflow-hidden"
+        >
             <div className="container mx-auto px-6 max-w-7xl">
                 <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
                     {/* Left Column - Text Content */}
-                    <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-8">
+                    <motion.div
+                        initial={{ opacity: 0, x: -24 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ delay: 0.15, duration: 0.65 }}
+                        className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-8"
+                    >
                         <h2 className="text-5xl md:text-7xl font-extrabold text-black tracking-tight leading-[1.05]">
                             Text Blast your guests
                         </h2>
@@ -23,10 +36,16 @@ const TextBlastSection = () => {
                         >
                             Create event
                         </Link>
-                    </div>
+                    </motion.div>
 
                     {/* Right Column - Visual Mockup (Phone) */}
-                    <div className="w-full md:w-1/2 flex justify-center">
+                    <motion.div
+                        initial={{ opacity: 0, x: 24, rotate: 2 }}
+                        whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ delay: 0.28, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                        className="w-full md:w-1/2 flex justify-center"
+                    >
                         {/* Phone Container */}
                         <div className="relative w-full max-w-[340px] bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden border-[8px] border-black/5">
                             {/* Card Header (Mint/Teal) */}
@@ -96,10 +115,10 @@ const TextBlastSection = () => {
                         {/* Floating Background Assets */}
                         <div className="absolute -z-10 top-0 right-0 w-64 h-64 bg-yellow-100/50 rounded-full blur-3xl"></div>
                         <div className="absolute -z-10 bottom-0 left-0 w-64 h-64 bg-cyan-100/50 rounded-full blur-3xl"></div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </section>
+        </motion.section>
     );
 };
 

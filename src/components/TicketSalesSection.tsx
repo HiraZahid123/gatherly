@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BarChart3, CreditCard, QrCode, ShieldCheck, Ticket } from "lucide-react";
+import { motion } from "framer-motion";
 
 const benefits = [
     {
@@ -27,12 +30,23 @@ const benefits = [
 
 export default function TicketSalesSection() {
     return (
-        <section className="relative overflow-hidden bg-[#f5f1e9] py-24 text-[#101713]">
+        <motion.section
+            initial={{ opacity: 0, y: 48 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden bg-[#f5f1e9] py-24 text-[#101713]"
+        >
             <div className="absolute -right-24 top-16 h-72 w-72 rounded-full bg-emerald-200/50 blur-3xl" />
             <div className="absolute -bottom-32 left-10 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
 
             <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-12">
-                <div>
+                <motion.div
+                    initial={{ opacity: 0, x: -24 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.15, duration: 0.65 }}
+                >
                     <span className="inline-flex items-center gap-2 rounded-full border border-emerald-700/20 bg-emerald-700/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-800">
                         <Ticket className="h-3.5 w-3.5" /> Ticket sales
                     </span>
@@ -49,9 +63,15 @@ export default function TicketSalesSection() {
                         Sell tickets for your event
                         <ArrowRight className="h-4 w-4" />
                     </Link>
-                </div>
+                </motion.div>
 
-                <div className="relative rounded-[2rem] border border-black/10 bg-[#101713] p-4 shadow-[0_30px_70px_rgba(16,23,19,0.2)] sm:p-6">
+                <motion.div
+                    initial={{ opacity: 0, x: 24, scale: 0.96 }}
+                    whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ delay: 0.28, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative rounded-[2rem] border border-black/10 bg-[#101713] p-4 shadow-[0_30px_70px_rgba(16,23,19,0.2)] sm:p-6"
+                >
                     <div className="grid gap-4 sm:grid-cols-[0.85fr_1.15fr]">
                         <div className="relative min-h-[280px] overflow-hidden rounded-2xl bg-emerald-950">
                             <Image
@@ -100,18 +120,29 @@ export default function TicketSalesSection() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
 
-            <div className="relative mx-auto mt-16 grid max-w-7xl gap-4 px-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
+            <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+                variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                className="relative mx-auto mt-16 grid max-w-7xl gap-4 px-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-12"
+            >
                 {benefits.map(({ icon: Icon, title, text }) => (
-                    <div key={title} className="border-t border-black/10 pt-4">
+                    <motion.div
+                        key={title}
+                        variants={{ hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } }}
+                        transition={{ duration: 0.45 }}
+                        className="border-t border-black/10 pt-4"
+                    >
                         <Icon className="h-5 w-5 text-emerald-800" />
                         <h3 className="mt-3 text-sm font-black">{title}</h3>
                         <p className="mt-2 text-sm leading-relaxed text-[#58675f]">{text}</p>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
-        </section>
+            </motion.div>
+        </motion.section>
     );
 }
