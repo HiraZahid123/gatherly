@@ -119,12 +119,10 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
             },
             take: 30,
         }),
-        event.isPaid
-            ? prisma.ticketTier.findMany({
-                where: { eventId: event.id, isActive: true },
-                orderBy: { sortOrder: "asc" },
-            })
-            : Promise.resolve([]),
+        prisma.ticketTier.findMany({
+            where: { eventId: event.id, isActive: true },
+            orderBy: { sortOrder: "asc" },
+        }),
     ]);
 
     // Format guests (similar to the API logic)

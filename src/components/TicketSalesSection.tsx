@@ -83,7 +83,7 @@ export default function TicketSalesSection() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                             <div className="absolute bottom-5 left-5 right-5 text-white">
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">Live event</p>
-                                <p className="mt-2 text-2xl font-black leading-tight">Summer after dark</p>
+                                <p className="mt-2 text-2xl font-black leading-tight">Igbẻdύ Fiesta</p>
                                 <p className="mt-1 text-xs text-white/70">Tickets from NGN 10,000</p>
                             </div>
                         </div>

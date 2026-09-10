@@ -30,6 +30,7 @@ interface EventSettingsModalProps {
     isCoHost?: boolean;
     isStaff?: boolean;
     onSelectGuest?: (guest: any) => void;
+    onTiersChange?: () => void;
 }
 
 export default function EventSettingsModal({
@@ -48,7 +49,8 @@ export default function EventSettingsModal({
     isHost = false,
     isCoHost = false,
     isStaff = false,
-    onSelectGuest
+    onSelectGuest,
+    onTiersChange
 }: EventSettingsModalProps) {
     const rsvpStyle = event?.theme?.rsvpStyle || "standard";
     const showRSVP = event?.theme?.showRSVP ?? true;
@@ -268,7 +270,16 @@ export default function EventSettingsModal({
                                     <h3 className="text-xl font-black text-white uppercase tracking-tight">Ticket Tiers</h3>
                                     <p className="text-white/30 text-xs mt-1">Create ticket tiers for paid entry. Adding a tier marks this event as paid.</p>
                                 </div>
-                                <TicketTierManager eventId={event?.id || ""} primaryColor={primaryColor} />
+                                <TicketTierManager 
+                                    eventId={event?.id || ""} 
+                                    primaryColor={primaryColor} 
+                                    onTiersChange={() => {
+                                        if (!event?.isPaid && onUpdate) {
+                                            onUpdate({ ...event, isPaid: true });
+                                        }
+                                        onTiersChange?.();
+                                    }}
+                                />
                             </div>
                         )}
                         {activeTab === "Sales" && (

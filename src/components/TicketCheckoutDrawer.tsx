@@ -172,14 +172,33 @@ export default function TicketCheckoutDrawer({
           guestEmail,
         }),
       });
-      const data = await res.json();
-      if (data.clientSecret) {
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Failed to parse response
+      }
+
+      if (!res.ok) {
+        setError(data?.error || `Checkout failed (${res.status})`);
+        return;
+      }
+
+      if (data?.clientSecret) {
         setClientSecret(data.clientSecret);
         setOrderId(data.orderId);
         goTo("PAYMENT");
+      } else if (data?.freeOrder) {
+        setRsvpResult({ ...data.rsvp, guestName, guestEmail });
+        setOrderResult({ ...data.order, ticketTier: selectedTier });
+        goTo("SUCCESS");
+        onSuccess?.();
       } else {
-        setError(data.error || "Could not start checkout.");
+        setError(data?.error || "Could not start checkout.");
       }
+    } catch (err: any) {
+      setError(err?.message || "Could not start checkout. Please try again.");
     } finally {
       setPaymentLoading(false);
     }
@@ -194,15 +213,29 @@ export default function TicketCheckoutDrawer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paymentIntentId }),
       });
-      const data = await res.json();
-      if (data.rsvp) {
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Failed to parse response
+      }
+
+      if (!res.ok) {
+        setError(data?.error || `Confirmation failed (${res.status})`);
+        return;
+      }
+
+      if (data?.rsvp) {
         setRsvpResult({ ...data.rsvp, guestName, guestEmail });
         setOrderResult({ ...data.order, ticketTier: selectedTier });
         goTo("SUCCESS");
         onSuccess?.();
       } else {
-        setError(data.error || "Could not confirm your ticket. Contact support.");
+        setError(data?.error || "Could not confirm your ticket. Contact support.");
       }
+    } catch (err: any) {
+      setError(err?.message || "Could not confirm your ticket. Contact support.");
     } finally {
       setConfirming(false);
     }
@@ -374,7 +407,7 @@ export default function TicketCheckoutDrawer({
                                   </div>
                                 </div>
                                 <p className="text-base font-black text-white shrink-0">
-                                  ${(tier.price / 100).toFixed(2)}
+                                  {tier.price === 0 ? "Free" : `₦${(tier.price / 100).toLocaleString()}`}
                                 </p>
                               </div>
                             </button>
@@ -537,7 +570,9 @@ export default function TicketCheckoutDrawer({
                     <span className="text-white/40">
                       {quantity}× {selectedTier.name}
                     </span>
-                    <span className="text-white font-black">${totalAmount.toFixed(2)}</span>
+                    <span className="text-white font-black">
+                      {totalAmount === 0 ? "Free" : `₦${totalAmount.toLocaleString()} NGN`}
+                    </span>
                   </div>
                 )}
 

@@ -169,6 +169,7 @@ export default function EditEventPage() {
                 };
 
                 setPendingData({
+                    id: foundEvent.id,
                     title: foundEvent.title,
                     description: foundEvent.description,
                     location: foundEvent.location,
@@ -180,6 +181,7 @@ export default function EditEventPage() {
                     checkInWindowStart: foundEvent.checkInWindowStart,
                     maxCheckIns: foundEvent.maxCheckIns,
                     cost: restoredSettings.cost || "",
+                    isPaid: foundEvent.isPaid ?? false,
                     theme: { ...themeData, settings: restoredSettings }
                 });
 
@@ -731,10 +733,10 @@ export default function EditEventPage() {
             <EventSettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
-                event={pendingData}
+                event={pendingData ? { ...pendingData, id: pendingData.id || params?.eventId } : { id: params?.eventId }}
                 settings={settings}
                 onUpdate={(updatedData) => {
-                    setPendingData({ ...updatedData });
+                    setPendingData((prev: any) => ({ ...prev, ...updatedData, id: updatedData.id || prev?.id || params?.eventId }));
                     if (updatedData.theme?.settings) {
                         setSettings({ ...updatedData.theme.settings });
                     }

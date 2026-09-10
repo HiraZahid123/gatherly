@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { stripe, PLATFORM_FEE_PERCENT } from "@/lib/stripe";
+import crypto from "crypto";
 
 interface Params { params: Promise<{ eventId: string }> }
 
@@ -40,9 +41,17 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const totalAmount = tier.price * quantity;
   const platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENT);
+  
   const currency = "ngn";
 
-  // Create order (PENDING)
+  if (totalAmount > 0 && totalAmount < 100000) {
+    return NextResponse.json(
+      { error: "Minimum payment amount is ₦1,000 to meet Stripe processing limits." },
+      { status: 400 }
+    );
+  }
+
+  // Create order
   const order = await prisma.order.create({
     data: {
       eventId,
@@ -54,10 +63,53 @@ export async function POST(req: NextRequest, { params }: Params) {
       unitPrice: tier.price,
       totalAmount,
       currency,
+      status: totalAmount === 0 ? "COMPLETED" : "PENDING",
     },
   });
 
-  // Create Stripe PaymentIntent
+  // FREE TICKET: Complete order and RSVP directly without Stripe!
+  if (totalAmount === 0) {
+    const qrToken = crypto.randomUUID();
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.ticketTier.update({
+        where: { id: order.ticketTierId },
+        data: { quantitySold: { increment: order.quantity } },
+      });
+
+      const existing = await tx.rSVP.findFirst({
+        where: {
+          eventId: order.eventId,
+          OR: [
+            ...(order.userId ? [{ userId: order.userId }] : []),
+            ...(order.guestEmail ? [{ guestEmail: order.guestEmail }] : []),
+          ],
+        },
+      });
+
+      const rsvp = existing
+        ? await tx.rSVP.update({
+            where: { id: existing.id },
+            data: { status: "ACCEPTED", qrToken, orderId: order.id },
+          })
+        : await tx.rSVP.create({
+            data: {
+              eventId: order.eventId,
+              userId: order.userId,
+              guestName: order.guestName,
+              guestEmail: order.guestEmail,
+              status: "ACCEPTED",
+              qrToken,
+              orderId: order.id,
+            },
+          });
+
+      return { order, rsvp };
+    });
+
+    return NextResponse.json({ freeOrder: true, order: result.order, rsvp: result.rsvp });
+  }
+
+  // PAID TICKET: Create Stripe PaymentIntent
   const paymentIntentOptions: any = {
     amount: totalAmount,
     currency,
@@ -71,12 +123,24 @@ export async function POST(req: NextRequest, { params }: Params) {
     paymentIntentOptions.transfer_data = { destination: stripeAccount.stripeAccountId };
   }
 
-  const paymentIntent = await stripe.paymentIntents.create(paymentIntentOptions);
+  try {
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentOptions);
 
-  await prisma.order.update({
-    where: { id: order.id },
-    data: { stripePaymentIntentId: paymentIntent.id },
-  });
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { stripePaymentIntentId: paymentIntent.id },
+    });
 
-  return NextResponse.json({ clientSecret: paymentIntent.client_secret, orderId: order.id });
+    return NextResponse.json({ clientSecret: paymentIntent.client_secret, orderId: order.id });
+  } catch (stripeErr: any) {
+    console.error("Stripe payment intent creation error:", stripeErr);
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: "FAILED" },
+    });
+    return NextResponse.json(
+      { error: stripeErr.message || "Failed to initialize payment with Stripe" },
+      { status: 400 }
+    );
+  }
 }

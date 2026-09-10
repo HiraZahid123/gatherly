@@ -91,8 +91,24 @@ export default function PublicEventClient({
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isCalendarDropdownOpen, setIsCalendarDropdownOpen] = useState(false);
     const [isShareOpen, setIsShareOpen] = useState(false);
-    const [ticketTiers] = useState(initialTicketTiers);
+    const [ticketTiers, setTicketTiers] = useState(initialTicketTiers);
     const [announceFocusTrigger, setAnnounceFocusTrigger] = useState(0);
+
+    const fetchTicketTiers = async () => {
+        if (!event?.id) return;
+        try {
+            const res = await fetch(`/api/events/${event.id}/ticket-tiers`);
+            const data = await res.json();
+            if (data.tiers) {
+                setTicketTiers(data.tiers);
+                if (data.tiers.length > 0 && !event.isPaid) {
+                    setEvent((prev: any) => ({ ...prev, isPaid: true }));
+                }
+            }
+        } catch (err) {
+            console.error("Failed to fetch ticket tiers", err);
+        }
+    };
 
     const isHost = Boolean(
         session?.user?.id && event?.hostId && session.user.id === event.hostId
@@ -711,7 +727,7 @@ export default function PublicEventClient({
                                             <div key={tier.id} className="flex items-center justify-between px-3 py-2.5 bg-white/5 rounded-xl border border-white/8">
                                                 <span className="text-sm font-bold text-white">{tier.name}</span>
                                                 <span className="text-sm font-black" style={{ color: primaryColor }}>
-                                                    ${(tier.price / 100).toFixed(2)}
+                                                    {tier.price === 0 ? "Free" : `₦${(tier.price / 100).toLocaleString()} NGN`}
                                                 </span>
                                             </div>
                                         ))}
@@ -961,6 +977,7 @@ export default function PublicEventClient({
                 isHost={isHost}
                 isCoHost={isCoHost}
                 isStaff={isStaff}
+                onTiersChange={fetchTicketTiers}
                 onSelectGuest={(guest) => {
                     if (guest.userId && guest.userId !== session?.user?.id) {
                         setSelectedGuestForChat({ id: guest.userId, name: guest.guestName || guest.name, image: guest.image });

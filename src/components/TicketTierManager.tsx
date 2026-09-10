@@ -50,10 +50,29 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.quantity) {
+    if (!eventId) {
+      setError("Please save the event first before adding ticket tiers.");
+      return;
+    }
+    if (!form.name.trim() || form.price === "" || !form.quantity) {
       setError("Name, price, and quantity are required");
       return;
     }
+    const parsedPrice = parseFloat(form.price);
+    const parsedQty = parseInt(form.quantity);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      setError("Price must be a valid number (0 or greater)");
+      return;
+    }
+    if (parsedPrice > 0 && parsedPrice < 1000) {
+      setError("Paid ticket price must be at least ₦1,000 (or 0 for free) to meet card processing minimums.");
+      return;
+    }
+    if (isNaN(parsedQty) || parsedQty <= 0) {
+      setError("Quantity must be at least 1");
+      return;
+    }
+
     setSaving(true);
     setError("");
     try {
@@ -61,35 +80,70 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          price: Math.round(parseFloat(form.price) * 100), // convert dollars → cents
-          quantity: parseInt(form.quantity),
+          name: form.name.trim(),
+          description: form.description?.trim() || "",
+          price: Math.round(parsedPrice * 100), // convert Naira to kobo
+          currency: "ngn",
+          quantity: parsedQty,
         }),
       });
-      const data = await res.json();
-      if (data.tier) {
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Non-JSON response
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || `Server error (${res.status})`);
+      }
+
+      if (data?.tier) {
         setTiers((prev) => [...prev, data.tier]);
         setForm({ name: "", description: "", price: "", quantity: "" });
         setShowForm(false);
         onTiersChange?.();
       } else {
-        setError(data.error || "Failed to create tier");
+        setError(data?.error || "Failed to create tier");
       }
+    } catch (err: any) {
+      setError(err?.message || "Failed to create tier");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (tierId: string) => {
-    await fetch(`/api/events/${eventId}/ticket-tiers`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tierId }),
-    });
-    setTiers((prev) => prev.filter((t) => t.id !== tierId));
-    onTiersChange?.();
+    if (!eventId) return;
+    try {
+      const res = await fetch(`/api/events/${eventId}/ticket-tiers`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tierId }),
+      });
+      if (res.ok) {
+        setTiers((prev) => prev.filter((t) => t.id !== tierId));
+        onTiersChange?.();
+      }
+    } catch (err) {
+      console.error("Failed to delete tier", err);
+    }
   };
+
+  if (!eventId) {
+    return (
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-center space-y-3">
+        <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+          <Ticket className="w-6 h-6" />
+        </div>
+        <h4 className="text-white font-bold text-sm">Save Your Event First</h4>
+        <p className="text-white/60 text-xs max-w-sm mx-auto leading-relaxed">
+          Ticket tiers and paid ticketing are linked to your saved event. Please save or create your event first, then add ticket tiers here or in event settings.
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -133,8 +187,7 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
               )}
               <div className="flex items-center gap-4 mt-2">
                 <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-white/50">
-                  <DollarSign className="w-3 h-3" />
-                  {(tier.price / 100).toFixed(2)} {tier.currency.toUpperCase()}
+                  {tier.price === 0 ? "Free" : `₦${(tier.price / 100).toLocaleString()} NGN`}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-white/50">
                   <Users className="w-3 h-3" />
@@ -185,15 +238,15 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-sm font-bold">₦</span>
                   <input
                     type="number"
-                    placeholder="Price"
-                    min="0.50"
-                    step="0.01"
+                    placeholder="Price in ₦ (e.g. 5000, 0 for free)"
+                    min="0"
+                    step="100"
                     value={form.price}
                     onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
-                    className="w-full h-10 bg-white/5 border border-white/10 rounded-xl pl-7 pr-3 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20 transition-colors"
+                    className="w-full h-10 bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20 transition-colors"
                     required
                   />
                 </div>

@@ -495,7 +495,7 @@ export default function EventForm({
                             name="cost"
                             value={formData.cost}
                             onChange={handleChange}
-                            placeholder="Cost per person"
+                            placeholder="Cost per person in ₦ (e.g. ₦5,000)"
                             className="bg-transparent border-none outline-none w-full text-base font-bold text-white/40 placeholder:text-white/20 focus:placeholder:text-transparent"
                         />
                         {formData.cost && (

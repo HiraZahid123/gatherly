@@ -114,18 +114,19 @@ export async function POST(request: NextRequest) {
 
         // If isPaid is true and cost is provided, create a default ticket tier
         if (isPaid && cost) {
-            // Extract numbers from cost string (e.g., "$10.50" -> 10.5)
-            const priceMatch = cost.match(/(\d+(?:\.\d+)?)/);
+            // Extract numbers from cost string (e.g., "₦5,000" or "5000" -> 5000)
+            const cleanCost = cost.replace(/,/g, '');
+            const priceMatch = cleanCost.match(/(\d+(?:\.\d+)?)/);
             if (priceMatch) {
-                const priceInDollars = parseFloat(priceMatch[1]);
-                const priceInCents = Math.round(priceInDollars * 100);
+                const priceInNaira = parseFloat(priceMatch[1]);
+                const priceInKobo = Math.round(priceInNaira * 100);
 
-                if (priceInCents > 0) {
+                if (priceInKobo > 0) {
                     await prisma.ticketTier.create({
                         data: {
                             eventId: event.id,
                             name: "General Admission",
-                            price: priceInCents,
+                            price: priceInKobo,
                             quantity: capacity || 100, // Default to capacity or 100
                             currency: "ngn",
                         },

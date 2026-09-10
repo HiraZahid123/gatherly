@@ -156,11 +156,11 @@ export default function ReadonlyEventSummary({ event, onShare, onEdit, isHost }:
                 {/* Cost */}
                 {event.theme?.settings?.cost && (
                     <div className="flex items-center gap-4 px-6 py-4 text-white/80 group">
-                        <div className="w-5 h-5 flex items-center justify-center">
-                            <DollarSign className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
+                        <div className="w-5 h-5 flex items-center justify-center font-bold text-lg text-white/40 group-hover:text-white transition-colors">
+                            ₦
                         </div>
                         <span className="text-base font-bold tracking-tight">
-                            {event.theme.settings.cost}
+                            {event.theme.settings.cost.startsWith('₦') ? event.theme.settings.cost : `₦${event.theme.settings.cost}`}
                         </span>
                     </div>
                 )}
