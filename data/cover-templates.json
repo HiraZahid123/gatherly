@@ -1,0 +1,557 @@
+[
+  {
+    "id": "cover_1789058861793_4udtp",
+    "title": "You're Invited",
+    "url": "/uploads/covers/cover-tpl-1789058861761-h871blf.jpg",
+    "category": "Party",
+    "order": 0,
+    "isCustom": true,
+    "createdAt": "2026-09-10T16:47:41.793Z"
+  },
+  {
+    "id": "cover_1789058315092_opivt",
+    "title": "Agent Image   Minimalist doodle birthday invitation poster  hand drawn black marker style  large han",
+    "url": "/uploads/covers/cover-tpl-1789058315060-3njrik2.jpg",
+    "category": "Party",
+    "order": 0,
+    "isCustom": true,
+    "createdAt": "2026-09-10T16:38:35.093Z"
+  },
+  {
+    "id": "cover_1789058115194_4x1no",
+    "title": "IT S A BIRTHDAY PARTY",
+    "url": "/uploads/covers/cover-tpl-1789058115139-ohlc8fg.jpg",
+    "category": "Birthday",
+    "order": 0,
+    "isCustom": true,
+    "createdAt": "2026-09-10T16:35:15.194Z"
+  },
+  {
+    "id": "aquarius",
+    "url": "/api/partiful/Aquarius.avif",
+    "title": "Aquarius",
+    "category": "Zodiac",
+    "order": 1,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "back-to-school",
+    "url": "/api/partiful/Back to School S.avif",
+    "title": "Back to School",
+    "category": "School",
+    "order": 2,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "devil-heart",
+    "url": "/api/partiful/Devil Heart.avif",
+    "title": "Devil Heart",
+    "category": "Party",
+    "order": 3,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "lady-gaga",
+    "url": "/api/partiful/adminnightladygaga.avif",
+    "title": "Lady Gaga",
+    "category": "Night Out",
+    "order": 4,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "aquarius-cake",
+    "url": "/api/partiful/aquarius-baby-cake.avif",
+    "title": "Aquarius Cake",
+    "category": "Birthday",
+    "order": 5,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "aquarius-airbrush",
+    "url": "/api/partiful/aquariusairbrush.avif",
+    "title": "Aquarius Airbrush",
+    "category": "Party",
+    "order": 6,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "award-goes-to",
+    "url": "/api/partiful/awardgoesto.avif",
+    "title": "Award Goes To",
+    "category": "Celebration",
+    "order": 7,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "awards-night",
+    "url": "/api/partiful/awards-night.avif",
+    "title": "Awards Night",
+    "category": "Celebration",
+    "order": 8,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bad-bunny-award",
+    "url": "/api/partiful/badbunnyaward.avif",
+    "title": "Bad Bunny Award",
+    "category": "Music",
+    "order": 9,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bad-bunny-debi",
+    "url": "/api/partiful/badbunnydebitirar.avif",
+    "title": "Bad Bunny",
+    "category": "Music",
+    "order": 10,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bday-copypasta",
+    "url": "/api/partiful/bday-copypasta-1.avif",
+    "title": "Birthday Copypasta",
+    "category": "Birthday",
+    "order": 11,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bitchy-shrek",
+    "url": "/api/partiful/bitchy-shrek-sophia.avif",
+    "title": "Bitchy Shrek",
+    "category": "Party",
+    "order": 12,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bowtie-invite",
+    "url": "/api/partiful/bowtie-invite.avif",
+    "title": "Bowtie Invite",
+    "category": "Formal",
+    "order": 13,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bridgerton",
+    "url": "/api/partiful/bridgerton-two.avif",
+    "title": "Bridgerton",
+    "category": "Formal",
+    "order": 14,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "brunch-oclock",
+    "url": "/api/partiful/brunch-oclock.avif",
+    "title": "Brunch O'clock",
+    "category": "Brunch",
+    "order": 15,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "calisober",
+    "url": "/api/partiful/calisober-soft.avif",
+    "title": "Calisober",
+    "category": "Party",
+    "order": 16,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "capricorn-cake",
+    "url": "/api/partiful/capricorn-baby-cake.avif",
+    "title": "Capricorn Cake",
+    "category": "Birthday",
+    "order": 17,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "chocolatebox",
+    "url": "/api/partiful/chocolatebox.avif",
+    "title": "Chocolate Box",
+    "category": "Celebration",
+    "order": 18,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "come-hang",
+    "url": "/api/partiful/come-hang-club-penguin.avif",
+    "title": "Club Penguin",
+    "category": "Hangout",
+    "order": 19,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "cozy-bear",
+    "url": "/api/partiful/cozy-chill-bear.avif",
+    "title": "Cozy Bear",
+    "category": "Hangout",
+    "order": 20,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "crafts-collage",
+    "url": "/api/partiful/crafts-collage.avif",
+    "title": "Crafts Collage",
+    "category": "Arts",
+    "order": 21,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "cutie-pie",
+    "url": "/api/partiful/cutie-pie-blue.avif",
+    "title": "Cutie Pie",
+    "category": "Birthday",
+    "order": 22,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "dapitt",
+    "url": "/api/partiful/dapitt.avif",
+    "title": "Dapitt",
+    "category": "Party",
+    "order": 23,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "dinner-02",
+    "url": "/api/partiful/dinner-02.avif",
+    "title": "Dinner",
+    "category": "Dinner",
+    "order": 24,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "dinner-butterflies",
+    "url": "/api/partiful/dinner-butterflies_ywle19.avif",
+    "title": "Dinner Butterflies",
+    "category": "Dinner",
+    "order": 25,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "disco-pride",
+    "url": "/api/partiful/disco-pride.avif",
+    "title": "Disco Pride",
+    "category": "Party",
+    "order": 26,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "matcha",
+    "url": "/api/partiful/drinkgradient-matcha.avif",
+    "title": "Matcha",
+    "category": "Brunch",
+    "order": 27,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "dump-him",
+    "url": "/api/partiful/dump-him.avif",
+    "title": "Dump Him",
+    "category": "Party",
+    "order": 28,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "dumplings",
+    "url": "/api/partiful/dumplingschopsticks.avif",
+    "title": "Dumplings",
+    "category": "Dinner",
+    "order": 29,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "galentines-type",
+    "url": "/api/partiful/galentines-day-type.avif",
+    "title": "Galentine's",
+    "category": "Party",
+    "order": 30,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "galentines-party",
+    "url": "/api/partiful/galentines-party.avif",
+    "title": "Galentine's Party",
+    "category": "Party",
+    "order": 31,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "galentines-cheetah",
+    "url": "/api/partiful/galentinescheetah.avif",
+    "title": "Galentine's Cheetah",
+    "category": "Party",
+    "order": 32,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "galentines-pink",
+    "url": "/api/partiful/galentinescheetahpink.avif",
+    "title": "Galentine's Pink",
+    "category": "Party",
+    "order": 33,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "galentines-curtain",
+    "url": "/api/partiful/galentinescurtain.avif",
+    "title": "Galentine's Curtain",
+    "category": "Party",
+    "order": 34,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "halftime",
+    "url": "/api/partiful/halftime-just.avif",
+    "title": "Halftime",
+    "category": "Sports",
+    "order": 35,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "harry-styles",
+    "url": "/api/partiful/harrystylesdisco.avif",
+    "title": "Harry Styles",
+    "category": "Music",
+    "order": 36,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "football",
+    "url": "/api/partiful/have-fun-football.avif",
+    "title": "Football",
+    "category": "Sports",
+    "order": 37,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "heartbreak-hotel",
+    "url": "/api/partiful/heartbreak-hotel.avif",
+    "title": "Heartbreak Hotel",
+    "category": "Party",
+    "order": 38,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "hearts-crafts",
+    "url": "/api/partiful/hearts-and-crafts.avif",
+    "title": "Hearts & Crafts",
+    "category": "Arts",
+    "order": 39,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "heated-rivalry",
+    "url": "/api/partiful/heatedrivalryheart3.avif",
+    "title": "Heated Rivalry",
+    "category": "Party",
+    "order": 40,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "housewarming",
+    "url": "/api/partiful/housewarming-muji.avif",
+    "title": "Housewarming",
+    "category": "Housewarming",
+    "order": 41,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "hypnotic-vday",
+    "url": "/api/partiful/hypnotic-vday.avif",
+    "title": "Hypnotic Vday",
+    "category": "Party",
+    "order": 42,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "iheartme",
+    "url": "/api/partiful/iheartme-nyc.avif",
+    "title": "I Heart Me",
+    "category": "Party",
+    "order": 43,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "lets-climb",
+    "url": "/api/partiful/lets-climb.avif",
+    "title": "Let's Climb",
+    "category": "Fitness",
+    "order": 44,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "love-is-blind",
+    "url": "/api/partiful/love-is-blind-wild.avif",
+    "title": "Love Is Blind",
+    "category": "Watch Party",
+    "order": 45,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "love-potion",
+    "url": "/api/partiful/love-potion.avif",
+    "title": "Love Potion",
+    "category": "Party",
+    "order": 46,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "lunar-new-year",
+    "url": "/api/partiful/lunarnewyear2026.avif",
+    "title": "Lunar New Year",
+    "category": "Celebration",
+    "order": 47,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "mocktail",
+    "url": "/api/partiful/mocktail-party.avif",
+    "title": "Mocktail Party",
+    "category": "Party",
+    "order": 48,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "movie-awards",
+    "url": "/api/partiful/movie-awards-spotlight.avif",
+    "title": "Movie Awards",
+    "category": "Watch Party",
+    "order": 49,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "nicole-kidman",
+    "url": "/api/partiful/nicole-kidman-divorce.avif",
+    "title": "Nicole Kidman",
+    "category": "Watch Party",
+    "order": 50,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "office-afters",
+    "url": "/api/partiful/office-afters.avif",
+    "title": "Office Afters",
+    "category": "Night Out",
+    "order": 51,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "olympics",
+    "url": "/api/partiful/olympics20262.avif",
+    "title": "Olympics",
+    "category": "Sports",
+    "order": 52,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "bad-bunny-boss",
+    "url": "/api/partiful/onlythingmorepowerfulbadbunny.avif",
+    "title": "Bad Bunny Boss",
+    "category": "Music",
+    "order": 53,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "oscar-watch",
+    "url": "/api/partiful/oscar-watch-party-star.avif",
+    "title": "Oscar Night",
+    "category": "Watch Party",
+    "order": 54,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "pingu",
+    "url": "/api/partiful/pingu-valentine.avif",
+    "title": "Pingu Valentine",
+    "category": "Party",
+    "order": 55,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "rehearsal-dinner",
+    "url": "/api/partiful/rehearsal-dinner.avif",
+    "title": "Rehearsal Dinner",
+    "category": "Dinner",
+    "order": 56,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "resolutions",
+    "url": "/api/partiful/resolutionbuttonss.avif",
+    "title": "Resolutions",
+    "category": "Celebration",
+    "order": 57,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "retro-vday",
+    "url": "/api/partiful/retro-vday.avif",
+    "title": "Retro Vday",
+    "category": "Party",
+    "order": 58,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "spongebob",
+    "url": "/api/partiful/spongebob-pie_el98lq.avif",
+    "title": "Spongebob",
+    "category": "Party",
+    "order": 59,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "lofi-study",
+    "url": "/api/partiful/study-break-lofi.avif",
+    "title": "Lofi Study",
+    "category": "Hangout",
+    "order": 60,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "turkey",
+    "url": "/api/partiful/turkey-notext.avif",
+    "title": "Turkey",
+    "category": "Dinner",
+    "order": 61,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "cupid",
+    "url": "/api/partiful/valentine-cupid.avif",
+    "title": "Cupid",
+    "category": "Party",
+    "order": 62,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "horror-valentine",
+    "url": "/api/partiful/valentine-horror.avif",
+    "title": "Horror Valentine",
+    "category": "Party",
+    "order": 63,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "valentines-cake",
+    "url": "/api/partiful/valentinescake.avif",
+    "title": "Valentine's Cake",
+    "category": "Birthday",
+    "order": 64,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "valentines-curtains",
+    "url": "/api/partiful/valentinesdaycurtains.avif",
+    "title": "Valentine's Curtains",
+    "category": "Party",
+    "order": 65,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  },
+  {
+    "id": "wingmeme",
+    "url": "/api/partiful/wingmemenature.avif",
+    "title": "Wing Meme",
+    "category": "Party",
+    "order": 66,
+    "createdAt": "2026-09-10T16:14:08.358Z"
+  }
+]

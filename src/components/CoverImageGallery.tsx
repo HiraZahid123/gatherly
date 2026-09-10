@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { X, Upload, Check, ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { compressImage } from "@/lib/compressImage";
+import ImagePositionAdjuster from "@/components/ui/ImagePositionAdjuster";
 
 interface CoverImageGalleryProps {
     isOpen: boolean;
@@ -81,33 +82,64 @@ const PARTIFUL_IMAGES = [
     { id: "wingmeme", url: "/api/partiful/wingmemenature.avif", label: "Wing Meme" }
 ];
 
+interface CoverTemplateDisplay {
+    id: string;
+    url: string;
+    title: string;
+    category?: string;
+}
+
 export default function CoverImageGallery({ isOpen, onClose, onSelect, currentImage }: CoverImageGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string>(currentImage || "");
-    const [adminTemplates, setAdminTemplates] = useState<{ id: string; title: string; previewImage: string }[]>([]);
+    const [templates, setTemplates] = useState<CoverTemplateDisplay[]>([]);
+    const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [adjustingFile, setAdjustingFile] = useState<File | null>(null);
     const [error, setError] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!isOpen) return;
-        fetch("/api/templates")
-            .then((response) => response.json())
-            .then((data) => setAdminTemplates(data.success ? data.templates : []))
-            .catch(() => setAdminTemplates([]));
+        setIsLoadingTemplates(true);
+        fetch("/api/cover-templates")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success && Array.isArray(data.templates) && data.templates.length > 0) {
+                    setTemplates(
+                        data.templates.map((t: any) => ({
+                            id: t.id,
+                            url: t.url,
+                            title: t.title,
+                            category: t.category,
+                        }))
+                    );
+                } else {
+                    setTemplates(PARTIFUL_IMAGES.map((p) => ({ id: p.id, url: p.url, title: p.label })));
+                }
+            })
+            .catch(() => {
+                setTemplates(PARTIFUL_IMAGES.map((p) => ({ id: p.id, url: p.url, title: p.label })));
+            })
+            .finally(() => setIsLoadingTemplates(false));
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setAdjustingFile(file);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
+    const handleAdjusterConfirm = async (adjustedFile: File) => {
+        setAdjustingFile(null);
         setError("");
         setUploading(true);
 
-        let uploadFile = file;
+        let uploadFile = adjustedFile;
         try {
-            uploadFile = await compressImage(file, { maxWidth: 1920, maxHeight: 1920 });
+            uploadFile = await compressImage(adjustedFile, { maxWidth: 1920, maxHeight: 1920 });
         } catch {
             // compression failed — fall back to original
         }
@@ -210,38 +242,30 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
                             />
                         </div>
 
-                        {/* Partiful Images */}
-                        {PARTIFUL_IMAGES.map((img) => (
+                        {/* Cover Templates */}
+                        {templates.map((img) => (
                             <div
                                 key={img.id}
-                                className={`aspect-square rounded-none overflow-hidden relative group cursor-pointer border transition-all ${selectedImage === img.url ? "border-white" : "border-white/5 hover:border-white/20"
-                                    }`}
+                                className={`aspect-square rounded-none overflow-hidden relative group cursor-pointer border transition-all ${
+                                    selectedImage === img.url ? "border-white" : "border-white/5 hover:border-white/20"
+                                }`}
                                 onClick={() => handleSelectImage(img.url)}
                             >
                                 <Image
                                     src={img.url}
-                                    alt={img.label}
+                                    alt={img.title || "Cover"}
                                     fill
                                     className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                                    unoptimized={img.url.startsWith("/uploads/")}
                                 />
-
+                                <span className="absolute bottom-0 inset-x-0 bg-black/70 px-2 py-1 text-[9px] font-bold text-white truncate">
+                                    {img.title}
+                                </span>
                                 {selectedImage === img.url && (
                                     <div className="absolute top-2 right-2 bg-white text-black p-0.5">
                                         <Check className="w-2.5 h-2.5" />
                                     </div>
                                 )}
-                            </div>
-                        ))}
-
-                        {adminTemplates.map((template) => (
-                            <div
-                                key={`admin-${template.id}`}
-                                className={`aspect-square rounded-none overflow-hidden relative group cursor-pointer border transition-all ${selectedImage === template.previewImage ? "border-emerald-400" : "border-white/5 hover:border-white/20"}`}
-                                onClick={() => handleSelectImage(template.previewImage)}
-                            >
-                                <Image src={template.previewImage} alt={template.title} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" unoptimized />
-                                <span className="absolute bottom-0 inset-x-0 bg-black/70 px-2 py-1 text-[9px] font-bold text-white truncate">{template.title}</span>
-                                {selectedImage === template.previewImage && <div className="absolute top-2 right-2 bg-emerald-400 text-black p-0.5"><Check className="w-2.5 h-2.5" /></div>}
                             </div>
                         ))}
                     </div>
@@ -270,6 +294,14 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
                     </div>
                 </div>
             </div>
+
+            {adjustingFile && (
+                <ImagePositionAdjuster
+                    file={adjustingFile}
+                    onConfirm={handleAdjusterConfirm}
+                    onCancel={() => setAdjustingFile(null)}
+                />
+            )}
         </div>
     );
 }

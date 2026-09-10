@@ -15,7 +15,9 @@ import {
     RefreshCw,
     SlidersHorizontal,
     ExternalLink,
+    ImageIcon,
 } from "lucide-react";
+import CoverTemplatesModule from "@/components/admin/CoverTemplatesModule";
 
 interface EventTemplateItem {
     id: string;
@@ -34,6 +36,7 @@ interface EventTemplateItem {
 }
 
 export default function AdminTemplatesPage() {
+    const [activeTab, setActiveTab] = useState<"covers" | "themes">("covers");
     const [templates, setTemplates] = useState<EventTemplateItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -148,17 +151,47 @@ export default function AdminTemplatesPage() {
 
     return (
         <div className="w-full max-w-full xl:max-w-7xl mx-auto space-y-8 pb-16">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                        <Sparkles className="w-8 h-8 text-emerald-400" />
-                        Event Templates
-                    </h1>
-                    <p className="text-sm text-gray-400 mt-1">
-                        Manage pre-designed event templates that appear in the homepage Trending section and creation studio.
-                    </p>
-                </div>
+            {/* Top Navigation Tabs */}
+            <div className="flex items-center gap-2 border-b border-white/10 pb-4">
+                <button
+                    onClick={() => setActiveTab("covers")}
+                    className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
+                        activeTab === "covers"
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                            : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
+                    }`}
+                >
+                    <ImageIcon className="w-4 h-4" />
+                    Cover Image Templates
+                </button>
+                <button
+                    onClick={() => setActiveTab("themes")}
+                    className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
+                        activeTab === "themes"
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                            : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
+                    }`}
+                >
+                    <Sparkles className="w-4 h-4" />
+                    Event Themes & Presets
+                </button>
+            </div>
+
+            {activeTab === "covers" ? (
+                <CoverTemplatesModule />
+            ) : (
+                <div className="space-y-8">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                                <Sparkles className="w-8 h-8 text-emerald-400" />
+                                Event Themes & Presets
+                            </h1>
+                            <p className="text-sm text-gray-400 mt-1">
+                                Manage pre-designed event presets that appear in the homepage Trending section and creation studio.
+                            </p>
+                        </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                     {templates.length === 0 && (
@@ -391,6 +424,8 @@ export default function AdminTemplatesPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
                 </div>
             )}
         </div>

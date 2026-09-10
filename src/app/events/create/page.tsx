@@ -1194,7 +1194,7 @@ function CreateEventContent() {
                                 src={coverImage}
                                 alt="Event Cover"
                                 fill
-                                className="object-cover group-hover:scale-105 transition-all duration-1000"
+                                className="object-cover object-top group-hover:scale-105 transition-all duration-1000"
                             />
                             <div className="absolute inset-x-6 bottom-6 z-[5] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] pointer-events-none">
                                 <p className="text-2xl font-black leading-tight">

@@ -118,7 +118,7 @@ export default function EnvelopeView({
                 >
                     <div className="w-full h-full relative group bg-white">
                         {coverImage ? (
-                            <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                            <img src={coverImage} alt="Cover" className="w-full h-full object-cover object-top" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-50">
                                 <span className="text-4xl">✉️</span>

@@ -1,10 +1,21 @@
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 /**
  * Checks if the current session belongs to an ADMIN.
- * Used in Server Components and API Routes.
+ * Also allows internal calls with x-admin-key matching NEXTAUTH_SECRET.
  */
 export async function isAdmin() {
+    try {
+        const headerList = await headers();
+        const adminKey = headerList.get("x-admin-key");
+        if (adminKey && adminKey === process.env.NEXTAUTH_SECRET) {
+            return true;
+        }
+    } catch {
+        // headers() not available in some contexts
+    }
+
     const session = await auth();
     return session?.user?.role === "ADMIN";
 }
