@@ -86,8 +86,7 @@ function CreateEventContent() {
             isPrivate: false,
             guestListHidden: false,
             visibility: "PUBLIC" as "PUBLIC" | "PRIVATE" | "UNLISTED"
-        },
-        cost: ""
+        }
     });
 
     // Memoize initialData to avoid unnecessary re-renders of EventForm
@@ -208,8 +207,8 @@ function CreateEventContent() {
             visibility: settings.privacy?.isPrivate ? "PRIVATE" : (data.visibility || settings.privacy?.visibility || "PUBLIC"),
             guestListHidden: settings.privacy?.guestListHidden,
             capacity: data.capacity,
-            cost: data.cost || settings.cost,
-            isPaid: data.isPaid !== undefined ? data.isPaid : (settings.cost !== ""),
+            // isPaid comes directly from the form toggle — no cost-based inference
+            isPaid: data.isPaid === true,
             // MERGE theme explicitly to ensure colors/effects from sidebar are preserved
             theme: {
                 ...(pendingData?.theme || {}),
@@ -253,8 +252,9 @@ function CreateEventContent() {
             localStorage.removeItem("event_effect_id");
             localStorage.removeItem("event_cover_image");
 
-            // Redirect to the event page and trigger instant Share Sheet
-            router.push(`/e/${result.event.slug}?created=true&share=true`);
+            // Redirect to the event page; for paid events also prompt ticket tier setup
+            const ticketsParam = submitData.isPaid ? '&tickets=true' : '';
+            router.push(`/e/${result.event.slug}?created=true&share=true${ticketsParam}`);
         } catch (error: any) {
             console.error("Failed to create event:", error);
             throw error;
@@ -301,7 +301,7 @@ function CreateEventContent() {
         }
 
         // Sync redundant fields to settings source of truth
-        if (data.capacity !== undefined || data.visibility !== undefined || data.requireApproval !== undefined || data.cost !== undefined) {
+        if (data.capacity !== undefined || data.visibility !== undefined || data.requireApproval !== undefined) {
             setSettings(prev => ({
                 ...prev,
                 rsvp: {
@@ -313,7 +313,6 @@ function CreateEventContent() {
                     ...prev.privacy,
                     visibility: data.visibility !== undefined ? data.visibility : prev.privacy.visibility,                    isPrivate: data.visibility === "PRIVATE" ? true : (data.visibility === "PUBLIC" ? false : prev.privacy.isPrivate)
                 },
-                cost: data.cost !== undefined ? data.cost : prev.cost
             }));
         }
     }, []);

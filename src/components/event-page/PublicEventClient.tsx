@@ -129,6 +129,15 @@ export default function PublicEventClient({
         }
     }, [searchParams]);
 
+    // Auto-open Ticket Tiers tab if redirected from a paid event creation
+    useEffect(() => {
+        if (searchParams.get("tickets") === "true" && hasAdminAccess) {
+            setSettingsTab("Tickets");
+            setIsSettingsOpen(true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams, hasAdminAccess]);
+
     // Apply theme on mount
     useEffect(() => {
         if (event?.theme) {
@@ -631,6 +640,26 @@ export default function PublicEventClient({
             )}
 
             <main className="relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 grid grid-cols-1 lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center transition-all duration-700">
+                {/* Paid event — no tiers yet: host-only setup prompt */}
+                {hasAdminAccess && event.isPaid && ticketTiers.length === 0 && (
+                    <div className="lg:col-span-2">
+                        <button
+                            onClick={() => { setSettingsTab("Tickets"); setIsSettingsOpen(true); }}
+                            className="w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 transition-all group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-amber-400 text-xl">🎟️</span>
+                                <div className="text-left">
+                                    <p className="text-sm font-black text-amber-300">Ticket tiers not set up yet</p>
+                                    <p className="text-[11px] text-amber-400/60 mt-0.5">Guests can't buy tickets until you add at least one tier.</p>
+                                </div>
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-widest text-amber-300 group-hover:translate-x-1 transition-transform whitespace-nowrap">
+                                Create Tiers →
+                            </span>
+                        </button>
+                    </div>
+                )}
                 <div className="space-y-12">
                     <ReadonlyEventSummary
                         event={event}

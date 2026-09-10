@@ -95,7 +95,6 @@ export default function EventForm({
         capacity: initialData?.capacity || "",
         visibility: initialData?.visibility || "PUBLIC",
         coverImage: (initialData as any)?.coverImage || "",
-        cost: "",
         vibeId: (initialData as any)?.theme?.vibeId || "classic",
         rsvp_going: (initialData as any)?.theme?.rsvpLabels?.going || "Going",
         rsvp_maybe: (initialData as any)?.theme?.rsvpLabels?.maybe || "Maybe",
@@ -171,7 +170,7 @@ export default function EventForm({
                 if (initialData.capacity !== undefined && initialData.capacity !== prev.capacity) updates.capacity = initialData.capacity ?? "";
                 if (initialData.visibility !== undefined && initialData.visibility !== prev.visibility) updates.visibility = initialData.visibility || "PUBLIC";
                 if ((initialData as any).coverImage !== undefined && (initialData as any).coverImage !== prev.coverImage) updates.coverImage = (initialData as any).coverImage || "";
-                if ((initialData as any).cost !== undefined && (initialData as any).cost !== prev.cost) updates.cost = (initialData as any).cost || "";
+                if ((initialData as any).isPaid !== undefined && (initialData as any).isPaid !== prev.isPaid) updates.isPaid = (initialData as any).isPaid || false;
                 if ((initialData as any).theme?.links !== undefined) updates.links = (initialData as any).theme.links || [];
 
                 const theme = (initialData as any).theme;
@@ -287,7 +286,6 @@ export default function EventForm({
             coverImage: formData.coverImage.trim() || undefined,
             status: "PUBLISHED", // Always publish events immediately
             isPaid: formData.isPaid,
-            cost: formData.cost,
             theme: {
                 vibeId: formData.vibeId,
                 rsvpLabels: {
@@ -301,7 +299,6 @@ export default function EventForm({
                     rsvp: {
                         requireApproval: formData.requireApproval,
                     },
-                    cost: formData.cost,
                 },
                 links: formData.links,
                 effect: effect, // Include effect in theme
@@ -485,37 +482,34 @@ export default function EventForm({
                 </div>
 
 
-                {/* Cost */}
-                <div className="flex flex-col border-b border-white/5 group hover:bg-white/[0.01] transition-all">
-                    <div className="flex items-center gap-4 px-6 py-4">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5 text-white/40">
-                            <path d="M5 12h14M12 5l7 7-7 7" className="rotate-[-45deg] origin-center" />
+                {/* Paid Event Toggle */}
+                <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
+                    <div className="flex items-center gap-4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white/40 shrink-0">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                            <line x1="1" y1="10" x2="23" y2="10" />
                         </svg>
-                        <input
-                            name="cost"
-                            value={formData.cost}
-                            onChange={handleChange}
-                            placeholder="Cost per person in ₦ (e.g. ₦5,000)"
-                            className="bg-transparent border-none outline-none w-full text-base font-bold text-white/40 placeholder:text-white/20 focus:placeholder:text-transparent"
-                        />
-                        {formData.cost && (
-                            <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-                                <input
-                                    type="checkbox"
-                                    name="isPaid"
-                                    checked={formData.isPaid}
-                                    onChange={(e) => {
-                                        const newData = { ...formData, isPaid: e.target.checked };
-                                        setFormData(newData);
-                                        onDataChange?.(newData);
-                                    }}
-                                    className="sr-only peer"
-                                />
-                                <div className="w-10 h-5 bg-white/10 rounded-full relative peer-checked:bg-green-500 transition-colors after:content-[''] after:absolute after:top-1 after:left-1 after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5"></div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-white/40 peer-checked:text-white">Paid via Stripe</span>
-                            </label>
-                        )}
+                        <div>
+                            <p className="text-base font-bold text-white/70">Paid Event</p>
+                            <p className="text-[11px] text-white/30 mt-0.5">
+                                {formData.isPaid ? "Ticket tiers can be set up after publishing" : "Free to attend"}
+                            </p>
+                        </div>
                     </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="isPaid"
+                            checked={formData.isPaid}
+                            onChange={(e) => {
+                                const newData = { ...formData, isPaid: e.target.checked };
+                                setFormData(newData);
+                                onDataChange?.(newData);
+                            }}
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-white/10 rounded-full relative peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-1 after:left-1 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
                 </div>
 
                 {/* Max Capacity */}

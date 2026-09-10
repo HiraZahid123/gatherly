@@ -112,28 +112,8 @@ export async function POST(request: NextRequest) {
             link: `/e/${event.slug}`,
         });
 
-        // If isPaid is true and cost is provided, create a default ticket tier
-        if (isPaid && cost) {
-            // Extract numbers from cost string (e.g., "₦5,000" or "5000" -> 5000)
-            const cleanCost = cost.replace(/,/g, '');
-            const priceMatch = cleanCost.match(/(\d+(?:\.\d+)?)/);
-            if (priceMatch) {
-                const priceInNaira = parseFloat(priceMatch[1]);
-                const priceInKobo = Math.round(priceInNaira * 100);
-
-                if (priceInKobo > 0) {
-                    await prisma.ticketTier.create({
-                        data: {
-                            eventId: event.id,
-                            name: "General Admission",
-                            price: priceInKobo,
-                            quantity: capacity || 100, // Default to capacity or 100
-                            currency: "ngn",
-                        },
-                    });
-                }
-            }
-        }
+        // Ticket tiers are created separately via the Event Settings modal after publishing.
+        // No auto-tier creation here — the host is prompted to add tiers on the event page.
 
         // Create reminders if they were provided in the theme settings
         if (processedTheme?.settings?.reminders !== undefined) {
