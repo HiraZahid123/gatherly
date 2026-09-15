@@ -16,6 +16,7 @@ interface DashboardEvent {
     location?: string;
     coverImage?: string;
     type?: string;
+    status?: string;
     theme?: {
         backgroundTheme?: string;
     };
@@ -37,6 +38,18 @@ export default function DashboardPage() {
     const [events, setEvents] = useState<DashboardEvent[]>([]);
     const [activeTab, setActiveTab] = useState("Hosting");
     const [isEventsLoading, setIsEventsLoading] = useState(true);
+    const [draftSavedToast, setDraftSavedToast] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("draftSaved") === "true") {
+                setDraftSavedToast(true);
+                window.history.replaceState({}, "", "/dashboard");
+                setTimeout(() => setDraftSavedToast(false), 6000);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (status === "authenticated") {
@@ -110,22 +123,24 @@ export default function DashboardPage() {
 
     const filteredEvents = useMemo(() => {
         const now = new Date();
-        if (activeTab === "Upcoming")       return hosted.filter(e => e.startDate && new Date(e.startDate) >= now);
+        if (activeTab === "Upcoming")       return hosted.filter(e => e.status !== "DRAFT" && e.startDate && new Date(e.startDate) >= now);
         if (activeTab === "Hosting")        return hosted;
+        if (activeTab === "Drafts")         return hosted.filter(e => e.status === "DRAFT");
         if (activeTab === "Open invite")    return attending.filter(e => e.startDate && new Date(e.startDate) >= now);
         if (activeTab === "Attended")       return attending.filter(e => e.startDate && new Date(e.startDate) < now);
-        if (activeTab === "All past events") return hosted.filter(e => e.startDate && new Date(e.startDate) < now);
+        if (activeTab === "All past events") return hosted.filter(e => e.status !== "DRAFT" && e.startDate && new Date(e.startDate) < now);
         return [];
     }, [hosted, attending, activeTab]);
 
     const displayStats = useMemo(() => {
         const now = new Date();
         return {
-            upcoming: hosted.filter(e => e.startDate && new Date(e.startDate) >= now).length,
+            upcoming: hosted.filter(e => e.status !== "DRAFT" && e.startDate && new Date(e.startDate) >= now).length,
             hosting:  hosted.length,
+            drafts:   hosted.filter(e => e.status === "DRAFT").length,
             open:     attending.filter(e => e.startDate && new Date(e.startDate) >= now).length,
             attended: attending.filter(e => e.startDate && new Date(e.startDate) < now).length,
-            past:     hosted.filter(e => e.startDate && new Date(e.startDate) < now).length,
+            past:     hosted.filter(e => e.status !== "DRAFT" && e.startDate && new Date(e.startDate) < now).length,
         };
     }, [hosted, attending]);
 
@@ -257,6 +272,24 @@ export default function DashboardPage() {
             </header>
 
             <main className="relative z-10 max-w-[1400px] mx-auto px-6 pt-32 pb-48">
+                {/* Draft Saved Toast Banner */}
+                {draftSavedToast && (
+                    <div className="mb-8 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-white backdrop-blur-md animate-in fade-in slide-in-from-top-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-xl">🎉</span>
+                            <p className="text-sm font-bold text-emerald-300">
+                                Event draft saved successfully! You can find and continue editing it anytime in the <span className="underline cursor-pointer" onClick={() => setActiveTab("Drafts")}>Drafts</span> tab.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setDraftSavedToast(false)}
+                            className="text-xs font-bold text-white/60 hover:text-white px-3 py-1 bg-white/10 rounded-full transition-colors"
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                )}
+
                 {/* Greeting */}
                 <section className="mb-12">
                     <h1 className="text-5xl font-black tracking-tight mb-2">Welcome back {session.user.name?.split(" ")[0] ?? "User"}!</h1>
@@ -283,6 +316,7 @@ export default function DashboardPage() {
                         {[
                             { name: "Upcoming",        count: displayStats.upcoming },
                             { name: "Hosting",         count: displayStats.hosting },
+                            { name: "Drafts",          count: displayStats.drafts },
                             { name: "Open invite",     count: displayStats.open },
                             { name: "Attended",        count: displayStats.attended },
                             { name: "All past events", count: displayStats.past },
@@ -312,7 +346,11 @@ export default function DashboardPage() {
                 ) : filteredEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10 group/grid">
                         {filteredEvents.map((event: DashboardEvent) => (
-                            <Link key={event.id} href={`/e/${event.slug}`} className="group/card block space-y-4">
+                            <Link 
+                                key={event.id} 
+                                href={event.status === "DRAFT" ? `/events/${event.id}/edit` : `/e/${event.slug}`} 
+                                className="group/card block space-y-4"
+                            >
                                 <div className="aspect-square rounded-[32px] overflow-hidden bg-white/5 relative shadow-2xl transition-all duration-500 group-hover/card:scale-[1.02] group-hover/card:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
                                     <Image
                                         src={event.coverImage || "/partiful/Aquarius.avif"}
@@ -321,9 +359,15 @@ export default function DashboardPage() {
                                         className="object-cover"
                                     />
                                     <div className="absolute top-4 left-4 flex gap-2">
-                                        <span className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-black tracking-widest uppercase truncate max-w-[100px] text-white">
-                                            {event.location || "TBD"}
-                                        </span>
+                                        {event.status === "DRAFT" ? (
+                                            <span className="px-3 py-1 bg-amber-500 text-black font-black text-[10px] tracking-widest uppercase rounded-full shadow-lg">
+                                                📝 Draft
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-black tracking-widest uppercase truncate max-w-[100px] text-white">
+                                                {event.location || "TBD"}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="absolute top-4 right-4">
                                         <button
@@ -335,7 +379,11 @@ export default function DashboardPage() {
                                         </button>
                                     </div>
                                     <div className="absolute bottom-4 right-4">
-                                        {event.isHosting ? (
+                                        {event.status === "DRAFT" ? (
+                                            <div className="px-3 py-1 bg-amber-400 text-black rounded-md text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-lg">
+                                                ✏️ Continue Draft
+                                            </div>
+                                        ) : event.isHosting ? (
                                             <div className="px-3 py-1 bg-[#facc15] text-black rounded-md text-[9px] font-black tracking-widest uppercase flex items-center gap-1 shadow-lg">
                                                 👑 Hosting
                                             </div>
@@ -352,15 +400,23 @@ export default function DashboardPage() {
                                 </div>
                                 <div className="space-y-1.5 px-2">
                                     <h3 className="text-xl font-black tracking-tight group-hover/card:text-white/90 transition-colors truncate">{event.title}</h3>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-white/40 font-bold uppercase tracking-widest">Hosted by</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-black ring-1 ring-white/20">
-                                                {event.host?.name?.charAt(0) || "U"}
-                                            </div>
-                                            <span className="text-xs font-black tracking-tight">{event.host?.name || "Unknown"}</span>
+                                    {event.status === "DRAFT" ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-amber-400 font-bold">Saved draft</span>
+                                            <span className="text-white/30">•</span>
+                                            <span className="text-xs text-white/50 hover:text-white transition-colors">Click to continue editing &rarr;</span>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-white/40 font-bold uppercase tracking-widest">Hosted by</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-black ring-1 ring-white/20">
+                                                    {event.host?.name?.charAt(0) || "U"}
+                                                </div>
+                                                <span className="text-xs font-black tracking-tight">{event.host?.name || "Unknown"}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </Link>
                         ))}
@@ -463,7 +519,7 @@ export default function DashboardPage() {
                         <span className="opacity-20">|</span>
                         <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
                         <span className="opacity-20">|</span>
-                        <Link href="/discover" className="hover:text-white transition-colors">Discover</Link>
+                        <Link href="/explore" className="hover:text-white transition-colors">Discover</Link>
                     </div>
                 </div>
             </footer>

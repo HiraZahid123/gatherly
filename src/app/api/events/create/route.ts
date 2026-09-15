@@ -40,6 +40,59 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
+        // Normalize date inputs to ISO strings before validation
+        if (body.startDate) {
+            const d = new Date(body.startDate);
+            if (!isNaN(d.getTime())) body.startDate = d.toISOString();
+        }
+        if (body.endDate) {
+            const d = new Date(body.endDate);
+            if (!isNaN(d.getTime())) body.endDate = d.toISOString();
+            else delete body.endDate;
+        } else if (body.endDate === "") {
+            delete body.endDate;
+        }
+        if (body.rsvpDeadline) {
+            const d = new Date(body.rsvpDeadline);
+            if (!isNaN(d.getTime())) body.rsvpDeadline = d.toISOString();
+            else body.rsvpDeadline = null;
+        } else if (body.rsvpDeadline === "") {
+            body.rsvpDeadline = null;
+        }
+
+        // If saving as draft, provide sensible defaults for partial data
+        if (body.status === "DRAFT") {
+            if (!body.title || typeof body.title !== "string" || body.title.trim().length < 3) {
+                body.title = body.title && body.title.trim().length > 0 ? body.title.trim() + " (Draft)" : "Untitled Draft";
+            }
+            if (!body.startDate) {
+                body.startDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            }
+            if (body.capacity !== undefined && (body.capacity === null || body.capacity <= 0 || isNaN(Number(body.capacity)))) {
+                delete body.capacity;
+            }
+        } else {
+            // Strict validations when publishing an event
+            if (!body.title || typeof body.title !== "string" || body.title.trim().length < 3) {
+                return NextResponse.json({ error: "Title must be at least 3 characters to publish." }, { status: 400 });
+            }
+            if (!body.location || typeof body.location !== "string" || body.location.trim().length < 3) {
+                return NextResponse.json({ error: "Location is required to publish an event." }, { status: 400 });
+            }
+            if (!body.startDate || isNaN(new Date(body.startDate).getTime())) {
+                return NextResponse.json({ error: "A valid start date and time are required to publish." }, { status: 400 });
+            }
+            if (new Date(body.startDate) <= new Date()) {
+                return NextResponse.json({ error: "Event start date and time must be in the future to publish." }, { status: 400 });
+            }
+            if (body.endDate && new Date(body.endDate) <= new Date(body.startDate)) {
+                return NextResponse.json({ error: "End date must be after the start date." }, { status: 400 });
+            }
+            if (body.rsvpDeadline && new Date(body.rsvpDeadline) >= new Date(body.startDate)) {
+                return NextResponse.json({ error: "RSVP deadline must be before the event starts." }, { status: 400 });
+            }
+        }
+
         // Validate input
         const validation = eventCreateSchema.safeParse(body);
         if (!validation.success) {
@@ -83,7 +136,7 @@ export async function POST(request: NextRequest) {
                 isPrivate: isPrivate || false,
                 isPaid: isPaid || false,
                 guestListHidden: guestListHidden || false,
-                status: status || "PUBLISHED", // Default to PUBLISHED for immediate visibility
+                status: body.status === "DRAFT" || status === "DRAFT" ? "DRAFT" : "PUBLISHED",
                 theme: Object.keys(processedTheme).length > 0 ? processedTheme : undefined,
                 hostId: session.user.id,
             },

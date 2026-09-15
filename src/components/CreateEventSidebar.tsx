@@ -1,6 +1,6 @@
 "use client";
 
-import { Palette, Sparkles, Settings, CheckCircle, LogIn, Type, Plus, Loader2 } from "lucide-react";
+import { Palette, Sparkles, Settings, CheckCircle, LogIn, Type, Plus, Loader2, Bookmark } from "lucide-react";
 
 interface CreateEventSidebarProps {
     onItemClick: (label: string) => void;
@@ -43,6 +43,7 @@ export default function CreateEventSidebar({
         { icon: Palette, label: "Theme" },
         { icon: Sparkles, label: "Effect", badge: "NEW" },
         { icon: Settings, label: "Settings" },
+        { icon: Bookmark, label: "Save Draft" },
         {
             icon: isLoading ? Loader2 : (isAuthenticated ? CheckCircle : LogIn),
             label: isAuthenticated ? "Publish" : "Sign in",

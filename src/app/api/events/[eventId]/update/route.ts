@@ -25,7 +25,7 @@ export async function PATCH(
         // Check if event exists and user is the owner
         const existingEvent = await prisma.event.findUnique({
             where: { id: eventId },
-            select: { hostId: true, title: true },
+            select: { hostId: true, title: true, status: true, startDate: true, endDate: true, location: true },
         });
 
         if (!existingEvent) {
@@ -42,7 +42,40 @@ export async function PATCH(
             );
         }
 
+        // Past events cannot be edited (drafts can always be edited)
+        if (existingEvent.status !== "DRAFT") {
+            const eventEndTime = existingEvent.endDate 
+                ? new Date(existingEvent.endDate) 
+                : (existingEvent.startDate ? new Date(new Date(existingEvent.startDate).getTime() + 4 * 60 * 60 * 1000) : null);
+            if (eventEndTime && eventEndTime < new Date()) {
+                return NextResponse.json(
+                    { error: "Past events cannot be edited because this event has already taken place." },
+                    { status: 400 }
+                );
+            }
+        }
+
         const body = await request.json();
+
+        // Normalize date inputs to ISO strings before validation
+        if (body.startDate) {
+            const d = new Date(body.startDate);
+            if (!isNaN(d.getTime())) body.startDate = d.toISOString();
+        }
+        if (body.endDate) {
+            const d = new Date(body.endDate);
+            if (!isNaN(d.getTime())) body.endDate = d.toISOString();
+            else delete body.endDate;
+        } else if (body.endDate === "") {
+            delete body.endDate;
+        }
+        if (body.rsvpDeadline) {
+            const d = new Date(body.rsvpDeadline);
+            if (!isNaN(d.getTime())) body.rsvpDeadline = d.toISOString();
+            else body.rsvpDeadline = null;
+        } else if (body.rsvpDeadline === "") {
+            body.rsvpDeadline = null;
+        }
 
         // Validate input
         const validation = eventUpdateSchema.safeParse(body);
@@ -51,6 +84,33 @@ export async function PATCH(
                 { error: validation.error.issues[0].message },
                 { status: 400 }
             );
+        }
+
+        // Enforce publishing requirements when publishing a draft or updating a published event
+        const willBePublished = body.status === "PUBLISHED" || (existingEvent.status === "PUBLISHED" && body.status !== "DRAFT");
+        if (willBePublished) {
+            const checkTitle = body.title !== undefined ? body.title : existingEvent.title;
+            const checkLocation = body.location !== undefined ? body.location : existingEvent.location;
+            const checkStartDate = body.startDate !== undefined ? body.startDate : existingEvent.startDate?.toISOString();
+
+            if (!checkTitle || typeof checkTitle !== "string" || checkTitle.trim().length < 3) {
+                return NextResponse.json({ error: "Title must be at least 3 characters to publish." }, { status: 400 });
+            }
+            if (!checkLocation || typeof checkLocation !== "string" || checkLocation.trim().length < 3) {
+                return NextResponse.json({ error: "Location is required to publish an event." }, { status: 400 });
+            }
+            if (!checkStartDate || isNaN(new Date(checkStartDate).getTime())) {
+                return NextResponse.json({ error: "A valid start date is required to publish." }, { status: 400 });
+            }
+            if (new Date(checkStartDate) <= new Date()) {
+                return NextResponse.json({ error: "Event start date and time must be in the future to publish." }, { status: 400 });
+            }
+            if (body.endDate && new Date(body.endDate) <= new Date(checkStartDate)) {
+                return NextResponse.json({ error: "End date must be after the start date." }, { status: 400 });
+            }
+            if (body.rsvpDeadline && new Date(body.rsvpDeadline) >= new Date(checkStartDate)) {
+                return NextResponse.json({ error: "RSVP deadline must be before the event starts." }, { status: 400 });
+            }
         }
 
         const {

@@ -5,8 +5,14 @@ import { notFound } from "next/navigation";
 
 const getEventBySlug = (slug: string) => unstable_cache(
     async () => {
-        return prisma.event.findUnique({
-            where: { slug },
+        if (!slug || slug === "undefined") return null;
+        return prisma.event.findFirst({
+            where: {
+                OR: [
+                    { slug },
+                    { id: slug }
+                ]
+            },
             include: {
                 host: { select: { id: true, name: true, email: true, image: true } },
                 _count: { select: { rsvps: { where: { status: "ACCEPTED" } } } },

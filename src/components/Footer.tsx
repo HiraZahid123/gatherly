@@ -18,9 +18,9 @@ export default function Footer() {
     return (
         <footer className="bg-black text-white pt-20 pb-10 border-t border-white/10">
             <div className="container mx-auto px-6 max-w-7xl">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12 mb-16">
                     {/* Brand */}
-                    <div className="col-span-1 md:col-span-1">
+                    <div className="col-span-2 md:col-span-1">
                         <Link href="/" className="inline-block mb-6 group">
                             <div className="relative h-11 w-44 transition-transform group-hover:scale-105">
                                 <Image
@@ -36,14 +36,15 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    {/* Navigation */}
+                    {/* Event Types */}
                     <div>
-                        <h4 className="font-semibold text-lg mb-4">Explore</h4>
+                        <h4 className="font-semibold text-lg mb-4">Event Types</h4>
                         <ul className="space-y-3 text-sm text-white/70">
                             <li><Link href="/wedding" className="hover:text-white transition-colors">Wedding</Link></li>
                             <li><Link href="/birthdays" className="hover:text-white transition-colors">Birthdays</Link></li>
                             <li><Link href="/concerts" className="hover:text-white transition-colors">Concerts</Link></li>
                             <li><Link href="/housewarmings" className="hover:text-white transition-colors">Housewarmings</Link></li>
+                            <li><Link href="/dinners" className="hover:text-white transition-colors">Dinners</Link></li>
                         </ul>
                     </div>
 
@@ -51,9 +52,47 @@ export default function Footer() {
                     <div>
                         <h4 className="font-semibold text-lg mb-4">Resources</h4>
                         <ul className="space-y-3 text-sm text-white/70">
+                            <li><Link href="/explore" className="hover:text-white transition-colors">Discover</Link></li>
                             <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
                             <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
                             <li><Link href="/dashboard" className="hover:text-white transition-colors">My Events</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* Socials */}
+                    <div>
+                        <h4 className="font-semibold text-lg mb-4">Socials</h4>
+                        <ul className="space-y-3 text-sm text-white/70">
+                            <li>
+                                <a 
+                                    href="https://instagram.com/jollywitme" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    Instagram
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="https://tiktok.com/@jollywitme" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    Tik Tok
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="https://x.com/jollywitme" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    X
+                                </a>
+                            </li>
                         </ul>
                     </div>
 

@@ -32,6 +32,19 @@ export async function PATCH(
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
+        // Past events cannot be edited (drafts can always be edited)
+        if (event.status !== "DRAFT") {
+            const eventEndTime = event.endDate 
+                ? new Date(event.endDate) 
+                : (event.startDate ? new Date(new Date(event.startDate).getTime() + 4 * 60 * 60 * 1000) : null);
+            if (eventEndTime && eventEndTime < new Date()) {
+                return NextResponse.json(
+                    { error: "Past events cannot be edited because this event has already taken place." },
+                    { status: 400 }
+                );
+            }
+        }
+
         // Update event (for now just settings/theme)
         const updatedEvent = await prisma.event.update({
             where: { id: eventId },

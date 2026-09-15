@@ -19,7 +19,7 @@ import InteractiveBackground from "@/components/InteractiveBackground";
 import VfxCanvas from "@/components/vfx/VfxCanvas";
 import { VIBE_THEMES, normalizeThemeId, normalizeEffectId } from "@/lib/theme";
 import EventSettingsModal from "@/components/EventSettingsModal";
-import { ChevronLeft, Palette, Sparkles, Settings, CheckCircle, LogIn, Loader2 } from "lucide-react";
+import { ChevronLeft, Palette, Sparkles, Settings, CheckCircle, LogIn, Loader2, Bookmark } from "lucide-react";
 import CustomFloatingVfx from "@/components/vfx/CustomFloatingVfx";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
@@ -42,6 +42,7 @@ function CreateEventContent() {
     const router = useRouter();
     const { data: session } = useSession() as { data: SessionData | null };
     const [isLoading, setIsLoading] = useState(false);
+    const [isSavingDraft, setIsSavingDraft] = useState(false);
     const [pendingData, setPendingData] = useState<any>(null);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
     const [isFontOpen, setIsFontOpen] = useState(false);
@@ -263,6 +264,75 @@ function CreateEventContent() {
         }
     };
 
+    const handleSaveDraft = async () => {
+        if (!session) {
+            router.push(`/auth/signin?callbackUrl=/events/create`);
+            return;
+        }
+
+        setIsSavingDraft(true);
+        try {
+            const isHex = (v: unknown) => typeof v === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v);
+            const parseDateToIso = (val: any) => {
+                if (!val || typeof val !== "string" || val.trim() === "") return undefined;
+                const d = new Date(val);
+                return isNaN(d.getTime()) ? undefined : d.toISOString();
+            };
+
+            const draftPayload = {
+                ...pendingData,
+                title: pendingData?.title && pendingData.title.trim().length > 0 ? pendingData.title.trim() : "Untitled Draft",
+                coverImage: coverImage,
+                status: "DRAFT",
+                startDate: parseDateToIso(pendingData?.startDate) || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                endDate: parseDateToIso(pendingData?.endDate),
+                rsvpDeadline: parseDateToIso(pendingData?.rsvpDeadline) ?? null,
+                visibility: settings.privacy?.isPrivate ? "PRIVATE" : (pendingData?.visibility || settings.privacy?.visibility || "PUBLIC"),
+                isPrivate: settings.privacy?.isPrivate ?? false,
+                guestListHidden: settings.privacy?.guestListHidden ?? false,
+                capacity: pendingData?.capacity && Number(pendingData.capacity) > 0 ? Number(pendingData.capacity) : undefined,
+                isPaid: pendingData?.isPaid === true,
+                theme: {
+                    ...(pendingData?.theme || {}),
+                    vibeId: pendingData?.theme?.vibeId || vibeId,
+                    rsvpStyle: pendingData?.theme?.rsvpStyle || rsvpStyle,
+                    showRSVP: pendingData?.theme?.showRSVP ?? showRSVP,
+                    rsvpLabels: rsvpLabels,
+                    backgroundTheme: selectedTheme,
+                    effect: effect,
+                    primaryColor: isHex(pendingData?.theme?.primaryColor) ? pendingData?.theme?.primaryColor : undefined,
+                    secondaryColor: isHex(pendingData?.theme?.secondaryColor) ? pendingData?.theme?.secondaryColor : undefined,
+                    settings: settings
+                }
+            };
+
+            const response = await fetch("/api/events/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(draftPayload),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to save draft");
+            }
+
+            // Clear local storage draft since it is now persisted in database
+            localStorage.removeItem("pending_event_data");
+            localStorage.removeItem("event_theme_id");
+            localStorage.removeItem("event_effect_id");
+            localStorage.removeItem("event_cover_image");
+
+            // Redirect to dashboard where host can continue editing whenever ready
+            router.push("/dashboard?draftSaved=true");
+        } catch (error: any) {
+            console.error("Failed to save draft:", error);
+            alert(error.message || "Failed to save draft");
+        } finally {
+            setIsSavingDraft(false);
+        }
+    };
+
 
 
     const handleDataChange = useCallback((data: any) => {
@@ -327,6 +397,7 @@ function CreateEventContent() {
         if (label === "Effect") setIsEffectOpen(true);
         if (label === "Preview") setIsPreviewMode(true);
         if (label === "Settings") setIsSettingsOpen(true);
+        if (label === "Save Draft") handleSaveDraft();
         if (label === "Publish") {
             document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
         }
@@ -494,8 +565,13 @@ function CreateEventContent() {
                         <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Previewing Invitation</span>
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                     </div>
-                    <button className="px-8 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold transition-all shadow-lg shadow-emerald-500/20">
-                        Save Draft
+                    <button
+                        type="button"
+                        onClick={handleSaveDraft}
+                        disabled={isSavingDraft}
+                        className="px-8 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                    >
+                        {isSavingDraft ? "Saving..." : "Save Draft"}
                     </button>
                 </div>
             )}
@@ -503,6 +579,23 @@ function CreateEventContent() {
             <main className={`relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 lg:pb-48 pb-32 grid grid-cols-1 ${isPreviewMode ? 'max-w-xl' : 'lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center'} transition-all duration-700`}>
                 {/* Left Column: Form Section */}
                 <div className={`space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000 ease-out ${isPreviewMode ? 'hidden' : ''}`}>
+
+                    {/* Top Dashboard & Save Draft Action Bar */}
+                    <div className="flex items-center justify-between gap-4 text-white/50 border-b border-white/10 pb-4">
+                        <Link href="/dashboard" className="flex items-center gap-1.5 text-xs font-bold text-white/60 hover:text-white transition-colors">
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>My Events</span>
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={handleSaveDraft}
+                            disabled={isSavingDraft}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                        >
+                            {isSavingDraft ? <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" /> : <Bookmark className="w-3.5 h-3.5 text-amber-400" />}
+                            <span>Save Draft</span>
+                        </button>
+                    </div>
 
                     {/* Mobile cover thumbnail — hidden on lg where the real preview column shows */}
                     <div className="lg:hidden w-full aspect-video rounded-2xl overflow-hidden relative shadow-xl">
@@ -1912,6 +2005,14 @@ function CreateEventContent() {
                     >
                         <Settings className="w-5 h-5 text-white/70" />
                         <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Settings</span>
+                    </button>
+                    <button
+                        onClick={handleSaveDraft}
+                        disabled={isSavingDraft}
+                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                        {isSavingDraft ? <Loader2 className="w-5 h-5 text-amber-400 animate-spin" /> : <Bookmark className="w-5 h-5 text-amber-400" />}
+                        <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Draft</span>
                     </button>
 
                     {/* Publish / Sign in — full-width primary CTA */}

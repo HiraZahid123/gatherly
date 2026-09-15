@@ -17,12 +17,15 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const filter = searchParams.get("filter"); // 'upcoming', 'past', or null for all
 
-        // Build where clause to include hosted events OR accepted RSVPs
+        // Build where clause: hosts can see their own events (including DRAFT), guests only see non-drafts
         const where: any = {
-            status: { in: ["PUBLISHED", "ACTIVE", "CLOSED"] },
             OR: [
-                { hostId: session.user.id },
                 {
+                    hostId: session.user.id,
+                    status: { in: ["DRAFT", "PUBLISHED", "ACTIVE", "CLOSED"] },
+                },
+                {
+                    status: { in: ["PUBLISHED", "ACTIVE", "CLOSED"] },
                     rsvps: {
                         some: {
                             userId: session.user.id,

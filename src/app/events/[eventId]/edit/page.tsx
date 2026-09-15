@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import EventForm from "@/components/EventForm";
 import RSVPOptions, { RSVP_STYLES } from "@/components/RSVPOptions";
@@ -13,7 +14,7 @@ import CoverImageGallery from "@/components/CoverImageGallery";
 import EffectSelector from "@/components/EffectSelector";
 import ThemeSelector from "@/components/ThemeSelector";
 import { VIBE_THEMES } from "@/lib/theme";
-import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert } from "lucide-react";
+import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert, Bookmark, Loader2 } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
@@ -51,6 +52,10 @@ export default function EditEventPage() {
     // Loading State
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isSavingDraft, setIsSavingDraft] = useState(false);
+    const [isPastEvent, setIsPastEvent] = useState(false);
+    const [isDraftEvent, setIsDraftEvent] = useState(false);
+    const [eventSlug, setEventSlug] = useState<string>("");
     const [error, setError] = useState("");
 
     // Event Data State
@@ -168,8 +173,10 @@ export default function EditEventPage() {
                     }
                 };
 
+                setEventSlug(foundEvent.slug || "");
                 setPendingData({
                     id: foundEvent.id,
+                    slug: foundEvent.slug,
                     title: foundEvent.title,
                     description: foundEvent.description,
                     location: foundEvent.location,
@@ -206,6 +213,18 @@ export default function EditEventPage() {
                 }
 
 
+                // Check if event is in the past (only for published/non-draft events)
+                const isDraft = foundEvent.status === "DRAFT";
+                setIsDraftEvent(isDraft);
+                if (!isDraft) {
+                    const eventEndTime = foundEvent.endDate 
+                        ? new Date(foundEvent.endDate) 
+                        : (foundEvent.startDate ? new Date(new Date(foundEvent.startDate).getTime() + 4 * 60 * 60 * 1000) : null);
+                    if (eventEndTime && eventEndTime < new Date()) {
+                        setIsPastEvent(true);
+                    }
+                }
+
                 // Restore other independent visual states if we were saving them (assuming we might eventually save these to DB too)
                 // For now, we'll keep defaults or try to infer from typical usage if available
                 if (foundEvent.coverImage) setCoverImage(foundEvent.coverImage);
@@ -222,6 +241,11 @@ export default function EditEventPage() {
 
 
     const handleSubmit = async (data: any) => {
+        if (isPastEvent) {
+            setError("Past events cannot be edited because this event has already taken place.");
+            return;
+        }
+
         setIsSaving(true);
 
         // Only pass colors if they are valid 6-digit hex strings
@@ -335,13 +359,79 @@ export default function EditEventPage() {
         }
     };
 
+    const handleSaveDraft = async () => {
+        if (isPastEvent) return;
+        setIsSavingDraft(true);
+        try {
+            const isHex = (v: unknown) => typeof v === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v);
+            const parseDateToIso = (val: any) => {
+                if (!val || typeof val !== "string" || val.trim() === "") return undefined;
+                const d = new Date(val);
+                return isNaN(d.getTime()) ? undefined : d.toISOString();
+            };
+
+            const draftPayload = {
+                ...pendingData,
+                title: pendingData?.title && pendingData.title.trim().length > 0 ? pendingData.title.trim() : "Untitled Draft",
+                coverImage: coverImage,
+                status: "DRAFT",
+                startDate: parseDateToIso(pendingData?.startDate) || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                endDate: parseDateToIso(pendingData?.endDate),
+                rsvpDeadline: parseDateToIso(pendingData?.rsvpDeadline) ?? null,
+                visibility: settings.privacy?.isPrivate ? "PRIVATE" : (pendingData?.visibility || settings.privacy?.visibility || "PUBLIC"),
+                isPrivate: settings.privacy?.isPrivate ?? false,
+                guestListHidden: settings.privacy?.guestListHidden ?? false,
+                capacity: pendingData?.capacity && Number(pendingData.capacity) > 0 ? Number(pendingData.capacity) : undefined,
+                isPaid: pendingData?.isPaid === true,
+                theme: {
+                    ...(pendingData?.theme || {}),
+                    vibeId: pendingData?.theme?.vibeId || vibeId,
+                    rsvpStyle: pendingData?.theme?.rsvpStyle || rsvpStyle,
+                    showRSVP: pendingData?.theme?.showRSVP ?? showRSVP,
+                    rsvpLabels: rsvpLabels,
+                    backgroundTheme: selectedTheme,
+                    effect: effect,
+                    primaryColor: isHex(pendingData?.theme?.primaryColor) ? pendingData?.theme?.primaryColor : undefined,
+                    secondaryColor: isHex(pendingData?.theme?.secondaryColor) ? pendingData?.theme?.secondaryColor : undefined,
+                    settings: settings
+                }
+            };
+
+            const response = await fetch(`/api/events/${params.eventId}/update`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(draftPayload),
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to save draft");
+            }
+
+            router.push("/dashboard?draftSaved=true");
+        } catch (error: any) {
+            console.error("Failed to save draft:", error);
+            alert(error.message || "Failed to save draft");
+        } finally {
+            setIsSavingDraft(false);
+        }
+    };
+
     const handleSidebarClick = (label: string) => {
         if (label === "Font") setIsFontOpen(true);
         if (label === "Theme") setIsThemeOpen(true);
         if (label === "Effect") setIsEffectOpen(true);
         if (label === "Preview") setIsPreviewMode(true);
         if (label === "Settings") setIsSettingsOpen(true);
+        if (label === "Save Draft") {
+            handleSaveDraft();
+            return;
+        }
         if (label === "Publish") {
+            if (isPastEvent) {
+                setError("Past events cannot be edited because this event has already taken place.");
+                return;
+            }
             // Dispatch submit event to the form
             document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
         }
@@ -563,6 +653,48 @@ export default function EditEventPage() {
             <main className={`relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 grid grid-cols-1 ${isPreviewMode ? 'max-w-xl' : 'lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center'} transition-all duration-700`}>
                 {/* Left Column: Form Section */}
                 <div className={`space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000 ease-out ${isPreviewMode ? 'hidden' : ''}`}>
+                    {/* Top Dashboard & Action Bar */}
+                    <div className="flex items-center justify-between gap-4 text-white/50 border-b border-white/10 pb-4">
+                        <Link href="/dashboard" className="flex items-center gap-1.5 text-xs font-bold text-white/60 hover:text-white transition-colors">
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>My Events</span>
+                        </Link>
+                        <div className="flex items-center gap-3">
+                            {isDraftEvent ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveDraft}
+                                        disabled={isSavingDraft || isSaving}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                                    >
+                                        {isSavingDraft ? <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" /> : <Bookmark className="w-3.5 h-3.5 text-amber-400" />}
+                                        <span>{isSavingDraft ? "Saving..." : "Save Draft"}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))}
+                                        disabled={isSaving || isSavingDraft}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                                    >
+                                        {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : null}
+                                        <span>{isSaving ? "Publishing..." : "Publish Event"}</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))}
+                                    disabled={isSaving || isPastEvent}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                                >
+                                    {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : null}
+                                    <span>{isSaving ? "Saving..." : "Save Changes"}</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="flex items-center gap-4 text-white/40">
                         {/* <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                             <ChevronLeft className="w-5 h-5" />
@@ -571,7 +703,33 @@ export default function EditEventPage() {
                         {/* <div className="h-px w-12 bg-current opacity-20"></div> */}
                     </div>
 
-                    <div className="space-y-2">
+                    {isPastEvent && (
+                        <div className="bg-amber-500/15 border border-amber-500/30 rounded-2xl p-5 mb-6 flex items-start gap-4 backdrop-blur-md">
+                            <AlertCircle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <h3 className="text-amber-300 font-bold text-base mb-1">Past Event (Read-Only)</h3>
+                                <p className="text-sm text-amber-200/80 leading-relaxed">
+                                    This event has already taken place and its details cannot be edited.
+                                </p>
+                                <div className="flex items-center gap-3 mt-4">
+                                    <Link
+                                        href={`/e/${eventSlug || pendingData?.slug || params.eventId}`}
+                                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold transition-all"
+                                    >
+                                        View Event Page
+                                    </Link>
+                                    <Link
+                                        href="/dashboard"
+                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-full text-xs font-bold transition-all"
+                                    >
+                                        Back to Dashboard
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className={`space-y-2 ${isPastEvent ? "pointer-events-none opacity-60 cursor-not-allowed select-none" : ""}`}>
                         <EventForm
                             initialData={pendingData}
                             onSubmit={handleSubmit}
@@ -581,7 +739,7 @@ export default function EditEventPage() {
                             hostImage={session?.user?.image || ""}
                             onAddCohosts={() => setIsSettingsOpen(true)}
                             effect={effect} // Pass effect prop
-                            submitLabel={isSaving ? "Saving..." : "Update Event"}
+                            submitLabel={isPastEvent ? "Past Event (Not Editable)" : (isSaving ? "Saving..." : (isDraftEvent ? "Publish Event" : "Update Event"))}
                             isLoading={isSaving}
                         />
                     </div>

@@ -244,30 +244,57 @@ export default function EventForm({
         e.preventDefault();
         setError("");
 
-        // Basic validation
-        if (!formData.title.trim()) {
-            setError("Title is required");
+        const notifyError = (msg: string) => {
+            setError(msg);
+            if (typeof window !== "undefined") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        };
+
+        // Strict validation for publishing
+        if (!formData.title.trim() || formData.title.trim().length < 3) {
+            notifyError("Title must be at least 3 characters to publish");
+            return;
+        }
+
+        if (!formData.location || !formData.location.trim() || formData.location.trim().length < 3) {
+            notifyError("Location is required to publish an event");
             return;
         }
 
         if (!formData.startDate) {
-            setError("Start date is required");
+            notifyError("Start date and time are required to publish");
+            return;
+        }
+
+        if (new Date(formData.startDate) <= new Date()) {
+            notifyError("Event start date and time must be in the future to publish");
+            return;
+        }
+
+        if (formData.endDate && new Date(formData.endDate) <= new Date(formData.startDate)) {
+            notifyError("End date must be after the start date");
+            return;
+        }
+
+        if (formData.rsvpDeadline && new Date(formData.rsvpDeadline) >= new Date(formData.startDate)) {
+            notifyError("RSVP deadline must be before the event start date");
             return;
         }
 
         // Numerical validations
         if (formData.capacity !== "" && Number(formData.capacity) <= 0) {
-            setError("Capacity must be a positive number");
+            notifyError("Capacity must be a positive number");
             return;
         }
 
         if (Number(formData.maxCheckIns) < 1) {
-            setError("Maximum check-ins per QR must be at least 1");
+            notifyError("Maximum check-ins per QR must be at least 1");
             return;
         }
 
         if (Number(formData.checkInWindowStart) < 0) {
-            setError("Check-in window cannot be negative");
+            notifyError("Check-in window cannot be negative");
             return;
         }
 
