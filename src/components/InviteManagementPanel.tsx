@@ -154,33 +154,6 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {isPaid && !stripeConnected && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex gap-3">
-                        <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                            <Info className="w-5 h-5 text-red-400" />
-                        </div>
-                        <div className="space-y-1">
-                            <h4 className="text-xs font-black uppercase tracking-widest text-red-400">Stripe Setup Required</h4>
-                            <p className="text-white/60 text-[11px] leading-relaxed max-w-xl">
-                                This is a paid event. To invite guests and sell tickets, you must first connect your Stripe account so you can accept payments and receive payouts.
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleConnectStripe}
-                        disabled={isConnectingStripe}
-                        className="px-5 py-2.5 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 disabled:opacity-50 shrink-0 self-start md:self-auto flex items-center gap-1.5"
-                    >
-                        {isConnectingStripe ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                            <>Connect Stripe</>
-                        )}
-                    </button>
-                </div>
-            )}
-
             {/* Tab Toggle */}
             <div className="space-y-4">
                 <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/10 rounded-xl w-fit">
@@ -205,27 +178,25 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
                     {activeTab === "email" ? (
                         <input
                             type="text"
-                            placeholder={isPaid && !stripeConnected ? "Stripe setup required to invite guests" : "guest@example.com, another@guest.com"}
+                            placeholder="guest@example.com, another@guest.com"
                             value={emailInput}
-                            disabled={isPaid && !stripeConnected}
                             onChange={(e) => setEmailInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSendInvites()}
-                            className="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-sm outline-none focus:border-white/20 transition-all placeholder:text-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-sm outline-none focus:border-white/20 transition-all placeholder:text-white/20"
                         />
                     ) : (
                         <input
                             type="text"
-                            placeholder={isPaid && !stripeConnected ? "Stripe setup required to invite guests" : "+1 555 000 1234, +44 7700 900123"}
+                            placeholder="+1 555 000 1234, +44 7700 900123"
                             value={phoneInput}
-                            disabled={isPaid && !stripeConnected}
                             onChange={(e) => setPhoneInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSendInvites()}
-                            className="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-sm outline-none focus:border-white/20 transition-all placeholder:text-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-sm outline-none focus:border-white/20 transition-all placeholder:text-white/20"
                         />
                     )}
                     <button
                         onClick={handleSendInvites}
-                        disabled={isSending || isPaid && !stripeConnected || !(activeTab === "email" ? emailInput : phoneInput).trim()}
+                        disabled={isSending || !(activeTab === "email" ? emailInput : phoneInput).trim()}
                         className="px-6 py-3 bg-white text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center min-w-[140px]"
                     >
                         {isSending ? (

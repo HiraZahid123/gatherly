@@ -37,17 +37,11 @@ export async function GET(
             orderBy: { createdAt: "desc" }
         });
 
-        // Check if host has connected Stripe Connect
-        const stripeAccount = await prisma.stripeAccount.findUnique({
-            where: { userId: event.hostId }
-        });
-        const stripeConnected = !!(stripeAccount && stripeAccount.chargesEnabled);
-
         return NextResponse.json({ 
             invitations,
             event: {
                 isPaid: event.isPaid,
-                stripeConnected
+                stripeConnected: true
             }
         });
     } catch (error) {
@@ -77,17 +71,8 @@ export async function POST(
             return NextResponse.json({ error: "Only the host can send invitations" }, { status: 403 });
         }
 
-        // If the event is paid, verify the host has connected Stripe Connect
-        if (event.isPaid) {
-            const stripeAccount = await prisma.stripeAccount.findUnique({
-                where: { userId: session.user.id }
-            });
-            if (!stripeAccount || !stripeAccount.chargesEnabled) {
-                return NextResponse.json({ 
-                    error: "Stripe connection required. Since this is a paid event, you must connect your Stripe account in Settings to enable ticketing and payouts before you can invite guests." 
-                }, { status: 400 });
-            }
-        }
+        // Platform admin Stripe gateway handles all paid ticket collections and payouts
+
 
         const body = await request.json();
         const validation = invitationCreateSchema.safeParse(body);

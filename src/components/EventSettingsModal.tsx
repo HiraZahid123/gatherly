@@ -8,7 +8,6 @@ import EventScannerPanel from "./EventScannerPanel";
 import BroadcastPanel from "./BroadcastPanel";
 import TicketTierManager from "./TicketTierManager";
 import SalesReportPanel from "./SalesReportPanel";
-import StripeConnectPanel from "./StripeConnectPanel";
 import PhotoAlbum from "./event-page/PhotoAlbum";
 import { X, Crown, Users, FileText, Shield, Globe, Camera, DollarSign, AlarmClock, ChevronRight, Info, Plus, Settings, HelpCircle, ShieldPlus, Search, Megaphone, Mail, QrCode, Download, CheckSquare, Square, CheckCheck, UserX, Ticket, TrendingUp, CreditCard, Bell, Check, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -141,7 +140,6 @@ export default function EventSettingsModal({
         { id: "Auto-Reminders", icon: AlarmClock, label: "Auto-Reminders" },
         { id: "Tickets", icon: Ticket, label: "Ticket Tiers" },
         { id: "Sales", icon: TrendingUp, label: "Sales & Payouts" },
-        { id: "Stripe", icon: CreditCard, label: "Stripe Connect" },
     ];
 
     const hasAdminAccess = isHost || isCoHost;
@@ -291,15 +289,7 @@ export default function EventSettingsModal({
                                 <SalesReportPanel eventId={event?.id || ""} primaryColor={primaryColor} />
                             </div>
                         )}
-                        {activeTab === "Stripe" && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div>
-                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">Stripe Connect</h3>
-                                    <p className="text-white/30 text-xs mt-1">Link your Stripe account to receive ticket payouts.</p>
-                                </div>
-                                <StripeConnectPanel />
-                            </div>
-                        )}
+
                         {activeTab === "Hosts" && (
                             <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 {isAddingCohost ? (

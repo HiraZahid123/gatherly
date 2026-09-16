@@ -31,14 +31,10 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (remaining < quantity)
     return NextResponse.json({ error: `Only ${remaining} ticket(s) remaining` }, { status: 400 });
 
-  // Ensure host has a Stripe Connect account (bypass in development for testing)
+  // Optional: check if host has a Stripe Connect account (if not, payment is collected directly by admin gateway)
   const stripeAccount = await prisma.stripeAccount.findFirst({
     where: { userId: event.hostId, chargesEnabled: true },
   });
-  
-  if (!stripeAccount && process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: "Host has not completed Stripe setup" }, { status: 400 });
-  }
 
   const totalAmount = tier.price * quantity;
   const { platformFee, details: feeDetails } = await calculatePlatformFee(totalAmount, quantity);
