@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe, PLATFORM_FEE_PERCENT } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
+import { calculatePlatformFee, getStripeConfig } from "@/lib/platformSettings";
 import crypto from "crypto";
 
 interface Params { params: Promise<{ eventId: string }> }
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   const totalAmount = tier.price * quantity;
-  const platformFee = Math.round(totalAmount * PLATFORM_FEE_PERCENT);
+  const { platformFee, details: feeDetails } = await calculatePlatformFee(totalAmount, quantity);
   
   const currency = "ngn";
 
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     amount: totalAmount,
     currency,
     automatic_payment_methods: { enabled: true },
-    metadata: { orderId: order.id, eventId, ticketTierId },
+    metadata: { orderId: order.id, eventId, ticketTierId, platformFee: String(platformFee), feeDetails },
   };
 
   // Only apply destination charge if host stripe account is connected
@@ -131,7 +132,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       data: { stripePaymentIntentId: paymentIntent.id },
     });
 
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret, orderId: order.id });
+    const { publishableKey } = await getStripeConfig();
+    return NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
+      orderId: order.id,
+      publishableKey: publishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    });
   } catch (stripeErr: any) {
     console.error("Stripe payment intent creation error:", stripeErr);
     await prisma.order.update({

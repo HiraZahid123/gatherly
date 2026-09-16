@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
+import { calculatePlatformFee } from "@/lib/platformSettings";
+import { getPayoutsForEvent } from "@/lib/payouts";
 
 interface Params { params: Promise<{ eventId: string }> }
 
@@ -14,8 +16,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!event || event.hostId !== session.user.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const [recentOrders, tiers, tierStats, totals, stripeAccount] = await Promise.all([
-    // Last 20 orders for the table — only fetch what the UI renders
+  const [allOrders, recentOrders, tiers, tierStats, totals, stripeAccount, payouts] = await Promise.all([
+    prisma.order.findMany({
+      where: { eventId, status: "COMPLETED" },
+      select: { totalAmount: true, quantity: true },
+    }),
     prisma.order.findMany({
       where: { eventId, status: "COMPLETED" },
       include: { ticketTier: { select: { name: true } } },
@@ -23,22 +28,33 @@ export async function GET(_req: NextRequest, { params }: Params) {
       take: 20,
     }),
     prisma.ticketTier.findMany({ where: { eventId }, orderBy: { sortOrder: "asc" } }),
-    // Per-tier aggregation in SQL — no JS filter/reduce
     prisma.order.groupBy({
       by: ["ticketTierId"],
       where: { eventId, status: "COMPLETED" },
       _sum: { quantity: true, totalAmount: true },
     }),
-    // Event-wide totals in SQL
     prisma.order.aggregate({
       where: { eventId, status: "COMPLETED" },
       _sum: { quantity: true, totalAmount: true },
     }),
     prisma.stripeAccount.findUnique({ where: { userId: session.user.id } }),
+    getPayoutsForEvent(eventId),
   ]);
 
   const totalRevenue = totals._sum.totalAmount ?? 0;
   const totalTicketsSold = totals._sum.quantity ?? 0;
+
+  // Calculate platform fee and net creator share
+  let totalPlatformFee = 0;
+  for (const ord of allOrders) {
+    const { platformFee } = await calculatePlatformFee(ord.totalAmount, ord.quantity);
+    totalPlatformFee += platformFee;
+  }
+  const netEarnings = Math.max(0, totalRevenue - totalPlatformFee);
+
+  // Manual / recorded payouts
+  const totalPaidOut = payouts.reduce((sum, p) => sum + p.amount, 0);
+  const balanceDue = Math.max(0, netEarnings - totalPaidOut);
 
   const statsMap = new Map(tierStats.map(s => [s.ticketTierId, s._sum]));
   const byTier = tiers.map((tier) => {
@@ -71,6 +87,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   return NextResponse.json({
     totalRevenue,
+    platformFee: totalPlatformFee,
+    netEarnings,
+    totalPaidOut,
+    balanceDue,
+    payoutHistory: payouts,
+    hasStripeConnected: Boolean(stripeAccount?.chargesEnabled),
     totalTicketsSold,
     byTier,
     recentOrders: recentOrders.map((o) => ({
@@ -93,3 +115,4 @@ export async function GET(_req: NextRequest, { params }: Params) {
     stripeBalance,
   });
 }
+

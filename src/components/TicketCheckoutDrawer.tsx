@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Ticket, User, Mail, ArrowRight, Loader2,
@@ -15,7 +15,9 @@ import {
 } from "@stripe/react-stripe-js";
 import ETicket from "./ETicket";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const defaultStripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 type Step = "TIERS" | "DETAILS" | "PAYMENT" | "SUCCESS";
 
@@ -138,6 +140,21 @@ export default function TicketCheckoutDrawer({
   const [rsvpResult, setRsvpResult] = useState<any>(null);
   const [orderResult, setOrderResult] = useState<any>(null);
 
+  const [stripePromise, setStripePromise] = useState<Promise<any> | null>(defaultStripePromise);
+
+  useEffect(() => {
+    if (isOpen && !stripePromise) {
+      fetch("/api/stripe/config")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.publishableKey) {
+            setStripePromise(loadStripe(data.publishableKey));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen, stripePromise]);
+
   const goTo = (next: Step, dir = 1) => { setDirection(dir); setStep(next); };
 
   const reset = () => {
@@ -186,6 +203,9 @@ export default function TicketCheckoutDrawer({
       }
 
       if (data?.clientSecret) {
+        if (data?.publishableKey) {
+          setStripePromise(loadStripe(data.publishableKey));
+        }
         setClientSecret(data.clientSecret);
         setOrderId(data.orderId);
         goTo("PAYMENT");

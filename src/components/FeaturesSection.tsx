@@ -177,10 +177,10 @@ const FeaturesSection = () => {
                     {/* Right Column - Text Content */}
                     <div className="flex flex-col items-center lg:items-start text-center lg:text-left px-4 lg:pl-12">
                         <h3 className="text-3xl md:text-5xl font-bold text-black mb-6 tracking-tight">
-                            See who&apos;s going 👀
+                            See who&apos;s pulling up 👀
                         </h3>
                         <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-lg leading-relaxed">
-                            Stalk the guest list, leave comments, reply to friends, and add reactions. Keep the party going long after the event starts.
+                            Track RSVPs, see who&apos;s bringing a plus 1, who&apos;s still deciding, react to updates and build the hype before your event even begins
                         </p>
                         <Link
                             href="/auth/signup"

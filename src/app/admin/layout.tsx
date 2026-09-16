@@ -15,16 +15,20 @@ import {
     BookOpen,
     Sparkles,
     Smartphone,
+    Percent,
+    DollarSign,
 } from "lucide-react";
 
 const NAV = [
-    { href: "/admin",                 label: "Overview",     icon: LayoutDashboard },
-    { href: "/admin/users",           label: "Users",        icon: Users },
-    { href: "/admin/events",          label: "Events",       icon: Calendar },
-    { href: "/admin/templates",       label: "Templates",    icon: Sparkles },
-    { href: "/admin/whatsapp",        label: "WhatsApp Bot", icon: Smartphone },
-    { href: "/admin/moderation",      label: "Moderation",   icon: ShieldAlert },
-    { href: "/admin/blog",            label: "Blog",         icon: BookOpen },
+    { href: "/admin",                 label: "Overview",          icon: LayoutDashboard },
+    { href: "/admin/users",           label: "Users",             icon: Users },
+    { href: "/admin/events",          label: "Events",            icon: Calendar },
+    { href: "/admin/revenue",         label: "Revenue & Payouts", icon: DollarSign },
+    { href: "/admin/templates",       label: "Templates",         icon: Sparkles },
+    { href: "/admin/whatsapp",        label: "WhatsApp Bot",      icon: Smartphone },
+    { href: "/admin/moderation",      label: "Moderation",        icon: ShieldAlert },
+    { href: "/admin/blog",            label: "Blog",              icon: BookOpen },
+    { href: "/admin/settings",        label: "Platform Settings", icon: Percent },
 ];
 
 export default function AdminLayout({
@@ -36,8 +40,8 @@ export default function AdminLayout({
     return (
         <div className="min-h-screen bg-[#050505] text-white flex font-sans antialiased">
             {/* Sidebar */}
-            <aside className="w-72 border-r border-white/5 bg-[#0a0a0b] flex flex-col fixed inset-y-0 z-50">
-                <div className="p-8 pb-10">
+            <aside className="w-72 border-r border-white/5 bg-[#0a0a0b] flex flex-col fixed inset-y-0 z-50 h-screen">
+                <div className="p-6 pb-5 shrink-0">
                     <Link href="/" className="flex items-center gap-3 group">
                         <div className="relative h-9 w-36 transition-transform group-hover:scale-105">
                             <Image
@@ -54,37 +58,37 @@ export default function AdminLayout({
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2">
-                    <h3 className="px-4 text-[10px] font-black uppercase tracking-widest text-white/20 mb-4">Core Management</h3>
+                <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto overflow-x-hidden custom-scrollbar min-h-0 py-1">
+                    <h3 className="px-4 text-[10px] font-black uppercase tracking-widest text-white/20 mb-3">Core Management</h3>
                     {NAV.map(({ href, label, icon: Icon }) => {
                         const active = pathname === href;
                         return (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all ${
                                     active
                                         ? "bg-white/5 text-white border border-white/10 shadow-lg"
                                         : "text-white/40 hover:text-white hover:bg-white/5"
                                 }`}
                             >
-                                <Icon className="w-4 h-4" />
-                                <span>{label}</span>
+                                <Icon className="w-4 h-4 shrink-0" />
+                                <span className="truncate">{label}</span>
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="p-6 border-t border-white/10 space-y-4">
-                    <Link href="/" className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                <div className="p-4 border-t border-white/10 space-y-2 shrink-0 bg-[#0a0a0b]">
+                    <Link href="/" className="flex items-center justify-between px-4 py-2.5 bg-white/5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all">
                         <span>Go to App</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                     </Link>
                     <button
                         onClick={() => signOut({ callbackUrl: "/admin/login" })}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-red-500/60 hover:text-red-500 transition-colors text-xs font-black uppercase tracking-widest"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500/60 hover:text-red-500 transition-colors text-xs font-black uppercase tracking-widest rounded-xl hover:bg-red-500/5"
                     >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="w-4 h-4 shrink-0" />
                         <span>Terminate Session</span>
                     </button>
                 </div>

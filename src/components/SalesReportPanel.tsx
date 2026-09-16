@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   Loader2, TrendingUp, Ticket, DollarSign,
   ArrowDownRight, ChevronRight, CreditCard,
+  CheckCircle2, Clock, Receipt, Banknote, ShieldCheck
 } from "lucide-react";
 
 interface SalesReportPanelProps {
@@ -40,66 +41,119 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
   }
 
   const fmt = (cents: number) =>
-    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(cents / 100);
+    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format((cents || 0) / 100);
+
+  const netEarnings = data.netEarnings ?? Math.max(0, data.totalRevenue - (data.platformFee || 0));
+  const totalPaidOut = data.totalPaidOut || 0;
+  const balanceDue = data.balanceDue ?? Math.max(0, netEarnings - totalPaidOut);
 
   return (
     <div className="space-y-5">
-      {/* Summary cards */}
+      {/* 4 Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
+        {/* Gross Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-2"
+          className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-1.5"
         >
           <div className="flex items-center justify-between">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Revenue</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Gross Sales</p>
             <TrendingUp className="w-4 h-4" style={{ color: primaryColor }} />
           </div>
-          <p className="text-xl font-black text-white">{fmt(data.totalRevenue)}</p>
+          <p className="text-lg font-black text-white">{fmt(data.totalRevenue)}</p>
+          <p className="text-[10px] text-white/30">{data.totalTicketsSold} tickets sold</p>
         </motion.div>
 
+        {/* Net Host Earnings */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-2"
+          className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 space-y-1.5"
         >
           <div className="flex items-center justify-between">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Tickets</p>
-            <Ticket className="w-4 h-4" style={{ color: primaryColor }} />
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400">Your Net Earnings</p>
+            <DollarSign className="w-4 h-4 text-emerald-400" />
           </div>
-          <p className="text-xl font-black text-white">{data.totalTicketsSold}</p>
+          <p className="text-lg font-black text-emerald-400">{fmt(netEarnings)}</p>
+          <p className="text-[10px] text-emerald-400/60 font-medium">After platform fee ({fmt(data.platformFee || 0)})</p>
         </motion.div>
       </div>
 
-      {/* Stripe balance */}
-      {data.stripeBalance && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white/3 border border-white/8 rounded-2xl p-4"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="w-4 h-4" style={{ color: primaryColor }} />
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">Stripe Balance</p>
+      {/* Payout Status Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white/3 border border-white/8 rounded-2xl p-4 space-y-3"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Banknote className="w-4 h-4 text-emerald-400" />
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">Payout & Settlement</p>
           </div>
-          <div className="flex items-center gap-6">
+          {data.hasStripeConnected ? (
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-bold border border-emerald-500/20 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> Stripe Auto
+            </span>
+          ) : balanceDue === 0 && netEarnings > 0 ? (
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 text-[10px] font-bold border border-blue-500/20 flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> Fully Settled
+            </span>
+          ) : (
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-bold border border-amber-500/20 flex items-center gap-1">
+              <Clock className="w-3 h-3" /> Pending Disbursal
+            </span>
+          )}
+        </div>
+
+        {data.hasStripeConnected && data.stripeBalance ? (
+          <div className="flex items-center gap-6 pt-1">
             <div>
-              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Available</p>
-              <p className="text-sm font-black text-green-400">
-                {fmt(data.stripeBalance.available)}
-              </p>
+              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Stripe Available</p>
+              <p className="text-sm font-black text-green-400">{fmt(data.stripeBalance.available)}</p>
             </div>
             <div>
-              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Pending</p>
-              <p className="text-sm font-black text-white/60">
-                {fmt(data.stripeBalance.pending)}
-              </p>
+              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Stripe Pending</p>
+              <p className="text-sm font-black text-white/60">{fmt(data.stripeBalance.pending)}</p>
             </div>
           </div>
-        </motion.div>
-      )}
+        ) : (
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+              <p className="text-[9px] text-white/40 uppercase font-black tracking-wider">Amount Paid to You</p>
+              <p className="text-sm font-black text-white mt-0.5">{fmt(totalPaidOut)}</p>
+            </div>
+            <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+              <p className="text-[9px] text-amber-400/80 uppercase font-black tracking-wider">Remaining Balance</p>
+              <p className="text-sm font-black text-amber-400 mt-0.5">{fmt(balanceDue)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Payout receipts if any recorded */}
+        {data.payoutHistory?.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-white/5">
+            <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold flex items-center gap-1.5">
+              <Receipt className="w-3 h-3 text-emerald-400" /> Payment Receipts
+            </p>
+            <div className="space-y-1.5">
+              {data.payoutHistory.map((rec: any) => (
+                <div key={rec.id} className="p-2.5 bg-black/50 rounded-xl border border-white/5 text-xs flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-white text-xs">{rec.paymentPlatform}</p>
+                    <p className="text-[10px] text-white/40 font-mono">
+                      {new Date(rec.paidAt).toLocaleDateString()} {rec.reference ? `· Ref: ${rec.reference}` : ""}
+                    </p>
+                  </div>
+                  <span className="font-black text-emerald-400 text-xs">+{fmt(rec.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </motion.div>
 
       {/* Tier breakdown */}
       {data.byTier?.length > 0 && (

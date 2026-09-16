@@ -25,6 +25,8 @@ src/generated/
 .env.test.local
 .env.production
 .env.production.local
+data/platform-settings.json
+data/event-payouts.json
 
 # ─── User uploads (runtime files, not source) ────────────────────────────────
 public/uploads/

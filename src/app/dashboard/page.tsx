@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Plus, Bell, Globe, HelpCircle, MoreHorizontal } from "lucide-react";
+import { Search, Plus, Bell, Globe, HelpCircle, MoreHorizontal, Banknote } from "lucide-react";
+import CreatorPayoutsSection from "@/components/dashboard/CreatorPayoutsSection";
 
 interface DashboardEvent {
     id: string;
@@ -320,15 +321,21 @@ export default function DashboardPage() {
                             { name: "Open invite",     count: displayStats.open },
                             { name: "Attended",        count: displayStats.attended },
                             { name: "All past events", count: displayStats.past },
+                            { name: "Earnings & Payouts", count: 0, isFinancial: true },
                         ].map((tab) => (
                             <button
                                 key={tab.name}
                                 onClick={() => setActiveTab(tab.name)}
                                 className={`flex items-center gap-2 px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.name
-                                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                    ? tab.isFinancial
+                                        ? "bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                                        : "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                                    : tab.isFinancial
+                                        ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20"
+                                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
+                                {tab.isFinancial && <Banknote className="w-3.5 h-3.5" />}
                                 <span>{tab.name}</span>
                                 {tab.count > 0 && <span className="opacity-40">{tab.count}</span>}
                             </button>
@@ -336,8 +343,10 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Events Grid */}
-                {isEventsLoading ? (
+                {/* View: Earnings & Payouts vs Events Grid */}
+                {activeTab === "Earnings & Payouts" ? (
+                    <CreatorPayoutsSection />
+                ) : isEventsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[1, 2, 3, 4].map(i => (
                             <div key={i} className="aspect-square bg-white/5 rounded-2xl animate-pulse"></div>

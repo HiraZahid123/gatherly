@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { getStripeConfig } from "@/lib/platformSettings";
 import crypto from "crypto";
-
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
 
-  if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+  const { webhookSecret } = await getStripeConfig();
+  const effectiveWebhookSecret = webhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!sig || !effectiveWebhookSecret) {
+    return NextResponse.json({ error: "Missing signature or webhook secret not configured" }, { status: 400 });
   }
 
   let event: any;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, sig, effectiveWebhookSecret);
   } catch (err: any) {
     return NextResponse.json({ error: `Webhook error: ${err.message}` }, { status: 400 });
   }

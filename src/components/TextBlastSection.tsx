@@ -28,7 +28,7 @@ const TextBlastSection = () => {
                             Text Blast your guests
                         </h2>
                         <p className="text-lg md:text-xl text-gray-800 leading-relaxed max-w-lg">
-                            Running late, need more drinks, or 10 people texting you asking for the gate code? Send updates to everyone at once with a single click.
+                            Whether it&apos;s a venue change, giving directions, or any last-minute update, reach your entire guest list instantly!
                         </p>
                         <Link
                             href="/auth/signup"
