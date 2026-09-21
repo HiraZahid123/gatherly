@@ -26,6 +26,9 @@ import {
   Check,
   ChevronRight,
   Trash2,
+  RotateCcw,
+  Printer,
+  Undo2,
 } from "lucide-react";
 
 interface PayoutRecord {
@@ -53,6 +56,9 @@ interface EventRevenueItem {
   totalTicketsSold: number;
   orderCount: number;
   grossRevenue: number;
+  refundedAmount?: number;
+  refundedOrderCount?: number;
+  refundedTickets?: number;
   platformFeeTotal: number;
   hostNetPayout: number;
   totalPaidOut: number;
@@ -66,6 +72,7 @@ interface EventRevenueItem {
 interface OrderItem {
   id: string;
   orderNumber: string;
+  status: string;
   guestName: string;
   guestEmail: string;
   quantity: number;
@@ -90,9 +97,14 @@ interface OrderItem {
 interface RevenueData {
   kpis: {
     totalGrossRevenue: number;
+    totalRefundedAmount?: number;
+    totalRefundedCount?: number;
+    totalRefundedTickets?: number;
+    netGrossRevenue?: number;
     totalPlatformCommission: number;
     totalHostPayouts: number;
     totalTicketsSold: number;
+    totalCompletedOrders?: number;
     totalOrders: number;
     totalPaidEvents: number;
     totalManualPayoutsSettled: number;
@@ -119,6 +131,7 @@ export default function AdminRevenuePage() {
   const [activeView, setActiveView] = useState<"EVENTS" | "ORDERS">("EVENTS");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "STRIPE_AUTO" | "SETTLED" | "PENDING">("ALL");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<"ALL" | "COMPLETED" | "REFUNDED">("ALL");
 
   // Payout Modal State
   const [activePayoutEvent, setActivePayoutEvent] = useState<EventRevenueItem | null>(null);
@@ -131,6 +144,11 @@ export default function AdminRevenuePage() {
 
   // History Modal State
   const [viewHistoryEvent, setViewHistoryEvent] = useState<EventRevenueItem | null>(null);
+
+  // Refund Modal State
+  const [refundingOrder, setRefundingOrder] = useState<OrderItem | null>(null);
+  const [refundReason, setRefundReason] = useState("");
+  const [isRefunding, setIsRefunding] = useState(false);
 
   useEffect(() => {
     fetchRevenueData();
@@ -285,9 +303,45 @@ export default function AdminRevenuePage() {
         order.guestEmail.toLowerCase().includes(q) ||
         order.orderNumber.toLowerCase().includes(q);
 
-      return matchesSearch;
+      if (!matchesSearch) return false;
+
+      if (orderStatusFilter === "COMPLETED") return order.status === "COMPLETED";
+      if (orderStatusFilter === "REFUNDED") return order.status === "REFUNDED";
+      return true;
     });
-  }, [data?.recentOrders, searchQuery]);
+  }, [data?.recentOrders, searchQuery, orderStatusFilter]);
+
+  // Refund Order Handler
+  const handleProcessRefund = async () => {
+    if (!refundingOrder) return;
+    setIsRefunding(true);
+    try {
+      const res = await fetch("/api/admin/revenue/refund", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: refundingOrder.id,
+          reason: refundReason,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setRefundingOrder(null);
+        setRefundReason("");
+        fetchRevenueData();
+      } else {
+        alert(json.error || "Failed to process refund");
+      }
+    } catch (err: any) {
+      alert(err.message || "An error occurred");
+    } finally {
+      setIsRefunding(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   // CSV Export Handler
   const handleExportCSV = () => {
@@ -299,7 +353,9 @@ export default function AdminRevenuePage() {
         "Creator Email",
         "Payout Status",
         "Tickets Sold",
+        "Refunded Tickets",
         "Gross Revenue (NGN)",
+        "Refunded Amount (NGN)",
         "Platform Commission (NGN)",
         "Creator Net Share (NGN)",
         "Amount Paid Out (NGN)",
@@ -313,7 +369,9 @@ export default function AdminRevenuePage() {
         `"${e.hostEmail}"`,
         e.payoutStatus,
         e.totalTicketsSold,
+        e.refundedTickets || 0,
         (e.grossRevenue / 100).toFixed(2),
+        ((e.refundedAmount || 0) / 100).toFixed(2),
         (e.platformFeeTotal / 100).toFixed(2),
         (e.hostNetPayout / 100).toFixed(2),
         (e.totalPaidOut / 100).toFixed(2),
@@ -324,6 +382,7 @@ export default function AdminRevenuePage() {
     } else {
       const headers = [
         "Order #",
+        "Status",
         "Buyer Name",
         "Buyer Email",
         "Event Title",
@@ -337,6 +396,7 @@ export default function AdminRevenuePage() {
       ];
       const rows = filteredOrders.map((o) => [
         o.orderNumber,
+        o.status,
         `"${o.guestName.replace(/"/g, '""')}"`,
         `"${o.guestEmail}"`,
         `"${o.eventTitle.replace(/"/g, '""')}"`,
@@ -398,22 +458,45 @@ export default function AdminRevenuePage() {
             <Download className="w-4 h-4 text-emerald-400" />
             <span>Export CSV</span>
           </button>
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-xs transition-all"
+            title="Print or Save as PDF"
+          >
+            <Printer className="w-4 h-4 text-emerald-400" />
+            <span>Print Report</span>
+          </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Gross Volume */}
         <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 relative overflow-hidden group">
           <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-4">
             <DollarSign className="w-5 h-5" />
           </div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Gross Volume Received</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Gross Volume</p>
           <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
             {loading ? "…" : formatCurrency(data?.kpis.totalGrossRevenue || 0)}
           </h3>
           <p className="text-[11px] text-white/40 mt-1">
-            Total guest ticket payments across {data?.kpis.totalPaidEvents || 0} paid events
+            Across {data?.kpis.totalPaidEvents || 0} paid events
+          </p>
+        </div>
+
+        {/* Total Refunds */}
+        <div className="bg-[#0a0a0b] border border-rose-500/20 rounded-3xl p-6 relative overflow-hidden group shadow-[0_0_30px_rgba(244,63,94,0.05)]">
+          <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4">
+            <RotateCcw className="w-5 h-5" />
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-rose-400/80">Total Refunds</p>
+          <h3 className="text-2xl sm:text-3xl font-black text-rose-400 mt-1">
+            {loading ? "…" : formatCurrency(data?.kpis.totalRefundedAmount || 0)}
+          </h3>
+          <p className="text-[11px] text-rose-300/50 mt-1">
+            {data?.kpis.totalRefundedCount || 0} orders ({data?.kpis.totalRefundedTickets || 0} tickets)
           </p>
         </div>
 
@@ -423,13 +506,13 @@ export default function AdminRevenuePage() {
             <TrendingUp className="w-5 h-5" />
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400/70">
-            Platform Commission (Your Cut)
+            Platform Commission
           </p>
           <h3 className="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">
             {loading ? "…" : formatCurrency(data?.kpis.totalPlatformCommission || 0)}
           </h3>
           <p className="text-[11px] text-emerald-300/50 mt-1">
-            Retained automatically in platform Stripe account
+            Retained in Stripe account
           </p>
         </div>
 
@@ -443,7 +526,7 @@ export default function AdminRevenuePage() {
             {loading ? "…" : formatCurrency(data?.kpis.totalHostPayouts || 0)}
           </h3>
           <p className="text-[11px] text-white/40 mt-1">
-            Total funds earned by event creators
+            Total creator earnings
           </p>
         </div>
 
@@ -457,7 +540,7 @@ export default function AdminRevenuePage() {
             {loading ? "…" : (data?.kpis.totalTicketsSold || 0).toLocaleString()}
           </h3>
           <p className="text-[11px] text-white/40 mt-1">
-            Across {data?.kpis.totalOrders || 0} completed orders
+            Across {data?.kpis.totalCompletedOrders ?? (data?.kpis.totalOrders || 0)} completed orders
           </p>
         </div>
       </div>
@@ -507,49 +590,87 @@ export default function AdminRevenuePage() {
           </div>
 
           {/* Status Filter Pill */}
-          <div className="flex items-center gap-1 bg-[#0a0a0b] border border-white/10 p-1 rounded-xl w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setStatusFilter("ALL")}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                statusFilter === "ALL" ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
-              }`}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("STRIPE_AUTO")}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                statusFilter === "STRIPE_AUTO"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                  : "text-white/40 hover:text-white"
-              }`}
-            >
-              Stripe Auto
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("SETTLED")}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                statusFilter === "SETTLED"
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                  : "text-white/40 hover:text-white"
-              }`}
-            >
-              Settled
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("PENDING")}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                statusFilter === "PENDING"
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                  : "text-white/40 hover:text-white"
-              }`}
-            >
-              Pending
-            </button>
+          <div className="flex items-center gap-1 bg-[#0a0a0b] border border-white/10 p-1 rounded-xl w-full sm:w-auto overflow-x-auto">
+            {activeView === "EVENTS" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("ALL")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    statusFilter === "ALL" ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("STRIPE_AUTO")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    statusFilter === "STRIPE_AUTO"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  Stripe Auto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("SETTLED")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    statusFilter === "SETTLED"
+                      ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  Settled
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("PENDING")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    statusFilter === "PENDING"
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  Pending
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter("ALL")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    orderStatusFilter === "ALL" ? "bg-white/10 text-white" : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  All ({data?.recentOrders?.length || 0})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter("COMPLETED")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    orderStatusFilter === "COMPLETED"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  Completed ({data?.kpis.totalCompletedOrders ?? (data?.kpis.totalOrders || 0)})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter("REFUNDED")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
+                    orderStatusFilter === "REFUNDED"
+                      ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  Refunded ({data?.kpis.totalRefundedCount || 0})
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -729,49 +850,93 @@ export default function AdminRevenuePage() {
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-emerald-400">Platform Cut</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Host Share</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Date</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-xs">
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-white/30 font-medium">
+                    <td colSpan={10} className="px-6 py-12 text-center text-white/30 font-medium">
                       No order transactions found.
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-white/70">
-                        #{order.orderNumber}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-bold text-white">{order.guestName}</p>
-                          <p className="text-[11px] text-white/40 font-mono">{order.guestEmail}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-white">{order.eventTitle}</p>
-                        <p className="text-[11px] text-white/40">Host: {order.hostName}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-white">{order.tierName}</span>{" "}
-                        <span className="text-white/40">×{order.quantity}</span>
-                      </td>
-                      <td className="px-6 py-4 font-black text-white">
-                        {formatCurrency(order.totalAmount, order.currency)}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-emerald-400">
-                        +{formatCurrency(order.platformFee, order.currency)}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-white">
-                        {formatCurrency(order.hostPayout, order.currency)}
-                      </td>
-                      <td className="px-6 py-4 text-white/40 font-mono text-[11px]">
-                        {new Date(order.createdAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
+                  filteredOrders.map((order) => {
+                    const isRefunded = order.status === "REFUNDED";
+                    return (
+                      <tr key={order.id} className={`hover:bg-white/[0.02] transition-colors ${isRefunded ? "opacity-75 bg-rose-500/[0.02]" : ""}`}>
+                        <td className="px-6 py-4 font-mono font-bold text-white/70">
+                          #{order.orderNumber}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-bold text-white">{order.guestName}</p>
+                            <p className="text-[11px] text-white/40 font-mono">{order.guestEmail}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-white">{order.eventTitle}</p>
+                          <p className="text-[11px] text-white/40">Host: {order.hostName}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-medium text-white">{order.tierName}</span>{" "}
+                          <span className="text-white/40">×{order.quantity}</span>
+                        </td>
+                        <td className="px-6 py-4 font-black text-white">
+                          <span className={isRefunded ? "line-through text-white/40" : ""}>
+                            {formatCurrency(order.totalAmount, order.currency)}
+                          </span>
+                          {isRefunded && (
+                            <span className="block text-[10px] text-rose-400 font-bold uppercase tracking-wider">Refunded</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 font-bold text-emerald-400">
+                          <span className={isRefunded ? "line-through text-white/30" : ""}>
+                            +{formatCurrency(order.platformFee, order.currency)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 font-bold text-white">
+                          <span className={isRefunded ? "line-through text-white/30" : ""}>
+                            {formatCurrency(order.hostPayout, order.currency)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-white/40 font-mono text-[11px]">
+                          {new Date(order.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          {isRefunded ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold text-[10px] uppercase tracking-wider">
+                              <RotateCcw className="w-2.5 h-2.5" />
+                              Refunded
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              Paid
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {!isRefunded ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRefundingOrder(order);
+                                setRefundReason("");
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500 hover:text-white transition-all text-[11px] font-bold tracking-wide"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                              <span>Refund</span>
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-white/30 font-medium italic">Reversed</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -1069,6 +1234,111 @@ export default function AdminRevenuePage() {
                 className="px-5 py-2 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: PROCESS REFUND ─── */}
+      {refundingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                  <RotateCcw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg text-white">Refund Ticket Order</h3>
+                  <p className="text-xs text-white/40">Reverse payment and restore ticket inventory</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRefundingOrder(null);
+                  setRefundReason("");
+                }}
+                className="p-1 rounded-lg text-white/40 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Order Details */}
+            <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-white/40 uppercase font-black tracking-wider text-[10px]">Order #</span>
+                <span className="font-mono font-bold text-white">#{refundingOrder.orderNumber}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/40 uppercase font-black tracking-wider text-[10px]">Buyer</span>
+                <span className="font-bold text-white truncate max-w-[240px]">
+                  {refundingOrder.guestName} ({refundingOrder.guestEmail})
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/40 uppercase font-black tracking-wider text-[10px]">Event</span>
+                <span className="font-bold text-white truncate max-w-[240px]">{refundingOrder.eventTitle}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/40 uppercase font-black tracking-wider text-[10px]">Ticket Tier</span>
+                <span className="font-medium text-white">{refundingOrder.tierName} × {refundingOrder.quantity}</span>
+              </div>
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between font-black text-sm">
+                <span className="text-rose-300">Refund Amount</span>
+                <span className="text-rose-400">{formatCurrency(refundingOrder.totalAmount, refundingOrder.currency)}</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
+              Refunding this order will mark it as refunded, restore {refundingOrder.quantity} ticket{refundingOrder.quantity > 1 ? "s" : ""} to the tier inventory, set RSVP to declined, and automatically refund via Stripe if paid online.
+            </div>
+
+            {/* Refund Reason */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-black uppercase tracking-wider text-white/50 block">
+                Reason for Refund (Optional)
+              </label>
+              <input
+                type="text"
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                placeholder="e.g. Customer requested cancellation, duplicate charge..."
+                className="w-full bg-black/60 border border-white/15 focus:border-rose-500 rounded-2xl px-4 py-3 text-white text-xs outline-none transition-all placeholder:text-white/20"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRefundingOrder(null);
+                  setRefundReason("");
+                }}
+                disabled={isRefunding}
+                className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleProcessRefund}
+                disabled={isRefunding}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+              >
+                {isRefunding ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Processing Refund...</span>
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Confirm Refund</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

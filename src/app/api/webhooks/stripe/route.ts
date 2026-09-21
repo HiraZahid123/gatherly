@@ -101,6 +101,58 @@ export async function POST(req: NextRequest) {
       });
       break;
     }
+
+    case "charge.refunded": {
+      const charge = event.data.object as any;
+      const paymentIntentId = charge.payment_intent;
+      const order = await prisma.order.findFirst({
+        where: {
+          OR: [
+            ...(paymentIntentId ? [{ stripePaymentIntentId: paymentIntentId }] : []),
+            { stripeChargeId: charge.id },
+          ],
+        },
+        include: { ticketTier: true, event: true },
+      });
+
+      if (!order || order.status === "REFUNDED") break;
+
+      await prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: { id: order.id },
+          data: { status: "REFUNDED" },
+        });
+
+        if (order.ticketTier) {
+          await tx.ticketTier.update({
+            where: { id: order.ticketTierId },
+            data: {
+              quantitySold: {
+                decrement: Math.min(order.ticketTier.quantitySold, order.quantity),
+              },
+            },
+          });
+        }
+
+        await tx.rSVP.updateMany({
+          where: { orderId: order.id },
+          data: { status: "DECLINED" },
+        });
+
+        if (order.userId) {
+          await tx.notification.create({
+            data: {
+              userId: order.userId,
+              title: "Ticket Order Refunded",
+              message: `Your ticket purchase for ${order.event?.title || "your event"} has been refunded.`,
+              type: "PAYMENT",
+              link: order.event?.slug ? `/e/${order.event.slug}` : "/dashboard",
+            },
+          });
+        }
+      });
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });

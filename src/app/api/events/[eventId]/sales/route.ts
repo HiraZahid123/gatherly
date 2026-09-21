@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!event || event.hostId !== session.user.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const [allOrders, recentOrders, tiers, tierStats, totals, stripeAccount, payouts] = await Promise.all([
+  const [allOrders, recentOrders, tiers, tierStats, totals, stripeAccount, payouts, refundedAgg] = await Promise.all([
     prisma.order.findMany({
       where: { eventId, status: "COMPLETED" },
       select: { totalAmount: true, quantity: true },
@@ -39,7 +39,16 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }),
     prisma.stripeAccount.findUnique({ where: { userId: session.user.id } }),
     getPayoutsForEvent(eventId),
+    prisma.order.aggregate({
+      where: { eventId, status: "REFUNDED" },
+      _sum: { quantity: true, totalAmount: true },
+      _count: true,
+    }),
   ]);
+
+  const totalRefundedAmount = refundedAgg._sum.totalAmount ?? 0;
+  const totalRefundedTickets = refundedAgg._sum.quantity ?? 0;
+  const refundedOrdersCount = refundedAgg._count ?? 0;
 
   const totalRevenue = totals._sum.totalAmount ?? 0;
   const totalTicketsSold = totals._sum.quantity ?? 0;
@@ -87,6 +96,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   return NextResponse.json({
     totalRevenue,
+    totalRefundedAmount,
+    totalRefundedTickets,
+    refundedOrdersCount,
     platformFee: totalPlatformFee,
     netEarnings,
     totalPaidOut,

@@ -8,10 +8,10 @@ export async function GET(req: NextRequest) {
   try {
     await verifyAdmin();
 
-    // Fetch all completed orders with related event, host, and tier
+    // Fetch all completed and refunded orders with related event, host, and tier
     const orders = await prisma.order.findMany({
       where: {
-        status: "COMPLETED",
+        status: { in: ["COMPLETED", "REFUNDED"] },
       },
       include: {
         event: {
@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
         return {
           id: order.id,
           orderNumber: order.id.slice(-8).toUpperCase(),
+          status: order.status,
           guestName: order.guestName || order.user?.name || "Anonymous Guest",
           guestEmail: order.guestEmail || order.user?.email || "N/A",
           quantity: order.quantity,
@@ -107,6 +108,9 @@ export async function GET(req: NextRequest) {
       totalTicketsSold: number;
       orderCount: number;
       grossRevenue: number;
+      refundedAmount: number;
+      refundedOrderCount: number;
+      refundedTickets: number;
       platformFeeTotal: number;
       hostNetPayout: number;
       currency: string;
@@ -114,13 +118,21 @@ export async function GET(req: NextRequest) {
     }>();
 
     for (const order of processedOrders) {
+      const isRefunded = order.status === "REFUNDED";
       const existing = eventMap.get(order.eventId);
+
       if (existing) {
-        existing.totalTicketsSold += order.quantity;
         existing.orderCount += 1;
-        existing.grossRevenue += order.totalAmount;
-        existing.platformFeeTotal += order.platformFee;
-        existing.hostNetPayout += order.hostPayout;
+        if (isRefunded) {
+          existing.refundedAmount += order.totalAmount;
+          existing.refundedOrderCount += 1;
+          existing.refundedTickets += order.quantity;
+        } else {
+          existing.totalTicketsSold += order.quantity;
+          existing.grossRevenue += order.totalAmount;
+          existing.platformFeeTotal += order.platformFee;
+          existing.hostNetPayout += order.hostPayout;
+        }
         if (new Date(order.createdAt) > new Date(existing.lastOrderAt)) {
           existing.lastOrderAt = order.createdAt;
         }
@@ -136,11 +148,14 @@ export async function GET(req: NextRequest) {
           hostImage: orders.find((o) => o.eventId === order.eventId)?.event?.host?.image,
           hostHasStripe: order.hostHasStripe,
           hostStripeAccountId: order.hostStripeAccountId,
-          totalTicketsSold: order.quantity,
+          totalTicketsSold: isRefunded ? 0 : order.quantity,
           orderCount: 1,
-          grossRevenue: order.totalAmount,
-          platformFeeTotal: order.platformFee,
-          hostNetPayout: order.hostPayout,
+          grossRevenue: isRefunded ? 0 : order.totalAmount,
+          refundedAmount: isRefunded ? order.totalAmount : 0,
+          refundedOrderCount: isRefunded ? 1 : 0,
+          refundedTickets: isRefunded ? order.quantity : 0,
+          platformFeeTotal: isRefunded ? 0 : order.platformFee,
+          hostNetPayout: isRefunded ? 0 : order.hostPayout,
           currency: order.currency,
           lastOrderAt: order.createdAt,
         });
@@ -178,17 +193,28 @@ export async function GET(req: NextRequest) {
 
     // Overall global KPIs
     let totalGrossRevenue = 0;
+    let totalRefundedAmount = 0;
+    let totalRefundedCount = 0;
+    let totalRefundedTickets = 0;
     let totalPlatformCommission = 0;
     let totalHostPayouts = 0;
     let totalTicketsSold = 0;
+    let totalCompletedOrders = 0;
     let totalManualPayoutsSettled = 0;
     let totalPendingSettlement = 0;
 
     for (const item of processedOrders) {
-      totalGrossRevenue += item.totalAmount;
-      totalPlatformCommission += item.platformFee;
-      totalHostPayouts += item.hostPayout;
-      totalTicketsSold += item.quantity;
+      if (item.status === "REFUNDED") {
+        totalRefundedAmount += item.totalAmount;
+        totalRefundedCount += 1;
+        totalRefundedTickets += item.quantity;
+      } else {
+        totalGrossRevenue += item.totalAmount;
+        totalPlatformCommission += item.platformFee;
+        totalHostPayouts += item.hostPayout;
+        totalTicketsSold += item.quantity;
+        totalCompletedOrders += 1;
+      }
     }
 
     for (const ev of eventsSummary) {
@@ -198,13 +224,20 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const netGrossRevenue = Math.max(0, totalGrossRevenue - totalRefundedAmount);
+
     return NextResponse.json({
       success: true,
       kpis: {
-        totalGrossRevenue, // in cents/kobo
+        totalGrossRevenue, // in cents/kobo (from completed orders)
+        totalRefundedAmount,
+        totalRefundedCount,
+        totalRefundedTickets,
+        netGrossRevenue,
         totalPlatformCommission,
         totalHostPayouts,
         totalTicketsSold,
+        totalCompletedOrders,
         totalOrders: processedOrders.length,
         totalPaidEvents: eventsSummary.length,
         totalManualPayoutsSettled,

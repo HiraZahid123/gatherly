@@ -33,11 +33,11 @@ export async function GET(req: NextRequest) {
 
     const eventIds = events.map((e) => e.id);
 
-    // Fetch all completed orders for this creator's events
+    // Fetch all completed and refunded orders for this creator's events
     const orders = await prisma.order.findMany({
       where: {
         eventId: { in: eventIds },
-        status: "COMPLETED",
+        status: { in: ["COMPLETED", "REFUNDED"] },
       },
       select: {
         id: true,
@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
         quantity: true,
         totalAmount: true,
         currency: true,
+        status: true,
         createdAt: true,
       },
       orderBy: {
@@ -75,12 +76,19 @@ export async function GET(req: NextRequest) {
         let grossRevenue = 0;
         let platformFeeTotal = 0;
         let ticketsSold = 0;
+        let refundedAmount = 0;
+        let refundedTickets = 0;
 
         for (const ord of eventOrders) {
-          grossRevenue += ord.totalAmount;
-          ticketsSold += ord.quantity;
-          const { platformFee } = await calculatePlatformFee(ord.totalAmount, ord.quantity);
-          platformFeeTotal += platformFee;
+          if (ord.status === "REFUNDED") {
+            refundedAmount += ord.totalAmount;
+            refundedTickets += ord.quantity;
+          } else {
+            grossRevenue += ord.totalAmount;
+            ticketsSold += ord.quantity;
+            const { platformFee } = await calculatePlatformFee(ord.totalAmount, ord.quantity);
+            platformFeeTotal += platformFee;
+          }
         }
 
         const netEarnings = Math.max(0, grossRevenue - platformFeeTotal);
@@ -105,7 +113,10 @@ export async function GET(req: NextRequest) {
           eventSlug: event.slug,
           startDate: event.startDate,
           ticketsSold,
-          orderCount: eventOrders.length,
+          refundedTickets,
+          refundedAmount,
+          orderCount: eventOrders.filter((o) => o.status === "COMPLETED").length,
+          refundedCount: eventOrders.filter((o) => o.status === "REFUNDED").length,
           grossRevenue,
           platformFee: platformFeeTotal,
           netEarnings,
@@ -120,6 +131,8 @@ export async function GET(req: NextRequest) {
 
     // Calculate creator's grand totals
     let totalGrossRevenue = 0;
+    let totalRefundedAmount = 0;
+    let totalRefundedTickets = 0;
     let totalPlatformFees = 0;
     let totalNetEarnings = 0;
     let totalPaidToUser = 0;
@@ -128,6 +141,8 @@ export async function GET(req: NextRequest) {
 
     for (const ev of eventsSummary) {
       totalGrossRevenue += ev.grossRevenue;
+      totalRefundedAmount += ev.refundedAmount;
+      totalRefundedTickets += ev.refundedTickets;
       totalPlatformFees += ev.platformFee;
       totalNetEarnings += ev.netEarnings;
       totalTicketsSold += ev.ticketsSold;
@@ -142,6 +157,9 @@ export async function GET(req: NextRequest) {
       hasStripeConnect: Boolean(stripeAccount?.chargesEnabled),
       totals: {
         totalGrossRevenue,
+        totalRefundedAmount,
+        totalRefundedTickets,
+        netGrossRevenue: Math.max(0, totalGrossRevenue - totalRefundedAmount),
         totalPlatformFees,
         totalNetEarnings,
         totalPaidToUser,

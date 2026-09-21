@@ -49,8 +49,8 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
 
   return (
     <div className="space-y-5">
-      {/* 4 Summary Cards */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Summary Cards */}
+      <div className={`grid ${data.totalRefundedAmount > 0 ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
         {/* Gross Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -64,6 +64,23 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
           <p className="text-lg font-black text-white">{fmt(data.totalRevenue)}</p>
           <p className="text-[10px] text-white/30">{data.totalTicketsSold} tickets sold</p>
         </motion.div>
+
+        {/* Refunds if any */}
+        {data.totalRefundedAmount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.03 }}
+            className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 space-y-1.5"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-rose-400">Refunded</p>
+              <Receipt className="w-4 h-4 text-rose-400" />
+            </div>
+            <p className="text-lg font-black text-rose-400">-{fmt(data.totalRefundedAmount)}</p>
+            <p className="text-[10px] text-rose-400/60 font-medium">{data.totalRefundedTickets || 0} tickets returned</p>
+          </motion.div>
+        )}
 
         {/* Net Host Earnings */}
         <motion.div
@@ -198,17 +215,24 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
                 key={order.id}
                 className="flex items-center gap-3 px-3 py-2.5 bg-white/2 hover:bg-white/4 rounded-xl transition-colors"
               >
-                <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                  <ArrowDownRight className="w-3.5 h-3.5 text-green-400" />
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${order.status === "REFUNDED" ? "bg-rose-500/10 text-rose-400" : "bg-white/5 text-green-400"}`}>
+                  <ArrowDownRight className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white leading-none">{order.guestName || order.guestEmail}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-bold text-white leading-none">{order.guestName || order.guestEmail}</p>
+                    {order.status === "REFUNDED" && (
+                      <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold text-[9px] uppercase tracking-wider">
+                        Refunded
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[10px] text-white/30 mt-0.5">
                     {order.quantity}× {order.tierName} ·{" "}
                     {new Date(order.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <p className="text-xs font-black text-white shrink-0">
+                <p className={`text-xs font-black shrink-0 ${order.status === "REFUNDED" ? "text-rose-400/80 line-through" : "text-white"}`}>
                   {fmt(order.totalAmount)}
                 </p>
               </div>

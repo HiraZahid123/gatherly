@@ -68,18 +68,9 @@ export default function InteractiveShowcase() {
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 text-white drop-shadow-md tracking-tight max-w-3xl mx-auto">
                     ...because WhatsApp groups aren&apos;t event management
                 </h2>
-                <p className="text-lg sm:text-xl text-white/80 mb-6 drop-shadow-sm font-medium">
+                <p className="text-lg sm:text-xl text-white/80 mb-10 drop-shadow-sm font-medium">
                     Create and customize for free
                 </p>
-                <div className="flex justify-center mb-12">
-                    <Link
-                        href="/events/create"
-                        className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-sm rounded-full shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all"
-                    >
-                        <span>Create Your Event</span>
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
 
                 {/* Tabs */}
                 <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -218,6 +209,17 @@ export default function InteractiveShowcase() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* CTA Button below template sample */}
+                <div className="flex justify-center mt-12">
+                    <Link
+                        href="/events/create"
+                        className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-sm md:text-base rounded-full shadow-2xl shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <span>Customize your own event</span>
+                        <ArrowRight className="w-4 h-4" />
+                    </Link>
                 </div>
             </div>
         </section>
