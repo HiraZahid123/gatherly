@@ -67,7 +67,7 @@ export default function Navbar() {
     return (
         <nav className={finalNavClasses}>
             <div className="container mx-auto px-6 flex justify-between items-center">
-                <div className="flex items-center gap-4 min-w-0">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 shrink-0">
                     {showHomeBack && (
                         <Link
                             href="/"
@@ -80,8 +80,8 @@ export default function Navbar() {
                         </Link>
                     )}
                     {/* Logo */}
-                    <Link href="/" className="flex items-center group">
-                        <div className="relative h-12 w-48 transition-transform group-hover:scale-105">
+                    <Link href="/" className="flex items-center group shrink-0">
+                        <div className="relative h-10 w-36 sm:h-12 sm:w-44 transition-transform group-hover:scale-105 shrink-0">
                             <Image
                                 src="/logo/logo-full.webp"
                                 alt="JollyWitMe Logo"
@@ -94,47 +94,41 @@ export default function Navbar() {
                 </div>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center space-x-8">
-                    {/* <Link
-                        href="/#features"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
-                    >
-                        How it Works
-                    </Link> */}
+                <div className="hidden lg:flex items-center space-x-5 xl:space-x-7 shrink-0">
                     <Link
                         href="/wedding"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                     >
                         Wedding
                     </Link>
                     <Link
                         href="/birthdays"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                     >
                         Birthdays
                     </Link>
                     <Link
                         href="/concerts"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                     >
                         Concerts
                     </Link>
                     <Link
                         href="/housewarmings"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                     >
                         Housewarmings
                     </Link>
                     <Link
                         href="/explore"
-                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                        className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                     >
                         Explore
                     </Link>
                     {isAuthenticated && (
                         <Link
                             href="/dashboard"
-                            className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400`}
+                            className={`${finalLinkColor} transition-colors text-sm font-medium hover:text-green-400 whitespace-nowrap`}
                         >
                             My Events
                         </Link>
@@ -270,9 +264,9 @@ export default function Navbar() {
                     )}
                 </div>
 
-                {/* Mobile Menu Button */}
+                {/* Mobile / Tablet Menu Button */}
                 <button
-                    className={`md:hidden p-2 ${finalLinkColor}`}
+                    className={`lg:hidden p-2 ${finalLinkColor}`}
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                     {isMenuOpen ? <X size={24} /> : (
@@ -291,16 +285,48 @@ export default function Navbar() {
                 </button>
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Mobile / Tablet Navigation */}
             {isMenuOpen && (
-                <div className={`md:hidden absolute top-full left-0 right-0 border-b p-6 flex flex-col space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 shadow-xl bg-[#0a0a0b]/95 backdrop-blur-lg border-white/10`}>
+                <div className={`lg:hidden absolute top-full left-0 right-0 border-b p-6 flex flex-col space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 shadow-xl bg-[#0a0a0b]/95 backdrop-blur-lg border-white/10 max-h-[85vh] overflow-y-auto`}>
+                    {/* Event Categories on Mobile/Tablet */}
+                    <div className="grid grid-cols-2 gap-2 pb-2 border-b border-white/10">
+                        <Link
+                            href="/wedding"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                        >
+                            💍 Wedding
+                        </Link>
+                        <Link
+                            href="/birthdays"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                        >
+                            🎂 Birthdays
+                        </Link>
+                        <Link
+                            href="/concerts"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                        >
+                            🎵 Concerts
+                        </Link>
+                        <Link
+                            href="/housewarmings"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                        >
+                            🏡 Housewarmings
+                        </Link>
+                    </div>
+
                     <Link
-                        href="/#features"
+                        href="/explore"
                         onClick={() => setIsMenuOpen(false)}
                         className={`text-lg font-medium flex items-center space-x-3 text-white`}
                     >
-                        <Plus size={20} className={"text-white/50"} />
-                        <span>How it Works</span>
+                        <Compass size={20} className={"text-white/50"} />
+                        <span>Explore Events</span>
                     </Link>
                     <Link
                         href="/blog"
@@ -309,14 +335,6 @@ export default function Navbar() {
                     >
                         <BookOpen size={20} className={"text-white/50"} />
                         <span>Blog</span>
-                    </Link>
-                    <Link
-                        href="/explore"
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`text-lg font-medium flex items-center space-x-3 text-white`}
-                    >
-                        <Compass size={20} className={"text-white/50"} />
-                        <span>Explore</span>
                     </Link>
                     <Link
                         href="/help"

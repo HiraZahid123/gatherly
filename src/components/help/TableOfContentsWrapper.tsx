@@ -14,8 +14,12 @@ export default function TableOfContentsWrapper({
   }, []);
 
   if (!mounted) {
-    return <aside style={{ width: "200px", minWidth: "200px", flexShrink: 0 }} />;
+    return <aside className="hidden xl:block w-[200px] min-w-[200px] shrink-0" />;
   }
 
-  return <TableOfContents sections={sections} />;
+  return (
+    <div className="hidden xl:block">
+      <TableOfContents sections={sections} />
+    </div>
+  );
 }

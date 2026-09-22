@@ -15,8 +15,12 @@ export default function HelpSidebarWrapper(
   }, []);
 
   if (!mounted) {
-    return <aside style={{ width: "260px", minWidth: "260px", flexShrink: 0 }} />;
+    return <aside className="hidden lg:block w-[260px] min-w-[260px] shrink-0" />;
   }
 
-  return <HelpSidebar {...props} />;
+  return (
+    <div className="hidden lg:block shrink-0">
+      <HelpSidebar {...props} />
+    </div>
+  );
 }

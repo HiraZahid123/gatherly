@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCategoryBySlug, helpCategories } from "@/lib/help-data";
 import HelpSidebarWrapper from "@/components/help/HelpSidebarWrapper";
@@ -29,21 +30,21 @@ export default async function CategoryPage({ params }: Props) {
   const allArticles = category.sections.flatMap((s) => s.articles);
 
   return (
-    <div style={{ display: "flex", minHeight: "calc(100vh - 60px)" }}>
-      {/* Left Sidebar */}
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-60px)] w-full max-w-7xl mx-auto">
+      {/* Left Sidebar (Desktop) */}
       <HelpSidebarWrapper activeCategorySlug={category.slug} />
 
       {/* Main content */}
-      <main style={{ flex: 1, padding: "0 0 80px", minWidth: 0 }}>
+      <main className="flex-1 w-full pb-20 min-w-0">
+        {/* Mobile / Tablet back navigation */}
+        <div className="lg:hidden p-4 border-b border-white/10 bg-white/[0.02]">
+          <Link href="/help" className="inline-flex items-center gap-1.5 text-xs text-green-400 font-bold hover:underline">
+            ← Back to Help Center
+          </Link>
+        </div>
+
         {/* Category Hero */}
-        <div
-          style={{
-            padding: "48px 48px 40px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
+        <div className="px-4 sm:px-8 lg:px-12 py-8 sm:py-12 border-b border-white/10 relative overflow-hidden">
           {/* Glow */}
           <div
             style={{
@@ -93,7 +94,7 @@ export default async function CategoryPage({ params }: Props) {
         </div>
 
         {/* Article Grid */}
-        <div style={{ padding: "40px 48px" }}>
+        <div className="px-4 sm:px-8 lg:px-12 py-8 sm:py-10">
           <p
             style={{
               fontSize: "12px",

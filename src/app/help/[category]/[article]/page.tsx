@@ -268,78 +268,54 @@ export default async function ArticlePage({ params }: Props) {
   const { category, article } = result;
 
   return (
-    <div style={{ display: "flex", minHeight: "calc(100vh - 60px)" }}>
-      {/* Left Sidebar */}
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-60px)] w-full max-w-7xl mx-auto">
+      {/* Left Sidebar (Desktop) */}
       <HelpSidebarWrapper
           activeCategorySlug={category.slug}
           activeArticleSlug={article.slug}
       />
 
       {/* Main content */}
-      <main
-        style={{
-          flex: 1,
-          padding: "48px 48px 80px",
-          minWidth: 0,
-          maxWidth: "760px",
-        }}
-      >
+      <main className="flex-1 w-full max-w-3xl px-4 sm:px-8 lg:px-12 py-6 sm:py-10 pb-20 min-w-0 mx-auto lg:mx-0">
+        {/* Mobile / Tablet back navigation */}
+        <div className="lg:hidden mb-6 p-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between text-xs">
+          <Link
+            href={`/help/${category.slug}`}
+            className="flex items-center gap-1.5 text-green-400 font-bold hover:underline"
+          >
+            <span>← {category.title}</span>
+          </Link>
+          <Link href="/help" className="text-white/40 hover:text-white transition-colors">
+            All Topics
+          </Link>
+        </div>
+
         {/* Breadcrumb */}
-        <nav
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            marginBottom: "28px",
-            fontSize: "13px",
-            color: "rgba(255,255,255,0.35)",
-            fontFamily: "var(--font-inter, Inter, sans-serif)",
-          }}
-        >
+        <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-6 text-xs sm:text-sm text-white/40 font-sans">
           <Link
             href="/help"
-            className="help-breadcrumb-link"
-            style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+            className="help-breadcrumb-link text-white/40 hover:text-white transition-colors"
           >
             Help Center
           </Link>
           <span>›</span>
           <Link
             href={`/help/${category.slug}`}
-            className="help-breadcrumb-link"
-            style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+            className="help-breadcrumb-link text-white/40 hover:text-white transition-colors"
           >
             {category.title}
           </Link>
           <span>›</span>
-          <span style={{ color: "rgba(255,255,255,0.6)" }}>{article.title}</span>
+          <span className="text-white/70 truncate max-w-[200px] sm:max-w-none">{article.title}</span>
         </nav>
 
         {/* Article title */}
-        <h1
-          style={{
-            fontSize: "clamp(28px, 4vw, 38px)",
-            fontWeight: 800,
-            color: "#fff",
-            margin: "0 0 12px",
-            letterSpacing: "-0.8px",
-            lineHeight: 1.15,
-            fontFamily: "var(--font-inter, Inter, sans-serif)",
-          }}
-        >
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-3 tracking-tight leading-tight font-sans">
           {article.title}
         </h1>
 
         {/* Description */}
-        <p
-          style={{
-            fontSize: "16px",
-            color: "rgba(255,255,255,0.45)",
-            margin: "0 0 40px",
-            lineHeight: 1.6,
-            fontFamily: "var(--font-inter, Inter, sans-serif)",
-          }}
-        >
+        <p className="text-sm sm:text-base text-white/50 mb-8 leading-relaxed font-sans">
           {article.description}
         </p>
 
