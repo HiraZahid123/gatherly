@@ -6,18 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 function getPrisma(): PrismaClient {
   if (globalForPrisma.prisma) {
-    // Hot-reload guard: if new schema fields like refundRequested are missing on stale global client
-    if (!(globalForPrisma.prisma as any)._hasRefundField) {
-      try {
-        delete require.cache[require.resolve("../generated/client")];
-      } catch {}
-      const { PrismaClient: FreshClient } = require("../generated/client");
-      globalForPrisma.prisma = new FreshClient({
-        log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-      });
-      (globalForPrisma.prisma as any)._hasRefundField = true;
-    }
-    return globalForPrisma.prisma!;
+    return globalForPrisma.prisma;
   }
 
   const client = new PrismaClient({
