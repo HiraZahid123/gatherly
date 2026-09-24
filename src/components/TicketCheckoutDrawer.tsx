@@ -48,15 +48,6 @@ export default function TicketCheckoutDrawer({
   const [rsvpResult, setRsvpResult] = useState<any>(null);
   const [orderResult, setOrderResult] = useState<any>(null);
 
-  useEffect(() => {
-    // Preload Paystack inline script
-    if (typeof window !== "undefined" && !(window as any).PaystackPop) {
-      const script = document.createElement("script");
-      script.src = "https://js.paystack.co/v1/inline.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
 
   const goTo = (next: Step, dir = 1) => { setDirection(dir); setStep(next); };
 
@@ -126,33 +117,9 @@ export default function TicketCheckoutDrawer({
         return;
       }
 
-      // PAYSTACK GATEWAY
+      // PAYSTACK GATEWAY: Standard Checkout Redirect
       if (data?.gateway === "PAYSTACK") {
         setOrderId(data.orderId);
-        const ref = data.reference;
-
-        if (typeof window !== "undefined" && (window as any).PaystackPop) {
-          try {
-            const handler = (window as any).PaystackPop.setup({
-              key: data.publicKey,
-              email: data.email || guestEmail,
-              amount: data.amount,
-              currency: "NGN",
-              ref: ref,
-              callback: function (response: any) {
-                handlePaymentSuccess(response.reference || ref);
-              },
-              onClose: function () {
-                setPaymentLoading(false);
-              },
-            });
-            handler.openIframe();
-            return;
-          } catch (popErr) {
-            console.warn("Paystack popup failed, falling back to redirect:", popErr);
-          }
-        }
-
         if (data.authorizationUrl) {
           window.location.href = data.authorizationUrl;
           return;
@@ -501,7 +468,7 @@ export default function TicketCheckoutDrawer({
                   className="w-full h-12 text-white font-bold uppercase tracking-widest text-xs rounded-xl active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2 bg-white/10"
                 >
                   {paymentLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to Paystack...</>
                   ) : step === "TIERS" ? (
                     <><Ticket className="w-4 h-4" /> Continue</>
                   ) : (

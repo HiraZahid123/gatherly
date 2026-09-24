@@ -20,6 +20,7 @@ import FlyerModal from "@/components/event-page/FlyerModal";
 import AnnouncementsSection from "@/components/event-page/AnnouncementsSection";
 import RSVPModal from "@/components/RSVPModal";
 import TicketCheckoutDrawer from "@/components/TicketCheckoutDrawer";
+import ETicket from "@/components/ETicket";
 import ShareEventModal from "@/components/event-page/ShareEventModal";
 import Confetti from "@/components/vfx/Confetti";
 import Rain from "@/components/vfx/Rain";
@@ -93,6 +94,7 @@ export default function PublicEventClient({
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [ticketTiers, setTicketTiers] = useState(initialTicketTiers);
     const [announceFocusTrigger, setAnnounceFocusTrigger] = useState(0);
+    const [paidTicketData, setPaidTicketData] = useState<{ rsvp: any; order: any } | null>(null);
 
     const fetchTicketTiers = async () => {
         if (!event?.id) return;
@@ -137,6 +139,61 @@ export default function PublicEventClient({
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams, hasAdminAccess]);
+
+    // Handle Paystack Payment Return Callback
+    useEffect(() => {
+        const reference = searchParams.get("reference") || searchParams.get("trxref");
+        if (!reference || !event?.id) return;
+
+        let active = true;
+        const verifyPayment = async () => {
+            setToastMessage("Verifying your payment with Paystack...");
+            setShowToast(true);
+
+            try {
+                const res = await fetch(`/api/events/${event.id}/checkout/confirm`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ reference }),
+                });
+
+                const data = await res.json();
+                if (!active) return;
+
+                if (res.ok && data?.rsvp) {
+                    setPaidTicketData({ rsvp: data.rsvp, order: data.order });
+                    setMyRSVP(data.rsvp);
+                    setToastMessage("🎉 Payment successful! Your ticket is confirmed.");
+                    setShowToast(true);
+                    fetchMyRSVP();
+                    fetchGuests();
+                } else {
+                    setToastMessage(data?.error || "Payment verification failed. Please contact the host.");
+                    setShowToast(true);
+                }
+            } catch (err: any) {
+                console.error("Payment confirmation failed:", err);
+                if (active) {
+                    setToastMessage("Could not verify payment. Please refresh or contact support.");
+                    setShowToast(true);
+                }
+            } finally {
+                if (typeof window !== "undefined") {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("reference");
+                    url.searchParams.delete("trxref");
+                    url.searchParams.delete("order_id");
+                    url.searchParams.delete("payment");
+                    window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+                }
+                setTimeout(() => setShowToast(false), 6000);
+            }
+        };
+
+        verifyPayment();
+        return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams, event?.id]);
 
     // Apply theme on mount
     useEffect(() => {
@@ -1058,6 +1115,27 @@ export default function PublicEventClient({
                         fetchGuests();
                     }}
                 />
+            )}
+
+            {paidTicketData && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+                    <div className="relative w-full max-w-md bg-[#0d0d0f] border border-white/10 rounded-3xl p-6 shadow-2xl">
+                        <button
+                            type="button"
+                            onClick={() => setPaidTicketData(null)}
+                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors z-10 text-sm font-bold"
+                        >
+                            ✕
+                        </button>
+                        <ETicket
+                            event={event}
+                            rsvp={paidTicketData.rsvp}
+                            order={paidTicketData.order}
+                            primaryColor={primaryColor}
+                            onClose={() => setPaidTicketData(null)}
+                        />
+                    </div>
+                </div>
             )}
 
             {showToast && (

@@ -122,7 +122,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   // PRIMARY GATEWAY: PAYSTACK
   const reference = `JWM_${order.id.slice(-6).toUpperCase()}_${Date.now()}`;
-  const callbackUrl = `${origin}/events/${event.slug}?order_id=${order.id}&reference=${reference}`;
+  const callbackUrl = `${origin}/e/${event.slug}?order_id=${order.id}&reference=${reference}&payment=paystack`;
 
   try {
     const paystackRes = await initializePaystackTransaction({

@@ -50,6 +50,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             stripePaymentIntentId: effectiveRef,
             stripeChargeId: String(verifyRes.data.id),
           },
+          include: { ticketTier: true },
         });
 
         await tx.ticketTier.update({
@@ -71,7 +72,13 @@ export async function POST(req: NextRequest, { params }: Params) {
         const rsvp = existing
           ? await tx.rSVP.update({
               where: { id: existing.id },
-              data: { status: "ACCEPTED", qrToken, orderId: order.id },
+              data: {
+                status: "ACCEPTED",
+                qrToken: existing.qrToken || qrToken,
+                orderId: order.id,
+                guestName: existing.guestName || order.guestName,
+                guestEmail: existing.guestEmail || order.guestEmail,
+              },
             })
           : await tx.rSVP.create({
               data: {
