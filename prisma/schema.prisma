@@ -551,6 +551,9 @@ model Order {
   totalAmount           Int         // quantity * unitPrice (cents)
   currency              String      @default("ngn")
   status                OrderStatus @default(PENDING)
+  refundRequested       Boolean     @default(false)
+  refundReason          String?
+  refundRequestedAt     DateTime?
   stripePaymentIntentId String?     @unique
   stripeChargeId        String?
   createdAt             DateTime    @default(now())

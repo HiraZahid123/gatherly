@@ -21,10 +21,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
       select: { totalAmount: true, quantity: true },
     }),
     prisma.order.findMany({
-      where: { eventId, status: "COMPLETED" },
+      where: { eventId, status: { in: ["COMPLETED", "REFUNDED"] } },
       include: { ticketTier: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
-      take: 20,
+      take: 50,
     }),
     prisma.ticketTier.findMany({ where: { eventId }, orderBy: { sortOrder: "asc" } }),
     prisma.order.groupBy({
@@ -91,12 +91,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
     byTier,
     recentOrders: recentOrders.map((o) => ({
       id: o.id,
+      orderNumber: o.id.slice(-8).toUpperCase(),
       guestName: o.guestName,
       guestEmail: o.guestEmail,
-      tierName: o.ticketTier.name,
+      tierName: o.ticketTier?.name || "Standard",
       quantity: o.quantity,
       totalAmount: o.totalAmount,
       currency: o.currency,
+      status: o.status,
+      refundRequested: o.refundRequested,
+      refundReason: o.refundReason,
+      refundRequestedAt: o.refundRequestedAt,
       createdAt: o.createdAt,
     })),
   });

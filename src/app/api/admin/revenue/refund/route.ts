@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     await verifyAdmin();
 
     const body = await req.json();
-    const { orderId, reason } = body;
+    const { orderId, reason, action } = body;
 
     if (!orderId) {
       return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
@@ -27,6 +27,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Action: REJECT refund request from creator
+    if (action === "REJECT") {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          refundRequested: false,
+        },
+      });
+
+      if (order.event?.hostId) {
+        await prisma.notification.create({
+          data: {
+            userId: order.event.hostId,
+            title: "Refund Request Declined",
+            message: `Your refund request for order #${order.id.slice(-8).toUpperCase()} (${order.guestName || "Guest"}) was declined by platform administration.${reason ? ` Note: ${reason}` : ""}`,
+            type: "PAYMENT",
+            link: `/dashboard`,
+          },
+        }).catch(() => {});
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "Refund request has been dismissed.",
+      });
+    }
+
     if (order.status === "REFUNDED") {
       return NextResponse.json({ error: "This order has already been refunded" }, { status: 400 });
     }
@@ -39,7 +66,7 @@ export async function POST(req: NextRequest) {
       try {
         const refundRes = await createPaystackRefund({
           transaction: ref,
-          merchantNote: reason || "Refund requested by administrator",
+          merchantNote: reason || order.refundReason || "Refund requested by administrator",
         });
         refundGatewayId = String(refundRes.data?.id || "");
       } catch (paystackErr: any) {
@@ -53,6 +80,7 @@ export async function POST(req: NextRequest) {
         where: { id: order.id },
         data: {
           status: "REFUNDED",
+          refundRequested: false,
         },
       });
 

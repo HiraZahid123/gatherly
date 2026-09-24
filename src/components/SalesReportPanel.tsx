@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import {
   Loader2, TrendingUp, Ticket, DollarSign,
   ArrowDownRight, ChevronRight, CreditCard,
-  CheckCircle2, Clock, Receipt, Banknote, ShieldCheck
+  CheckCircle2, Clock, Receipt, Banknote, ShieldCheck,
+  RotateCcw, X, AlertCircle
 } from "lucide-react";
 
 interface SalesReportPanelProps {
@@ -17,12 +18,63 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Refund Request State
+  const [requestingOrder, setRequestingOrder] = useState<any>(null);
+  const [requestReason, setRequestReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestError, setRequestError] = useState("");
+  const [requestSuccess, setRequestSuccess] = useState("");
+
+  const loadSales = async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/sales`);
+      const json = await res.json();
+      setData(json);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(`/api/events/${eventId}/sales`)
-      .then((r) => r.json())
-      .then(setData)
-      .finally(() => setLoading(false));
+    loadSales();
   }, [eventId]);
+
+  const handleSubmitRefundRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!requestingOrder) return;
+    if (!requestReason.trim()) {
+      setRequestError("Please provide a reason for the refund request.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setRequestError("");
+    try {
+      const res = await fetch(`/api/events/${eventId}/orders/${requestingOrder.id}/refund-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: requestReason.trim() }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setRequestSuccess("Refund request submitted for admin review!");
+        setTimeout(() => {
+          setRequestingOrder(null);
+          setRequestReason("");
+          setRequestSuccess("");
+          loadSales();
+        }, 1500);
+      } else {
+        setRequestError(json.error || "Failed to submit request.");
+      }
+    } catch (err: any) {
+      setRequestError(err?.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -215,9 +267,37 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
                     {new Date(order.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <p className={`text-xs font-black shrink-0 ${order.status === "REFUNDED" ? "text-rose-400/80 line-through" : "text-white"}`}>
-                  {fmt(order.totalAmount)}
-                </p>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className={`text-xs font-black shrink-0 ${order.status === "REFUNDED" ? "text-rose-400/80 line-through" : "text-white"}`}>
+                      {fmt(order.totalAmount)}
+                    </p>
+                  </div>
+                  {order.status === "COMPLETED" && (
+                    <div>
+                      {order.refundRequested ? (
+                        <span className="px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />
+                          Requested
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRequestingOrder(order);
+                            setRequestReason("");
+                            setRequestError("");
+                            setRequestSuccess("");
+                          }}
+                          className="px-2 py-1 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 border border-white/10 text-white/50 font-bold text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Refund
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -228,6 +308,107 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
         <div className="text-center py-8 space-y-2">
           <DollarSign className="w-8 h-8 text-white/10 mx-auto" />
           <p className="text-white/20 text-xs uppercase tracking-widest font-bold">No sales yet</p>
+        </div>
+      )}
+
+      {/* ─── MODAL: CREATOR REFUND REQUEST ─── */}
+      {requestingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl relative">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <RotateCcw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-base text-white">Request Ticket Refund</h3>
+                  <p className="text-xs text-white/40">Submit for platform administrator approval</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRequestingOrder(null)}
+                className="p-1 rounded-lg text-white/40 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Order summary */}
+            <div className="p-3.5 bg-white/[0.03] border border-white/8 rounded-2xl space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-white/40">Guest</span>
+                <span className="font-bold text-white truncate max-w-[200px]">
+                  {requestingOrder.guestName || requestingOrder.guestEmail}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/40">Ticket</span>
+                <span className="font-medium text-white">{requestingOrder.quantity}× {requestingOrder.tierName}</span>
+              </div>
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between font-black">
+                <span className="text-rose-300">Amount to Refund</span>
+                <span className="text-rose-400">{fmt(requestingOrder.totalAmount)}</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] leading-relaxed flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+              <span>
+                Once approved by the admin, the funds will be reversed to the customer via Paystack, their QR ticket will be cancelled, and the ticket will return to your tier inventory.
+              </span>
+            </div>
+
+            {/* Reason Form */}
+            <form onSubmit={handleSubmitRefundRequest} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-wider text-white/50 block">
+                  Reason for Refund (Required)
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={requestReason}
+                  onChange={(e) => setRequestReason(e.target.value)}
+                  placeholder="e.g. Guest had a travel emergency, duplicate booking, or event time changed..."
+                  className="w-full bg-black/60 border border-white/15 focus:border-amber-500 rounded-2xl px-3.5 py-2.5 text-white text-xs outline-none transition-all placeholder:text-white/20 resize-none"
+                />
+              </div>
+
+              {requestError && (
+                <p className="text-rose-400 text-xs font-medium">{requestError}</p>
+              )}
+
+              {requestSuccess && (
+                <p className="text-emerald-400 text-xs font-bold">{requestSuccess}</p>
+              )}
+
+              <div className="flex items-center justify-end gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setRequestingOrder(null)}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !requestReason.trim()}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs uppercase tracking-wider transition-all disabled:opacity-40"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <span>Submit Request</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -91,6 +91,9 @@ interface OrderItem {
   hostName: string;
   hostEmail: string;
   tierName: string;
+  refundRequested?: boolean;
+  refundReason?: string | null;
+  refundRequestedAt?: string | null;
 }
 
 interface RevenueData {
@@ -126,7 +129,7 @@ export default function AdminRevenuePage() {
   const [activeView, setActiveView] = useState<"EVENTS" | "ORDERS">("EVENTS");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "SETTLED" | "PENDING">("ALL");
-  const [orderStatusFilter, setOrderStatusFilter] = useState<"ALL" | "COMPLETED" | "REFUNDED">("ALL");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<"ALL" | "COMPLETED" | "REFUNDED" | "REFUND_REQUESTED">("ALL");
 
   // Payout Modal State
   const [activePayoutEvent, setActivePayoutEvent] = useState<EventRevenueItem | null>(null);
@@ -301,9 +304,14 @@ export default function AdminRevenuePage() {
 
       if (orderStatusFilter === "COMPLETED") return order.status === "COMPLETED";
       if (orderStatusFilter === "REFUNDED") return order.status === "REFUNDED";
+      if (orderStatusFilter === "REFUND_REQUESTED") return order.refundRequested && order.status === "COMPLETED";
       return true;
     });
   }, [data?.recentOrders, searchQuery, orderStatusFilter]);
+
+  const pendingRefundRequestsCount = useMemo(() => {
+    return data?.recentOrders?.filter((o) => o.refundRequested && o.status === "COMPLETED").length || 0;
+  }, [data?.recentOrders]);
 
   // Refund Order Handler
   const handleProcessRefund = async () => {
@@ -325,6 +333,35 @@ export default function AdminRevenuePage() {
         fetchRevenueData();
       } else {
         alert(json.error || "Failed to process refund");
+      }
+    } catch (err: any) {
+      alert(err.message || "An error occurred");
+    } finally {
+      setIsRefunding(false);
+    }
+  };
+
+  // Reject / Dismiss Refund Request Handler
+  const handleRejectRefund = async () => {
+    if (!refundingOrder) return;
+    setIsRefunding(true);
+    try {
+      const res = await fetch("/api/admin/revenue/refund", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: refundingOrder.id,
+          action: "REJECT",
+          reason: refundReason,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setRefundingOrder(null);
+        setRefundReason("");
+        fetchRevenueData();
+      } else {
+        alert(json.error || "Failed to dismiss refund request");
       }
     } catch (err: any) {
       alert(err.message || "An error occurred");
@@ -652,6 +689,22 @@ export default function AdminRevenuePage() {
                 >
                   Refunded ({data?.kpis.totalRefundedCount || 0})
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderStatusFilter("REFUND_REQUESTED")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                    orderStatusFilter === "REFUND_REQUESTED"
+                      ? "bg-amber-500 text-black font-black shadow-lg shadow-amber-500/20"
+                      : "text-white/40 hover:text-white"
+                  }`}
+                >
+                  <span>Refund Requests</span>
+                  {pendingRefundRequestsCount > 0 && (
+                    <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-black ${orderStatusFilter === "REFUND_REQUESTED" ? "bg-black text-amber-400" : "bg-amber-500 text-black"}`}>
+                      {pendingRefundRequestsCount}
+                    </span>
+                  )}
+                </button>
               </>
             )}
           </div>
@@ -888,6 +941,18 @@ export default function AdminRevenuePage() {
                               <RotateCcw className="w-2.5 h-2.5" />
                               Refunded
                             </span>
+                          ) : order.refundRequested ? (
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-[10px] uppercase tracking-wider animate-pulse">
+                                <Clock className="w-2.5 h-2.5" />
+                                Requested
+                              </span>
+                              {order.refundReason && (
+                                <p className="text-[10px] text-amber-400/80 italic max-w-[160px] truncate" title={order.refundReason}>
+                                  "{order.refundReason}"
+                                </p>
+                              )}
+                            </div>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
                               <CheckCircle2 className="w-2.5 h-2.5" />
@@ -901,12 +966,16 @@ export default function AdminRevenuePage() {
                               type="button"
                               onClick={() => {
                                 setRefundingOrder(order);
-                                setRefundReason("");
+                                setRefundReason(order.refundReason || "");
                               }}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500 hover:text-white transition-all text-[11px] font-bold tracking-wide"
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-[11px] font-bold tracking-wide ${
+                                order.refundRequested
+                                  ? "bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/20 font-black"
+                                  : "bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500 hover:text-white"
+                              }`}
                             >
                               <RotateCcw className="w-3 h-3" />
-                              <span>Refund</span>
+                              <span>{order.refundRequested ? "Review Request" : "Refund"}</span>
                             </button>
                           ) : (
                             <span className="text-[11px] text-white/30 font-medium italic">Reversed</span>
@@ -1270,6 +1339,18 @@ export default function AdminRevenuePage() {
               </div>
             </div>
 
+            {/* Host Request Note if present */}
+            {refundingOrder.refundRequested && refundingOrder.refundReason && (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-2xl space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
+                  Creator's Request Reason:
+                </span>
+                <p className="text-amber-200 text-xs italic">
+                  "{refundingOrder.refundReason}"
+                </p>
+              </div>
+            )}
+
             <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
               Refunding this order will mark it as refunded, restore {refundingOrder.quantity} ticket{refundingOrder.quantity > 1 ? "s" : ""} to the tier inventory, set RSVP to declined, and automatically refund via Paystack if paid online.
             </div>
@@ -1277,47 +1358,61 @@ export default function AdminRevenuePage() {
             {/* Refund Reason */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-black uppercase tracking-wider text-white/50 block">
-                Reason for Refund (Optional)
+                {refundingOrder.refundRequested ? "Admin Note / Response Reason" : "Reason for Refund (Optional)"}
               </label>
               <input
                 type="text"
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
-                placeholder="e.g. Customer requested cancellation, duplicate charge..."
+                placeholder={refundingOrder.refundRequested ? "e.g. Approved as per host request" : "e.g. Customer requested cancellation..."}
                 className="w-full bg-black/60 border border-white/15 focus:border-rose-500 rounded-2xl px-4 py-3 text-white text-xs outline-none transition-all placeholder:text-white/20"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setRefundingOrder(null);
-                  setRefundReason("");
-                }}
-                disabled={isRefunding}
-                className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-bold transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleProcessRefund}
-                disabled={isRefunding}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
-              >
-                {isRefunding ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Processing Refund...</span>
-                  </>
-                ) : (
-                  <>
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Confirm Refund</span>
-                  </>
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <div>
+                {refundingOrder.refundRequested && (
+                  <button
+                    type="button"
+                    onClick={handleRejectRefund}
+                    disabled={isRefunding}
+                    className="px-4 py-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    Decline Request
+                  </button>
                 )}
-              </button>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRefundingOrder(null);
+                    setRefundReason("");
+                  }}
+                  disabled={isRefunding}
+                  className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleProcessRefund}
+                  disabled={isRefunding}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                >
+                  {isRefunding ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{refundingOrder.refundRequested ? "Approve & Refund" : "Confirm Refund"}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

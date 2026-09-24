@@ -80,6 +80,9 @@ export async function GET(req: NextRequest) {
           hostName: order.event?.host?.name || "Unknown Host",
           hostEmail: order.event?.host?.email || "N/A",
           tierName: order.ticketTier?.name || "Standard",
+          refundRequested: order.refundRequested ?? false,
+          refundReason: order.refundReason ?? null,
+          refundRequestedAt: order.refundRequestedAt ?? null,
         };
       })
     );
