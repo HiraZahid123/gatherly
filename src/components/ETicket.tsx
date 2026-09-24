@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Calendar, MapPin, User, Download, QrCode } from "lucide-react";
-import { useRef } from "react";
+import { Calendar, MapPin, User, Download, QrCode, Loader2, Check } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface ETicketProps {
   event: any;
@@ -14,6 +14,8 @@ interface ETicketProps {
 
 export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", onClose }: ETicketProps) {
   const ticketRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
 
   const formattedDate = event?.startDate
     ? new Date(event.startDate).toLocaleDateString("en-US", {
@@ -31,18 +33,33 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
       })
     : "";
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${rsvp?.qrToken}&margin=10`;
+  const qrToken = rsvp?.qrToken || order?.id || "ticket";
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrToken)}&margin=10`;
 
   const handleDownload = async () => {
     try {
+      setDownloading(true);
+      const res = await fetch(qrUrl);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = qrUrl;
-      a.download = `ticket-${event?.slug || "event"}.png`;
-      a.target = "_blank";
+      a.href = blobUrl;
+      const safeTitle = (event?.title || event?.slug || "ticket").replace(/[^a-zA-Z0-9_-]/g, "_");
+      a.download = `ticket-${safeTitle}-qr.png`;
       document.body.appendChild(a);
       a.click();
-      a.remove();
-    } catch {}
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+
+      setDownloaded(true);
+      setTimeout(() => setDownloaded(false), 3000);
+    } catch (err) {
+      console.error("Failed to download QR image:", err);
+      // Fallback
+      window.open(qrUrl, "_blank");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -171,10 +188,17 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
       <div className="flex gap-3 max-w-sm mx-auto">
         <button
           onClick={handleDownload}
-          className="flex-1 h-11 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold uppercase tracking-widest text-[10px] text-white/60 hover:text-white transition-all flex items-center justify-center gap-2"
+          disabled={downloading}
+          className="flex-1 h-11 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold uppercase tracking-widest text-[10px] text-white/60 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          Save QR
+          {downloading ? (
+            <Loader2 className="w-4 h-4 animate-spin text-white" />
+          ) : downloaded ? (
+            <Check className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          {downloading ? "Saving..." : downloaded ? "Saved!" : "Save QR"}
         </button>
         {onClose && (
           <button
