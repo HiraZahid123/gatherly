@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "/help/greeting-cards",
         "/help/greeting-cards/sending-a-card",
         "/help/ticketing-payouts",
-        "/help/ticketing-payouts/connecting-stripe",
+        "/help/ticketing-payouts/collecting-payouts",
         "/help/ticketing-payouts/ticket-tiers",
         "/help/limits-waitlists",
         "/help/limits-waitlists/event-waitlists",

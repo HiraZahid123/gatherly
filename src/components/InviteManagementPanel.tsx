@@ -24,9 +24,6 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isPaid, setIsPaid] = useState(false);
-    const [stripeConnected, setStripeConnected] = useState(true);
-    const [isConnectingStripe, setIsConnectingStripe] = useState(false);
 
     const fetchInvitations = async () => {
         try {
@@ -34,32 +31,11 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
             const data = await response.json();
             if (response.ok) {
                 setInvitations(data.invitations);
-                if (data.event) {
-                    setIsPaid(!!data.event.isPaid);
-                    setStripeConnected(!!data.event.stripeConnected);
-                }
             }
         } catch (err) {
             console.error("Failed to fetch invitations", err);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleConnectStripe = async () => {
-        setIsConnectingStripe(true);
-        try {
-            const res = await fetch("/api/stripe/connect/onboard", { method: "POST" });
-            const { url, error: err } = await res.json();
-            if (url) {
-                window.location.href = url;
-            } else {
-                setError(err || "Failed to start Stripe Connect onboarding.");
-            }
-        } catch (err) {
-            setError("Connection error during Stripe Connect onboarding.");
-        } finally {
-            setIsConnectingStripe(false);
         }
     };
 

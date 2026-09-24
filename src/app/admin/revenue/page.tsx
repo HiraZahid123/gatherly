@@ -51,8 +51,6 @@ interface EventRevenueItem {
   hostName: string;
   hostEmail: string;
   hostImage?: string | null;
-  hostHasStripe: boolean;
-  hostStripeAccountId?: string | null;
   totalTicketsSold: number;
   orderCount: number;
   grossRevenue: number;
@@ -63,7 +61,7 @@ interface EventRevenueItem {
   hostNetPayout: number;
   totalPaidOut: number;
   balanceDue: number;
-  payoutStatus: "STRIPE_AUTO" | "SETTLED" | "PARTIAL" | "PENDING";
+  payoutStatus: "SETTLED" | "PARTIAL" | "PENDING";
   payoutHistory: PayoutRecord[];
   currency: string;
   lastOrderAt: string;
@@ -82,6 +80,8 @@ interface OrderItem {
   hostPayout: number;
   feeDetails: string;
   currency: string;
+  reference?: string | null;
+  transactionId?: string | null;
   stripePaymentIntentId?: string | null;
   stripeChargeId?: string | null;
   createdAt: string;
@@ -90,7 +90,6 @@ interface OrderItem {
   eventSlug?: string;
   hostName: string;
   hostEmail: string;
-  hostHasStripe: boolean;
   tierName: string;
 }
 
@@ -116,11 +115,7 @@ interface RevenueData {
 
 const PAYMENT_PLATFORMS = [
   "Direct Bank Transfer",
-  "Paystack",
-  "Flutterwave",
-  "PayPal",
-  "Stripe Manual Transfer",
-  "Wire / International Transfer",
+  "Paystack Transfer",
   "Cash",
   "Other",
 ];
@@ -130,7 +125,7 @@ export default function AdminRevenuePage() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"EVENTS" | "ORDERS">("EVENTS");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "STRIPE_AUTO" | "SETTLED" | "PENDING">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "SETTLED" | "PENDING">("ALL");
   const [orderStatusFilter, setOrderStatusFilter] = useState<"ALL" | "COMPLETED" | "REFUNDED">("ALL");
 
   // Payout Modal State
@@ -283,7 +278,6 @@ export default function AdminRevenuePage() {
 
       if (!matchesSearch) return false;
 
-      if (statusFilter === "STRIPE_AUTO") return item.payoutStatus === "STRIPE_AUTO";
       if (statusFilter === "SETTLED") return item.payoutStatus === "SETTLED";
       if (statusFilter === "PENDING") return item.payoutStatus === "PENDING" || item.payoutStatus === "PARTIAL";
       return true;
@@ -391,7 +385,7 @@ export default function AdminRevenuePage() {
         "Gross Total (NGN)",
         "Platform Fee (NGN)",
         "Host Share (NGN)",
-        "Stripe Intent ID",
+        "Payment Reference",
         "Date",
       ];
       const rows = filteredOrders.map((o) => [
@@ -405,7 +399,7 @@ export default function AdminRevenuePage() {
         (o.totalAmount / 100).toFixed(2),
         (o.platformFee / 100).toFixed(2),
         (o.hostPayout / 100).toFixed(2),
-        o.stripePaymentIntentId || "N/A",
+        (o as any).reference || o.stripePaymentIntentId || "N/A",
         new Date(o.createdAt).toLocaleString(),
       ]);
       downloadCSV("all-ticket-orders.csv", [headers.join(","), ...rows.map((r) => r.join(","))].join("\n"));
@@ -512,7 +506,7 @@ export default function AdminRevenuePage() {
             {loading ? "…" : formatCurrency(data?.kpis.totalPlatformCommission || 0)}
           </h3>
           <p className="text-[11px] text-emerald-300/50 mt-1">
-            Retained in Stripe account
+            Retained in Paystack account
           </p>
         </div>
 
@@ -601,17 +595,6 @@ export default function AdminRevenuePage() {
                   }`}
                 >
                   All
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter("STRIPE_AUTO")}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap ${
-                    statusFilter === "STRIPE_AUTO"
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : "text-white/40 hover:text-white"
-                  }`}
-                >
-                  Stripe Auto
                 </button>
                 <button
                   type="button"
@@ -766,7 +749,7 @@ export default function AdminRevenuePage() {
                           <span className="font-black text-white text-sm">
                             {formatCurrency(item.hostNetPayout, item.currency)}
                           </span>
-                          {item.totalPaidOut > 0 && item.payoutStatus !== "STRIPE_AUTO" && (
+                          {item.totalPaidOut > 0 && (
                             <p className="text-[10px] text-white/40 mt-0.5 font-mono">
                               Paid: {formatCurrency(item.totalPaidOut, item.currency)}
                             </p>
@@ -777,12 +760,7 @@ export default function AdminRevenuePage() {
                       {/* Payout Status & Action */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          {item.payoutStatus === "STRIPE_AUTO" ? (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>Stripe Auto Payout</span>
-                            </div>
-                          ) : item.payoutStatus === "SETTLED" ? (
+                          {item.payoutStatus === "SETTLED" ? (
                             <div className="flex items-center gap-2">
                               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[11px] font-bold">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
@@ -1293,7 +1271,7 @@ export default function AdminRevenuePage() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
-              Refunding this order will mark it as refunded, restore {refundingOrder.quantity} ticket{refundingOrder.quantity > 1 ? "s" : ""} to the tier inventory, set RSVP to declined, and automatically refund via Stripe if paid online.
+              Refunding this order will mark it as refunded, restore {refundingOrder.quantity} ticket{refundingOrder.quantity > 1 ? "s" : ""} to the tier inventory, set RSVP to declined, and automatically refund via Paystack if paid online.
             </div>
 
             {/* Refund Reason */}

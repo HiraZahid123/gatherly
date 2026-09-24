@@ -53,16 +53,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Check user's Stripe Account status
-    const stripeAccount = await prisma.stripeAccount.findUnique({
-      where: { userId },
-      select: {
-        chargesEnabled: true,
-        payoutsEnabled: true,
-        stripeAccountId: true,
-      },
-    });
-
     // Fetch payouts recorded
     const allPayouts = await getAllPayouts();
     const userPayouts = allPayouts.filter((p) => eventIds.includes(p.eventId));
@@ -95,11 +85,8 @@ export async function GET(req: NextRequest) {
         const totalPaidOut = eventPayouts.reduce((sum, p) => sum + p.amount, 0);
         const balanceDue = Math.max(0, netEarnings - totalPaidOut);
 
-        const isStripeAuto = Boolean(stripeAccount?.chargesEnabled);
-        let status: "STRIPE_AUTO" | "FULLY_PAID" | "PARTIAL" | "PENDING" = "PENDING";
-        if (isStripeAuto) {
-          status = "STRIPE_AUTO";
-        } else if (totalPaidOut >= netEarnings && netEarnings > 0) {
+        let status: "FULLY_PAID" | "PARTIAL" | "PENDING" = "PENDING";
+        if (totalPaidOut >= netEarnings && netEarnings > 0) {
           status = "FULLY_PAID";
         } else if (totalPaidOut > 0) {
           status = "PARTIAL";
@@ -146,15 +133,12 @@ export async function GET(req: NextRequest) {
       totalPlatformFees += ev.platformFee;
       totalNetEarnings += ev.netEarnings;
       totalTicketsSold += ev.ticketsSold;
-      if (!stripeAccount?.chargesEnabled) {
-        totalPaidToUser += ev.totalPaidOut;
-        totalRemainingDue += ev.balanceDue;
-      }
+      totalPaidToUser += ev.totalPaidOut;
+      totalRemainingDue += ev.balanceDue;
     }
 
     return NextResponse.json({
       success: true,
-      hasStripeConnect: Boolean(stripeAccount?.chargesEnabled),
       totals: {
         totalGrossRevenue,
         totalRefundedAmount,

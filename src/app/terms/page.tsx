@@ -127,7 +127,7 @@ You may not copy, modify, distribute, sell, license, or reproduce any part of th
         num: "11",
         title: "Third-Party Services",
         icon: Layers,
-        body: `The Platform may integrate with third-party services, including payment processors (Stripe), mapping services, email providers, SMS/WhatsApp providers, and social media platforms.
+        body: `The Platform may integrate with third-party services, including payment processors (Paystack), mapping services, email providers, SMS/WhatsApp providers, and social media platforms.
 We are not responsible for the content, policies, or practices of third-party services. Your use of such services is subject to their terms and policies.`,
     },
     {

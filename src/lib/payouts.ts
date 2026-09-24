@@ -7,7 +7,7 @@ export interface EventPayoutRecord {
   hostId?: string;
   amount: number; // in cents/kobo
   currency: string;
-  paymentPlatform: string; // e.g. "Direct Bank Transfer", "Paystack", "Flutterwave", "PayPal", "Stripe", "Cash", "Other"
+  paymentPlatform: string; // e.g. "Direct Bank Transfer", "Paystack", "Cash", "Other"
   reference?: string; // Transaction reference or receipt number
   notes?: string;
   paidAt: string;

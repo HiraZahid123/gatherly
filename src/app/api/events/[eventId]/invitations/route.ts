@@ -40,8 +40,7 @@ export async function GET(
         return NextResponse.json({ 
             invitations,
             event: {
-                isPaid: event.isPaid,
-                stripeConnected: true
+                isPaid: event.isPaid
             }
         });
     } catch (error) {
@@ -71,7 +70,7 @@ export async function POST(
             return NextResponse.json({ error: "Only the host can send invitations" }, { status: 403 });
         }
 
-        // Platform admin Stripe gateway handles all paid ticket collections and payouts
+        // Platform admin Paystack gateway handles all paid ticket collections and payouts
 
 
         const body = await request.json();

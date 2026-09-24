@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
 import { calculatePlatformFee } from "@/lib/platformSettings";
 import { getPayoutsForEvent } from "@/lib/payouts";
 
@@ -16,7 +15,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   if (!event || event.hostId !== session.user.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const [allOrders, recentOrders, tiers, tierStats, totals, stripeAccount, payouts, refundedAgg] = await Promise.all([
+  const [allOrders, recentOrders, tiers, tierStats, totals, payouts, refundedAgg] = await Promise.all([
     prisma.order.findMany({
       where: { eventId, status: "COMPLETED" },
       select: { totalAmount: true, quantity: true },
@@ -37,7 +36,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
       where: { eventId, status: "COMPLETED" },
       _sum: { quantity: true, totalAmount: true },
     }),
-    prisma.stripeAccount.findUnique({ where: { userId: session.user.id } }),
     getPayoutsForEvent(eventId),
     prisma.order.aggregate({
       where: { eventId, status: "REFUNDED" },
@@ -79,21 +77,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     };
   });
 
-  // Fetch pending balance from Stripe if connected
-  let stripeBalance = null;
-  if (stripeAccount?.chargesEnabled) {
-    try {
-      const balance = await stripe.balance.retrieve(undefined, {
-        stripeAccount: stripeAccount.stripeAccountId,
-      });
-      stripeBalance = {
-        available: balance.available.reduce((s, b) => s + b.amount, 0),
-        pending: balance.pending.reduce((s, b) => s + b.amount, 0),
-        currency: balance.available[0]?.currency ?? "ngn",
-      };
-    } catch (_) {}
-  }
-
   return NextResponse.json({
     totalRevenue,
     totalRefundedAmount,
@@ -104,7 +87,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     totalPaidOut,
     balanceDue,
     payoutHistory: payouts,
-    hasStripeConnected: Boolean(stripeAccount?.chargesEnabled),
     totalTicketsSold,
     byTier,
     recentOrders: recentOrders.map((o) => ({
@@ -117,14 +99,5 @@ export async function GET(_req: NextRequest, { params }: Params) {
       currency: o.currency,
       createdAt: o.createdAt,
     })),
-    stripeAccount: stripeAccount
-      ? {
-          chargesEnabled: stripeAccount.chargesEnabled,
-          payoutsEnabled: stripeAccount.payoutsEnabled,
-          stripeAccountId: stripeAccount.stripeAccountId,
-        }
-      : null,
-    stripeBalance,
   });
 }
-

@@ -6,12 +6,12 @@ export type CommissionType = "PERCENTAGE" | "FIXED" | "BOTH";
 export interface PlatformCommissionSettings {
     commissionType: CommissionType;
     percentageRate: number; // e.g. 3 for 3%
-    fixedAmount: number;    // e.g. 100 for ₦100 (in major currency units, e.g. Naira / Dollars)
-    currency: string;       // "ngn" | "usd"
+    fixedAmount: number;    // e.g. 100 for ₦100 (in major currency units, e.g. Naira)
+    currency: string;       // "ngn"
     payoutScheduleNote?: string;
-    stripePublishableKey?: string;
-    stripeSecretKey?: string;
-    stripeWebhookSecret?: string;
+    // Paystack
+    paystackPublicKey?: string;
+    paystackSecretKey?: string;
     updatedAt: string;
     updatedBy?: string;
 }
@@ -25,11 +25,11 @@ export const DEFAULT_COMMISSION_SETTINGS: PlatformCommissionSettings = {
     percentageRate: 3.0,
     fixedAmount: 0,
     currency: "ngn",
-    payoutScheduleNote: "Automatic end-of-day remittance via Stripe Connect",
+    payoutScheduleNote: "Automatic end-of-day bank remittance via Paystack",
     updatedAt: new Date().toISOString(),
 };
 
-// In-memory cache for ultra-fast checkout calculations and Stripe key lookups
+// In-memory cache for ultra-fast checkout calculations and Paystack key lookups
 let cachedSettings: PlatformCommissionSettings | null = null;
 let lastCacheTime = 0;
 const CACHE_TTL_MS = 60 * 1000; // 1 minute cache
@@ -42,7 +42,7 @@ export function maskSecret(secret?: string | null): string {
     const trimmed = secret.trim();
     if (trimmed.length <= 8) return "••••••••";
     
-    // Find prefix (e.g. sk_test_, sk_live_, whsec_)
+    // Find prefix (e.g. sk_test_, sk_live_)
     const underscoreIndex = trimmed.lastIndexOf("_");
     const prefix = underscoreIndex !== -1 ? trimmed.slice(0, underscoreIndex + 1) : "";
     const suffix = trimmed.slice(-4);
@@ -58,23 +58,19 @@ export function isMaskedSecret(secret?: string | null): boolean {
 }
 
 /**
- * Validates Stripe key prefixes
+ * Validates Paystack key prefixes
  */
-export function validateStripeKeyFormat(type: "publishable" | "secret" | "webhook", key: string): { valid: boolean; error?: string } {
+export function validatePaystackKeyFormat(type: "public" | "secret", key: string): { valid: boolean; error?: string } {
     const trimmed = key.trim();
     if (!trimmed) return { valid: true };
 
-    if (type === "publishable") {
+    if (type === "public") {
         if (!trimmed.startsWith("pk_test_") && !trimmed.startsWith("pk_live_")) {
-            return { valid: false, error: "Publishable key must start with 'pk_test_' or 'pk_live_'." };
+            return { valid: false, error: "Public key must start with 'pk_test_' or 'pk_live_'." };
         }
     } else if (type === "secret") {
-        if (!trimmed.startsWith("sk_test_") && !trimmed.startsWith("sk_live_") && !trimmed.startsWith("rk_test_") && !trimmed.startsWith("rk_live_")) {
-            return { valid: false, error: "Secret key must start with 'sk_test_', 'sk_live_', 'rk_test_', or 'rk_live_'." };
-        }
-    } else if (type === "webhook") {
-        if (!trimmed.startsWith("whsec_")) {
-            return { valid: false, error: "Webhook secret must start with 'whsec_'." };
+        if (!trimmed.startsWith("sk_test_") && !trimmed.startsWith("sk_live_")) {
+            return { valid: false, error: "Secret key must start with 'sk_test_' or 'sk_live_'." };
         }
     }
 
@@ -82,7 +78,7 @@ export function validateStripeKeyFormat(type: "publishable" | "secret" | "webhoo
 }
 
 /**
- * Loads current platform commission & stripe settings from disk synchronously.
+ * Loads current platform commission & Paystack settings from disk synchronously.
  */
 export function getCommissionSettingsSync(): PlatformCommissionSettings {
     const now = Date.now();
@@ -129,43 +125,40 @@ export async function getCommissionSettings(): Promise<PlatformCommissionSetting
 }
 
 /**
- * Returns the effective Stripe configuration, prioritizing saved platform settings
+ * Returns the effective Paystack configuration, prioritizing saved platform settings
  * and falling back to environment variables.
  */
-export function getStripeConfigSync(): {
-    publishableKey: string;
+export function getPaystackConfigSync(): {
+    publicKey: string;
     secretKey: string;
-    webhookSecret: string;
     isLive: boolean;
     configured: boolean;
 } {
     const settings = getCommissionSettingsSync();
 
-    const publishableKey = settings.stripePublishableKey?.trim() || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
-    const secretKey = settings.stripeSecretKey?.trim() || process.env.STRIPE_SECRET_KEY || "";
-    const webhookSecret = settings.stripeWebhookSecret?.trim() || process.env.STRIPE_WEBHOOK_SECRET || "";
+    const publicKey = settings.paystackPublicKey?.trim() || process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "";
+    const secretKey = settings.paystackSecretKey?.trim() || process.env.PAYSTACK_SECRET_KEY || "";
 
-    const isLive = publishableKey.startsWith("pk_live_") || secretKey.startsWith("sk_live_");
-    const configured = Boolean(publishableKey && secretKey);
+    const isLive = publicKey.startsWith("pk_live_") || secretKey.startsWith("sk_live_");
+    const configured = Boolean(publicKey && secretKey);
 
     return {
-        publishableKey,
+        publicKey,
         secretKey,
-        webhookSecret,
         isLive,
         configured,
     };
 }
 
-export async function getStripeConfig() {
-    return getStripeConfigSync();
+export async function getPaystackConfig() {
+    return getPaystackConfigSync();
 }
 
 /**
- * Saves updated platform commission and Stripe settings to persistent storage and updates the cache.
+ * Saves updated platform commission and Paystack settings to persistent storage and updates the cache.
  */
 export async function saveCommissionSettings(
-    newSettings: Partial<PlatformCommissionSettings> & { clearStripeKeys?: boolean },
+    newSettings: Partial<PlatformCommissionSettings> & { clearPaystackKeys?: boolean },
     adminIdentifier?: string
 ): Promise<PlatformCommissionSettings> {
     const current = await getCommissionSettings();
@@ -173,37 +166,23 @@ export async function saveCommissionSettings(
     const percentage = Number(newSettings.percentageRate ?? current.percentageRate);
     const fixed = Number(newSettings.fixedAmount ?? current.fixedAmount);
 
-    // Handle Stripe Keys securely
-    let publishableKey = current.stripePublishableKey;
-    let secretKey = current.stripeSecretKey;
-    let webhookSecret = current.stripeWebhookSecret;
+    // Handle Paystack Keys
+    let paystackPublicKey = current.paystackPublicKey;
+    let paystackSecretKey = current.paystackSecretKey;
 
-    if (newSettings.clearStripeKeys) {
-        publishableKey = undefined;
-        secretKey = undefined;
-        webhookSecret = undefined;
+    if (newSettings.clearPaystackKeys) {
+        paystackPublicKey = undefined;
+        paystackSecretKey = undefined;
     } else {
-        if (newSettings.stripePublishableKey !== undefined) {
-            publishableKey = newSettings.stripePublishableKey.trim() || undefined;
+        if (newSettings.paystackPublicKey !== undefined) {
+            paystackPublicKey = newSettings.paystackPublicKey.trim() || undefined;
         }
-
-        // Only overwrite secret key if a new, unmasked value is provided
-        if (newSettings.stripeSecretKey !== undefined) {
-            const rawSecret = newSettings.stripeSecretKey.trim();
-            if (rawSecret && !isMaskedSecret(rawSecret)) {
-                secretKey = rawSecret;
-            } else if (rawSecret === "") {
-                secretKey = undefined;
-            }
-        }
-
-        // Only overwrite webhook secret if a new, unmasked value is provided
-        if (newSettings.stripeWebhookSecret !== undefined) {
-            const rawWh = newSettings.stripeWebhookSecret.trim();
-            if (rawWh && !isMaskedSecret(rawWh)) {
-                webhookSecret = rawWh;
-            } else if (rawWh === "") {
-                webhookSecret = undefined;
+        if (newSettings.paystackSecretKey !== undefined) {
+            const rawPsk = newSettings.paystackSecretKey.trim();
+            if (rawPsk && !isMaskedSecret(rawPsk)) {
+                paystackSecretKey = rawPsk;
+            } else if (rawPsk === "") {
+                paystackSecretKey = undefined;
             }
         }
     }
@@ -214,9 +193,8 @@ export async function saveCommissionSettings(
         percentageRate: Math.max(0, Math.min(100, isNaN(percentage) ? 3 : percentage)),
         fixedAmount: Math.max(0, isNaN(fixed) ? 0 : fixed),
         commissionType: newSettings.commissionType || current.commissionType,
-        stripePublishableKey: publishableKey,
-        stripeSecretKey: secretKey,
-        stripeWebhookSecret: webhookSecret,
+        paystackPublicKey,
+        paystackSecretKey,
         updatedAt: new Date().toISOString(),
         updatedBy: adminIdentifier || "Admin",
     };
@@ -235,7 +213,7 @@ export async function saveCommissionSettings(
 
 /**
  * Calculates the platform commission fee for a ticket order.
- * @param totalAmountInCents Total order amount in lowest currency denomination (cents / kobo, e.g. ₦1,000 = 100,000 kobo).
+ * @param totalAmountInCents Total order amount in lowest currency denomination (kobo, e.g. ₦1,000 = 100,000 kobo).
  * @param quantity Number of tickets purchased.
  * @returns Object with platformFee in lowest currency units and a human-readable explanation.
  */
@@ -258,8 +236,8 @@ export async function calculatePlatformFee(
     }
 
     if (settings.commissionType === "FIXED" || settings.commissionType === "BOTH") {
-        // fixedAmount is configured in standard major units (e.g. ₦100 or $1.00)
-        // multiply by 100 to get kobo/cents, then multiply by quantity
+        // fixedAmount is configured in standard major units (e.g. ₦100)
+        // multiply by 100 to get kobo, then multiply by quantity
         const fixedFeePerTicketInCents = Math.round(settings.fixedAmount * 100);
         const totalFixedFee = fixedFeePerTicketInCents * quantity;
         calculatedFeeInCents += totalFixedFee;

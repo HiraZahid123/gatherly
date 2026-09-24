@@ -1,4 +1,4 @@
-﻿export interface ArticleSection {
+export interface ArticleSection {
   id: string;
   heading: string;
   body: string; // markdown-lite: supports **bold**, `code`, [text](url), and \n for new paragraphs
@@ -468,36 +468,35 @@ export const helpCategories: HelpCategory[] = [
     ],
   },
   // ───────────────────────────────────────────
-  // 8. TICKETING & PAYOUTS (STRIPE CONNECT)
+  // 8. TICKETING & PAYOUTS (PAYSTACK & BANK TRANSFERS)
   // ───────────────────────────────────────────
   {
     slug: "ticketing-payouts",
     emoji: "🎟️",
     title: "Ticketing & Payouts",
-    description: "Sell tickets for your events, manage pricing tiers, and connect Stripe Connect.",
+    description: "Sell tickets for your events, manage pricing tiers, and track bank payouts via Paystack.",
     sections: [
       {
         title: "Payout Setup",
         articles: [
           {
-            slug: "connecting-stripe",
-            title: "Connecting your Stripe account",
-            description: "How to set up Stripe Connect to collect payouts for your tickets.",
+            slug: "collecting-payouts",
+            title: "Collecting your ticket payouts",
+            description: "How ticket earnings and bank payouts work on JollyWitMe.",
             sections: [
               {
-                id: "stripe-onboarding",
-                heading: "Setting up Stripe Connect",
-                body: "To host paid events and charge attendees, you must link a **Stripe Connect** payout account. This links your banking information directly so you can accept guest ticket purchases and receive payouts.\n\nFor security, if you enable paid ticketing on an event, you will not be allowed to send invites or publish the event until Stripe has been successfully connected.",
+                id: "paystack-payouts",
+                heading: "How Ticket Sales & Payouts Work",
+                body: "All ticket sales are securely processed via **Paystack**, supporting debit cards (Mastercard, Visa, Verve), Direct Bank Transfers (OPAY, Kuda, GTBank), and USSD.\n\nYour ticket revenue is credited to your event balance in real time. You can monitor gross sales, platform fees, refunds, and payout receipts directly from your Creator Payouts dashboard.",
                 steps: [
-                  "Log in and navigate to your **Dashboard**.",
-                  "Open **Settings** (or click 'Connect Stripe' from the warning banner on your event edit page).",
-                  "In the Stripe Settings panel, click **Connect Stripe Account**.",
-                  "You will be securely redirected to Stripe onboarding. Follow the instructions to link your banking details.",
-                  "Once completed, you will be redirected back to JollyWitMe with your payouts fully active and enabled!"
+                  "Create a paid event and set up your ticket tiers.",
+                  "Guests buy tickets instantly using Paystack via card, bank transfer, or USSD.",
+                  "Track real-time ticket sales and net earnings on your **Earnings & Payouts** tab.",
+                  "Payouts are disbursed directly to your designated bank account."
                 ],
                 callout: {
                   type: "tip",
-                  text: "During development or test mode, you can click 'Skip this form' at the top of the Stripe onboarding page to instantly activate a mock connection without using real banking details."
+                  text: "You can download a CSV report or print official financial statements anytime from your Creator Payouts ledger."
                 }
               }
             ]

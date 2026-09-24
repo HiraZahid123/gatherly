@@ -20,7 +20,8 @@ import {
     Check,
     Lock,
     ExternalLink,
-    Server
+    Server,
+    CreditCard
 } from "lucide-react";
 import { PlatformCommissionSettings, CommissionType } from "@/lib/platformSettings";
 
@@ -29,10 +30,12 @@ interface ExtendedSettings extends PlatformCommissionSettings {
     hasEnvKeys?: boolean;
     isConfigured?: boolean;
     isLive?: boolean;
+    isPaystackConfigured?: boolean;
+    isPaystackLive?: boolean;
 }
 
 export default function AdminSettingsPage() {
-    const [activeTab, setActiveTab] = useState<"COMMISSION" | "STRIPE">("COMMISSION");
+    const [activeTab, setActiveTab] = useState<"COMMISSION" | "PAYSTACK">("COMMISSION");
     const [settings, setSettings] = useState<ExtendedSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -45,17 +48,13 @@ export default function AdminSettingsPage() {
     const [currency, setCurrency] = useState<string>("ngn");
     const [payoutScheduleNote, setPayoutScheduleNote] = useState<string>("");
 
-    // Stripe Gateway Form state
-    const [stripePublishableKey, setStripePublishableKey] = useState<string>("");
-    const [stripeSecretKey, setStripeSecretKey] = useState<string>("");
-    const [stripeWebhookSecret, setStripeWebhookSecret] = useState<string>("");
-    const [showSecretKey, setShowSecretKey] = useState<boolean>(false);
-    const [showWebhookSecret, setShowWebhookSecret] = useState<boolean>(false);
-
-    // Testing Stripe Connection
-    const [testingConnection, setTestingConnection] = useState<boolean>(false);
-    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
-    const [copiedWebhook, setCopiedWebhook] = useState<boolean>(false);
+    // Paystack Gateway Form state
+    const [paystackPublicKey, setPaystackPublicKey] = useState<string>("");
+    const [paystackSecretKey, setPaystackSecretKey] = useState<string>("");
+    const [showPaystackSecretKey, setShowPaystackSecretKey] = useState<boolean>(false);
+    const [testingPaystack, setTestingPaystack] = useState<boolean>(false);
+    const [paystackTestResult, setPaystackTestResult] = useState<{ success: boolean; message: string } | null>(null);
+    const [copiedPaystackWebhook, setCopiedPaystackWebhook] = useState<boolean>(false);
 
     // Live Simulator state
     const [samplePrice, setSamplePrice] = useState<number>(10000); // ₦10,000
@@ -79,10 +78,9 @@ export default function AdminSettingsPage() {
                 setCurrency(s.currency || "ngn");
                 setPayoutScheduleNote(s.payoutScheduleNote || "");
 
-                // Stripe keys (masked from backend)
-                setStripePublishableKey(s.stripePublishableKey || "");
-                setStripeSecretKey(s.stripeSecretKey || "");
-                setStripeWebhookSecret(s.stripeWebhookSecret || "");
+                // Paystack keys (masked from backend)
+                setPaystackPublicKey(s.paystackPublicKey || "");
+                setPaystackSecretKey(s.paystackSecretKey || "");
             }
         } catch (err) {
             console.error("Failed to load settings:", err);
@@ -125,33 +123,28 @@ export default function AdminSettingsPage() {
         }
     };
 
-    const handleSaveStripe = async (e: React.FormEvent) => {
+    const handleSavePaystack = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setStatusMessage(null);
-        setTestResult(null);
 
         try {
             const res = await fetch("/api/admin/commission", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    stripePublishableKey: stripePublishableKey.trim(),
-                    stripeSecretKey: stripeSecretKey.trim(),
-                    stripeWebhookSecret: stripeWebhookSecret.trim(),
+                    paystackPublicKey,
+                    paystackSecretKey,
                 }),
             });
 
             const data = await res.json();
             if (data.success) {
                 setSettings(data.settings);
-                setStripePublishableKey(data.settings.stripePublishableKey || "");
-                setStripeSecretKey(data.settings.stripeSecretKey || "");
-                setStripeWebhookSecret(data.settings.stripeWebhookSecret || "");
-                setStatusMessage({ type: "success", text: "Stripe API keys updated and active across platform!" });
+                setStatusMessage({ type: "success", text: "Paystack API keys saved successfully!" });
                 setTimeout(() => setStatusMessage(null), 5000);
             } else {
-                setStatusMessage({ type: "error", text: data.error || "Failed to save Stripe keys" });
+                setStatusMessage({ type: "error", text: data.error || "Failed to save Paystack settings" });
             }
         } catch (err: any) {
             setStatusMessage({ type: "error", text: err.message || "An unexpected error occurred" });
@@ -160,47 +153,38 @@ export default function AdminSettingsPage() {
         }
     };
 
-    const handleTestStripeConnection = async () => {
-        setTestingConnection(true);
-        setTestResult(null);
+    const handleTestPaystackConnection = async () => {
+        setTestingPaystack(true);
+        setPaystackTestResult(null);
 
         try {
-            const res = await fetch("/api/admin/stripe/test", {
+            const res = await fetch("/api/admin/paystack/test", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    secretKey: stripeSecretKey.trim(),
-                }),
+                body: JSON.stringify({ secretKey: paystackSecretKey }),
             });
 
             const data = await res.json();
-            if (data.success) {
-                setTestResult({
-                    success: true,
-                    message: data.message || "Stripe connection verified successfully!",
-                });
-            } else {
-                setTestResult({
-                    success: false,
-                    message: data.error || "Connection test failed.",
-                });
-            }
+            setPaystackTestResult({
+                success: data.success,
+                message: data.message || data.error || "Test completed.",
+            });
         } catch (err: any) {
-            setTestResult({
+            setPaystackTestResult({
                 success: false,
-                message: err.message || "Could not reach Stripe test service.",
+                message: err.message || "Could not reach Paystack test service.",
             });
         } finally {
-            setTestingConnection(false);
+            setTestingPaystack(false);
         }
     };
 
-    const handleCopyWebhookUrl = () => {
+    const handleCopyPaystackWebhookUrl = () => {
         const origin = typeof window !== "undefined" ? window.location.origin : "https://jollywitme.com";
-        const url = `${origin}/api/webhooks/stripe`;
+        const url = `${origin}/api/webhooks/paystack`;
         navigator.clipboard.writeText(url);
-        setCopiedWebhook(true);
-        setTimeout(() => setCopiedWebhook(false), 3000);
+        setCopiedPaystackWebhook(true);
+        setTimeout(() => setCopiedPaystackWebhook(false), 3000);
     };
 
     // Live calculations for the simulator
@@ -220,9 +204,9 @@ export default function AdminSettingsPage() {
 
     const currencySymbol = currency === "usd" ? "$" : "₦";
 
-    // Mode determination
-    const isLive = stripePublishableKey.startsWith("pk_live_") || stripeSecretKey.startsWith("sk_live_");
-    const isConfigured = settings?.isConfigured || Boolean(stripePublishableKey && stripeSecretKey);
+    // Paystack determination
+    const isPaystackLive = paystackPublicKey.startsWith("pk_live_") || paystackSecretKey.startsWith("sk_live_");
+    const isPaystackConfigured = settings?.isPaystackConfigured || Boolean(paystackPublicKey && paystackSecretKey);
 
     return (
         <div className="space-y-8 max-w-6xl pb-24">
@@ -235,17 +219,17 @@ export default function AdminSettingsPage() {
                     <div>
                         <h1 className="text-2xl font-black tracking-tight text-white">Platform Settings</h1>
                         <p className="text-white/40 text-xs mt-0.5">
-                            Manage ticket commission fees, payout schedules, and Stripe payment gateway credentials
+                            Manage ticket commission fees, payout schedules, and Paystack payment gateway credentials
                         </p>
                     </div>
                 </div>
 
                 {/* Tab Pill Selector */}
-                <div className="flex items-center p-1 rounded-2xl bg-[#0a0a0b] border border-white/10 self-start sm:self-auto">
+                <div className="flex items-center p-1 rounded-2xl bg-[#0a0a0b] border border-white/10 self-start sm:self-auto flex-wrap gap-1">
                     <button
                         type="button"
                         onClick={() => setActiveTab("COMMISSION")}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all ${
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                             activeTab === "COMMISSION"
                                 ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20 font-black"
                                 : "text-white/60 hover:text-white hover:bg-white/5"
@@ -256,16 +240,16 @@ export default function AdminSettingsPage() {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setActiveTab("STRIPE")}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all relative ${
-                            activeTab === "STRIPE"
+                        onClick={() => setActiveTab("PAYSTACK")}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all relative ${
+                            activeTab === "PAYSTACK"
                                 ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20 font-black"
                                 : "text-white/60 hover:text-white hover:bg-white/5"
                         }`}
                     >
-                        <KeyRound className="w-3.5 h-3.5" />
-                        <span>Stripe Gateway</span>
-                        {isConfigured && (
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Paystack Gateway (NGN)</span>
+                        {isPaystackConfigured && (
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         )}
                     </button>
@@ -295,47 +279,47 @@ export default function AdminSettingsPage() {
                     <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-3" />
                     <p className="text-white/40 text-sm">Loading platform configurations...</p>
                 </div>
-            ) : activeTab === "STRIPE" ? (
-                /* ─── TAB 2: STRIPE GATEWAY CONFIGURATION ─── */
+            ) : activeTab === "PAYSTACK" ? (
+                /* ─── TAB 2: PAYSTACK GATEWAY CONFIGURATION ─── */
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Left Column: Stripe Form */}
+                    {/* Left Column: Paystack Form */}
                     <div className="lg:col-span-7 space-y-6">
-                        <form onSubmit={handleSaveStripe} className="space-y-6">
+                        <form onSubmit={handleSavePaystack} className="space-y-6">
                             {/* Gateway Status Banner */}
                             <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 shadow-xl space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-3 h-3 rounded-full ${isConfigured ? "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]" : "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]"}`} />
+                                        <div className={`w-3 h-3 rounded-full ${isPaystackConfigured ? "bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]" : "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]"}`} />
                                         <h3 className="font-bold text-sm text-white">
-                                            {isConfigured ? "Stripe Gateway Configured" : "Stripe Gateway Not Configured"}
+                                            {isPaystackConfigured ? "Paystack Active (Primary Gateway)" : "Paystack Not Configured"}
                                         </h3>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                                            isLive 
+                                            isPaystackLive 
                                                 ? "bg-rose-500/10 text-rose-400 border-rose-500/30" 
                                                 : "bg-amber-500/10 text-amber-400 border-amber-500/30"
                                         }`}>
-                                            {isLive ? "● LIVE MODE" : "○ TEST MODE"}
+                                            {isPaystackLive ? "● LIVE MODE" : "○ TEST MODE"}
                                         </span>
                                     </div>
                                 </div>
                                 <p className="text-xs text-white/50 leading-relaxed">
-                                    Configure your platform Stripe credentials below. These keys process payments for all ticket orders and remit funds to event creators.
+                                    Paystack processes all NGN ticket payments for Verve cards, Mastercard, Visa, Direct Bank Transfers (OPAY, Kuda, GTB), and USSD.
                                 </p>
                             </div>
 
-                            {/* Stripe API Credentials */}
+                            {/* Paystack API Credentials */}
                             <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 shadow-xl space-y-5">
                                 <label className="text-xs font-black uppercase tracking-widest text-white/40 block">
-                                    Stripe API Credentials
+                                    Paystack API Credentials
                                 </label>
 
-                                {/* Publishable Key */}
+                                {/* Public Key */}
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <label className="text-xs font-bold text-white/70 block">
-                                            Publishable Key
+                                            Public Key
                                         </label>
                                         <span className="text-[10px] font-mono text-white/40">
                                             Starts with pk_test_ or pk_live_
@@ -343,13 +327,13 @@ export default function AdminSettingsPage() {
                                     </div>
                                     <input
                                         type="text"
-                                        value={stripePublishableKey}
-                                        onChange={(e) => setStripePublishableKey(e.target.value)}
+                                        value={paystackPublicKey}
+                                        onChange={(e) => setPaystackPublicKey(e.target.value)}
                                         className="w-full bg-black/60 border border-white/15 focus:border-emerald-500 rounded-2xl px-4 py-3.5 text-white font-mono text-xs outline-none transition-all placeholder:text-white/20"
-                                        placeholder="pk_test_51P..."
+                                        placeholder="pk_test_a20dc3..."
                                     />
                                     <p className="text-[11px] text-white/40">
-                                        Used by the browser checkout drawer to render the secure payment element.
+                                        Used in the checkout drawer to launch the secure Paystack popup window.
                                     </p>
                                 </div>
 
@@ -357,7 +341,7 @@ export default function AdminSettingsPage() {
                                 <div className="space-y-2 pt-2 border-t border-white/5">
                                     <div className="flex items-center justify-between">
                                         <label className="text-xs font-bold text-white/70 block">
-                                            Secret API Key
+                                            Secret Key
                                         </label>
                                         <span className="text-[10px] font-mono text-white/40">
                                             Starts with sk_test_ or sk_live_
@@ -365,54 +349,23 @@ export default function AdminSettingsPage() {
                                     </div>
                                     <div className="relative">
                                         <input
-                                            type={showSecretKey ? "text" : "password"}
-                                            value={stripeSecretKey}
-                                            onChange={(e) => setStripeSecretKey(e.target.value)}
+                                            type={showPaystackSecretKey ? "text" : "password"}
+                                            value={paystackSecretKey}
+                                            onChange={(e) => setPaystackSecretKey(e.target.value)}
                                             className="w-full bg-black/60 border border-white/15 focus:border-emerald-500 rounded-2xl pl-4 pr-12 py-3.5 text-white font-mono text-xs outline-none transition-all placeholder:text-white/20"
-                                            placeholder="sk_test_51P... (leave unchanged to keep current key)"
+                                            placeholder="sk_test_a3e022... (leave unchanged to keep current)"
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => setShowSecretKey(!showSecretKey)}
+                                            onClick={() => setShowPaystackSecretKey(!showPaystackSecretKey)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                                         >
-                                            {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            {showPaystackSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                         </button>
                                     </div>
                                     <p className="text-[11px] text-white/40 flex items-center gap-1.5">
                                         <Lock className="w-3 h-3 text-emerald-400" />
-                                        <span>Stored securely. Masked values (•••) will not overwrite your existing secret key.</span>
-                                    </p>
-                                </div>
-
-                                {/* Webhook Secret */}
-                                <div className="space-y-2 pt-2 border-t border-white/5">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-xs font-bold text-white/70 block">
-                                            Webhook Signing Secret (Optional)
-                                        </label>
-                                        <span className="text-[10px] font-mono text-white/40">
-                                            Starts with whsec_
-                                        </span>
-                                    </div>
-                                    <div className="relative">
-                                        <input
-                                            type={showWebhookSecret ? "text" : "password"}
-                                            value={stripeWebhookSecret}
-                                            onChange={(e) => setStripeWebhookSecret(e.target.value)}
-                                            className="w-full bg-black/60 border border-white/15 focus:border-emerald-500 rounded-2xl pl-4 pr-12 py-3.5 text-white font-mono text-xs outline-none transition-all placeholder:text-white/20"
-                                            placeholder="whsec_..."
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowWebhookSecret(!showWebhookSecret)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
-                                        >
-                                            {showWebhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                    </div>
-                                    <p className="text-[11px] text-white/40">
-                                        Verifies incoming payment webhooks for instant order confirmation and ticket issuance.
+                                        <span>Masked values (•••) will not overwrite your existing secret key.</span>
                                     </p>
                                 </div>
                             </div>
@@ -421,18 +374,18 @@ export default function AdminSettingsPage() {
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2">
                                 <button
                                     type="button"
-                                    onClick={handleTestStripeConnection}
-                                    disabled={testingConnection || (!stripeSecretKey && !settings?.isConfigured)}
+                                    onClick={handleTestPaystackConnection}
+                                    disabled={testingPaystack || (!paystackSecretKey && !isPaystackConfigured)}
                                     className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all border border-white/10 hover:border-white/20 disabled:opacity-40"
                                 >
-                                    {testingConnection ? (
+                                    {testingPaystack ? (
                                         <>
                                             <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
-                                            <span>Testing Credentials...</span>
+                                            <span>Testing...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Zap className="w-4 h-4 text-emerald-400" />
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                                             <span>Test Connection</span>
                                         </>
                                     )}
@@ -441,69 +394,69 @@ export default function AdminSettingsPage() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 disabled:opacity-50"
+                                    className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
                                 >
                                     {saving ? (
                                         <>
                                             <RefreshCw className="w-4 h-4 animate-spin" />
-                                            <span>Saving Keys...</span>
+                                            <span>Saving...</span>
                                         </>
                                     ) : (
                                         <>
                                             <Save className="w-4 h-4" />
-                                            <span>Save Stripe Gateway Keys</span>
+                                            <span>Save Paystack Keys</span>
                                         </>
                                     )}
                                 </button>
                             </div>
 
                             {/* Connection Test Result Banner */}
-                            {testResult && (
+                            {paystackTestResult && (
                                 <div
                                     className={`p-4 rounded-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
-                                        testResult.success
+                                        paystackTestResult.success
                                             ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
                                             : "bg-rose-500/10 border-rose-500/30 text-rose-300"
                                     }`}
                                 >
-                                    {testResult.success ? (
+                                    {paystackTestResult.success ? (
                                         <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
                                     ) : (
                                         <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
                                     )}
                                     <div className="text-xs">
-                                        <p className="font-bold">{testResult.success ? "Connection Succeeded" : "Connection Failed"}</p>
-                                        <p className="mt-0.5 opacity-80">{testResult.message}</p>
+                                        <p className="font-bold">{paystackTestResult.success ? "Paystack Verified" : "Authentication Failed"}</p>
+                                        <p className="mt-0.5 opacity-80">{paystackTestResult.message}</p>
                                     </div>
                                 </div>
                             )}
                         </form>
                     </div>
 
-                    {/* Right Column: Webhook Setup & Quick Reference */}
+                    {/* Right Column: Webhook Setup */}
                     <div className="lg:col-span-5 space-y-6">
                         {/* Webhook Endpoint Card */}
                         <div className="bg-[#0a0a0b] border border-white/10 rounded-3xl p-6 shadow-xl space-y-5">
                             <div className="flex items-center gap-2.5 pb-4 border-b border-white/10">
                                 <Server className="w-5 h-5 text-emerald-400" />
-                                <h3 className="font-bold text-sm text-white">Stripe Webhook Endpoint</h3>
+                                <h3 className="font-bold text-sm text-white">Paystack Webhook Endpoint</h3>
                             </div>
 
                             <p className="text-white/50 text-xs leading-relaxed">
-                                Add this webhook URL to your Stripe Dashboard (Developers &rarr; Webhooks &rarr; Add endpoint) to receive real-time payment notifications:
+                                Copy this URL and paste it into your Paystack Dashboard (Settings &rarr; API Keys & Webhooks &rarr; Test/Live Webhook URL):
                             </p>
 
                             <div className="p-3.5 bg-black/60 rounded-2xl border border-white/10 space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] uppercase font-black tracking-wider text-white/40">
-                                        Endpoint URL
+                                        Webhook URL
                                     </span>
                                     <button
                                         type="button"
-                                        onClick={handleCopyWebhookUrl}
+                                        onClick={handleCopyPaystackWebhookUrl}
                                         className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
                                     >
-                                        {copiedWebhook ? (
+                                        {copiedPaystackWebhook ? (
                                             <>
                                                 <Check className="w-3.5 h-3.5" />
                                                 <span>Copied!</span>
@@ -517,26 +470,22 @@ export default function AdminSettingsPage() {
                                     </button>
                                 </div>
                                 <p className="font-mono text-xs text-white break-all select-all">
-                                    {typeof window !== "undefined" ? window.location.origin : "https://jollywitme.com"}/api/webhooks/stripe
+                                    {typeof window !== "undefined" ? window.location.origin : "https://jollywitme.com"}/api/webhooks/paystack
                                 </p>
                             </div>
 
                             <div className="space-y-2">
                                 <span className="text-[10px] uppercase font-black tracking-wider text-white/40 block">
-                                    Events to Listen For
+                                    Events Handled Automatically
                                 </span>
-                                <ul className="text-xs space-y-1 text-white/60 font-mono">
+                                <ul className="text-xs space-y-1.5 text-white/60 font-mono">
                                     <li className="flex items-center gap-2">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                        payment_intent.succeeded
+                                        charge.success (ticket confirmation)
                                     </li>
                                     <li className="flex items-center gap-2">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                        charge.refunded
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                        account.updated
+                                        refund.processed (inventory restoration)
                                     </li>
                                 </ul>
                             </div>
@@ -546,9 +495,9 @@ export default function AdminSettingsPage() {
                         <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3">
                             <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                             <div className="text-xs text-white/50 leading-relaxed space-y-1">
-                                <p className="font-bold text-white/80">Zero-Downtime Dynamic Gateway</p>
+                                <p className="font-bold text-white/80">HMAC-SHA512 Signature Security</p>
                                 <p>
-                                    Updated keys take effect immediately across all active checkout drawers and API routes without needing to restart your VPS server.
+                                    All incoming Paystack webhooks are cryptographically authenticated using your Secret Key to prevent tampering or spoofed notifications.
                                 </p>
                             </div>
                         </div>
@@ -733,7 +682,7 @@ export default function AdminSettingsPage() {
                                         value={payoutScheduleNote}
                                         onChange={(e) => setPayoutScheduleNote(e.target.value)}
                                         className="w-full bg-black/60 border border-white/15 focus:border-emerald-500 rounded-2xl px-4 py-3 text-white text-xs outline-none transition-all placeholder:text-white/20"
-                                        placeholder="e.g. End-of-day automatic remittance to creator's linked account via Stripe"
+                                        placeholder="e.g. End-of-day automatic remittance to creator's linked account via Paystack"
                                     />
                                     <p className="text-[11px] text-white/40">Displayed in host analytics panel for transparency.</p>
                                 </div>
@@ -834,7 +783,7 @@ export default function AdminSettingsPage() {
                                         </span>
                                     </div>
                                     <p className="text-[10px] text-emerald-300/70">
-                                        Retained automatically via Stripe ({effectiveFeePercent}% effective rate)
+                                        Retained automatically via Paystack ({effectiveFeePercent}% effective rate)
                                     </p>
                                 </div>
 
@@ -849,7 +798,7 @@ export default function AdminSettingsPage() {
                                         </span>
                                     </div>
                                     <p className="text-[10px] text-white/40">
-                                        Transferred to host's Stripe Connect bank account
+                                        Remitted to host's verified bank account
                                     </p>
                                 </div>
                             </div>
@@ -858,7 +807,7 @@ export default function AdminSettingsPage() {
                             <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-start gap-2.5">
                                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                                 <p className="text-[11px] text-white/50 leading-relaxed">
-                                    Automated by Stripe Destination Charges. Commission is deducted before creator funds are released.
+                                    Automated by Paystack. Commission is deducted before creator net earnings are disbursed.
                                 </p>
                             </div>
                         </div>

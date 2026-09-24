@@ -27,13 +27,6 @@ export async function GET(req: NextRequest) {
                 name: true,
                 email: true,
                 image: true,
-                stripeAccount: {
-                  select: {
-                    stripeAccountId: true,
-                    chargesEnabled: true,
-                    payoutsEnabled: true,
-                  },
-                },
               },
             },
           },
@@ -72,13 +65,13 @@ export async function GET(req: NextRequest) {
           guestEmail: order.guestEmail || order.user?.email || "N/A",
           quantity: order.quantity,
           unitPrice: order.unitPrice,
-          totalAmount: order.totalAmount, // in kobo/cents
+          totalAmount: order.totalAmount, // in kobo
           platformFee,
           hostPayout,
           feeDetails: details,
           currency: order.currency || "ngn",
-          stripePaymentIntentId: order.stripePaymentIntentId,
-          stripeChargeId: order.stripeChargeId,
+          reference: order.stripePaymentIntentId,
+          transactionId: order.stripeChargeId,
           createdAt: order.createdAt,
           eventId: order.eventId,
           eventTitle: order.event?.title || "Unknown Event",
@@ -86,8 +79,6 @@ export async function GET(req: NextRequest) {
           hostId: order.event?.hostId,
           hostName: order.event?.host?.name || "Unknown Host",
           hostEmail: order.event?.host?.email || "N/A",
-          hostHasStripe: Boolean(order.event?.host?.stripeAccount?.chargesEnabled),
-          hostStripeAccountId: order.event?.host?.stripeAccount?.stripeAccountId || null,
           tierName: order.ticketTier?.name || "Standard",
         };
       })
@@ -103,8 +94,6 @@ export async function GET(req: NextRequest) {
       hostName: string;
       hostEmail: string;
       hostImage?: string | null;
-      hostHasStripe: boolean;
-      hostStripeAccountId?: string | null;
       totalTicketsSold: number;
       orderCount: number;
       grossRevenue: number;
@@ -114,42 +103,35 @@ export async function GET(req: NextRequest) {
       platformFeeTotal: number;
       hostNetPayout: number;
       currency: string;
-      lastOrderAt: Date;
+      lastOrderAt?: Date;
     }>();
 
     for (const order of processedOrders) {
-      const isRefunded = order.status === "REFUNDED";
       const existing = eventMap.get(order.eventId);
-
       if (existing) {
-        existing.orderCount += 1;
-        if (isRefunded) {
+        if (order.status === "REFUNDED") {
           existing.refundedAmount += order.totalAmount;
           existing.refundedOrderCount += 1;
           existing.refundedTickets += order.quantity;
         } else {
           existing.totalTicketsSold += order.quantity;
+          existing.orderCount += 1;
           existing.grossRevenue += order.totalAmount;
           existing.platformFeeTotal += order.platformFee;
           existing.hostNetPayout += order.hostPayout;
         }
-        if (new Date(order.createdAt) > new Date(existing.lastOrderAt)) {
-          existing.lastOrderAt = order.createdAt;
-        }
       } else {
+        const isRefunded = order.status === "REFUNDED";
         eventMap.set(order.eventId, {
           eventId: order.eventId,
           eventTitle: order.eventTitle,
           eventSlug: order.eventSlug,
-          startDate: orders.find((o) => o.eventId === order.eventId)?.event?.startDate,
+          startDate: order.eventSlug ? undefined : null,
           hostId: order.hostId,
           hostName: order.hostName,
           hostEmail: order.hostEmail,
-          hostImage: orders.find((o) => o.eventId === order.eventId)?.event?.host?.image,
-          hostHasStripe: order.hostHasStripe,
-          hostStripeAccountId: order.hostStripeAccountId,
           totalTicketsSold: isRefunded ? 0 : order.quantity,
-          orderCount: 1,
+          orderCount: isRefunded ? 0 : 1,
           grossRevenue: isRefunded ? 0 : order.totalAmount,
           refundedAmount: isRefunded ? order.totalAmount : 0,
           refundedOrderCount: isRefunded ? 1 : 0,
@@ -170,10 +152,8 @@ export async function GET(req: NextRequest) {
         const totalPaidOut = eventPayouts.reduce((sum, p) => sum + p.amount, 0);
         const balanceDue = Math.max(0, event.hostNetPayout - totalPaidOut);
 
-        let payoutStatus: "STRIPE_AUTO" | "SETTLED" | "PARTIAL" | "PENDING" = "PENDING";
-        if (event.hostHasStripe) {
-          payoutStatus = "STRIPE_AUTO";
-        } else if (totalPaidOut >= event.hostNetPayout && event.hostNetPayout > 0) {
+        let payoutStatus: "SETTLED" | "PARTIAL" | "PENDING" = "PENDING";
+        if (totalPaidOut >= event.hostNetPayout && event.hostNetPayout > 0) {
           payoutStatus = "SETTLED";
         } else if (totalPaidOut > 0) {
           payoutStatus = "PARTIAL";
@@ -218,10 +198,8 @@ export async function GET(req: NextRequest) {
     }
 
     for (const ev of eventsSummary) {
-      if (!ev.hostHasStripe) {
-        totalManualPayoutsSettled += ev.totalPaidOut;
-        totalPendingSettlement += ev.balanceDue;
-      }
+      totalManualPayoutsSettled += ev.totalPaidOut;
+      totalPendingSettlement += ev.balanceDue;
     }
 
     const netGrossRevenue = Math.max(0, totalGrossRevenue - totalRefundedAmount);
@@ -229,7 +207,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       kpis: {
-        totalGrossRevenue, // in cents/kobo (from completed orders)
+        totalGrossRevenue, // in kobo
         totalRefundedAmount,
         totalRefundedCount,
         totalRefundedTickets,
@@ -238,18 +216,17 @@ export async function GET(req: NextRequest) {
         totalHostPayouts,
         totalTicketsSold,
         totalCompletedOrders,
-        totalOrders: processedOrders.length,
-        totalPaidEvents: eventsSummary.length,
-        totalManualPayoutsSettled,
-        totalPendingSettlement,
+        totalSettledPayouts: totalManualPayoutsSettled,
+        totalPendingPayouts: totalPendingSettlement,
       },
       events: eventsSummary,
-      recentOrders: processedOrders.slice(0, 100),
+      recentOrders: processedOrders.slice(0, 50),
+      payoutHistory: allPayouts,
     });
   } catch (err: any) {
     console.error("[api/admin/revenue]", err);
     return NextResponse.json(
-      { error: err.message || "Failed to load revenue and payouts report" },
+      { error: err.message || "Failed to fetch revenue analytics" },
       { status: 500 }
     );
   }

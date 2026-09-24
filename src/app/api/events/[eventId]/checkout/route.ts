@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
-import { calculatePlatformFee, getStripeConfig } from "@/lib/platformSettings";
+import { calculatePlatformFee, getPaystackConfigSync } from "@/lib/platformSettings";
+import { initializePaystackTransaction } from "@/lib/paystack";
 import crypto from "crypto";
 
 interface Params { params: Promise<{ eventId: string }> }
@@ -31,24 +31,23 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (remaining < quantity)
     return NextResponse.json({ error: `Only ${remaining} ticket(s) remaining` }, { status: 400 });
 
-  // Optional: check if host has a Stripe Connect account (if not, payment is collected directly by admin gateway)
-  const stripeAccount = await prisma.stripeAccount.findFirst({
-    where: { userId: event.hostId, chargesEnabled: true },
-  });
-
-  const totalAmount = tier.price * quantity;
+  const totalAmount = tier.price * quantity; // In kobo (e.g. ₦1,000 = 100,000 kobo)
   const { platformFee, details: feeDetails } = await calculatePlatformFee(totalAmount, quantity);
   
   const currency = "ngn";
+  const paystackConfig = getPaystackConfigSync();
 
-  if (totalAmount > 0 && totalAmount < 100000) {
+  // Minimum amount validation (Paystack minimum is ₦50)
+  const minRequiredAmount = 5000; // 5,000 kobo = ₦50
+  if (totalAmount > 0 && totalAmount < minRequiredAmount) {
+    const minNaira = minRequiredAmount / 100;
     return NextResponse.json(
-      { error: "Minimum payment amount is ₦1,000 to meet Stripe processing limits." },
+      { error: `Minimum payment amount is ₦${minNaira.toLocaleString()}.` },
       { status: 400 }
     );
   }
 
-  // Create order
+  // Create order in PENDING status (or COMPLETED if free)
   const order = await prisma.order.create({
     data: {
       eventId,
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     },
   });
 
-  // FREE TICKET: Complete order and RSVP directly without Stripe!
+  // FREE TICKET: Complete order and RSVP directly
   if (totalAmount === 0) {
     const qrToken = crypto.randomUUID();
     const result = await prisma.$transaction(async (tx) => {
@@ -106,42 +105,66 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ freeOrder: true, order: result.order, rsvp: result.rsvp });
   }
 
-  // PAID TICKET: Create Stripe PaymentIntent
-  const paymentIntentOptions: any = {
-    amount: totalAmount,
-    currency,
-    automatic_payment_methods: { enabled: true },
-    metadata: { orderId: order.id, eventId, ticketTierId, platformFee: String(platformFee), feeDetails },
-  };
-
-  // Only apply destination charge if host stripe account is connected
-  if (stripeAccount) {
-    paymentIntentOptions.application_fee_amount = platformFee;
-    paymentIntentOptions.transfer_data = { destination: stripeAccount.stripeAccountId };
-  }
-
-  try {
-    const paymentIntent = await stripe.paymentIntents.create(paymentIntentOptions);
-
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { stripePaymentIntentId: paymentIntent.id },
-    });
-
-    const { publishableKey } = await getStripeConfig();
-    return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
-      orderId: order.id,
-      publishableKey: publishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-    });
-  } catch (stripeErr: any) {
-    console.error("Stripe payment intent creation error:", stripeErr);
+  // Check Paystack configuration
+  if (!paystackConfig.configured) {
     await prisma.order.update({
       where: { id: order.id },
       data: { status: "FAILED" },
     });
     return NextResponse.json(
-      { error: stripeErr.message || "Failed to initialize payment with Stripe" },
+      { error: "Payment gateway is currently undergoing maintenance. Please contact support or the event host." },
+      { status: 503 }
+    );
+  }
+
+  // Determine host site URL for callback
+  const origin = req.headers.get("origin") || req.nextUrl.origin || "https://jollywitme.com";
+
+  // PRIMARY GATEWAY: PAYSTACK
+  const reference = `JWM_${order.id.slice(-6).toUpperCase()}_${Date.now()}`;
+  const callbackUrl = `${origin}/events/${event.slug}?order_id=${order.id}&reference=${reference}`;
+
+  try {
+    const paystackRes = await initializePaystackTransaction({
+      email: guestEmail,
+      amount: totalAmount,
+      reference,
+      callbackUrl,
+      metadata: {
+        orderId: order.id,
+        eventId: event.id,
+        ticketTierId: tier.id,
+        guestName,
+        guestEmail,
+        quantity,
+        platformFee: String(platformFee),
+        feeDetails,
+      },
+    });
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { stripePaymentIntentId: reference },
+    });
+
+    return NextResponse.json({
+      gateway: "PAYSTACK",
+      authorizationUrl: paystackRes.data.authorization_url,
+      accessCode: paystackRes.data.access_code,
+      reference: paystackRes.data.reference,
+      publicKey: paystackConfig.publicKey,
+      orderId: order.id,
+      amount: totalAmount,
+      email: guestEmail,
+    });
+  } catch (paystackErr: any) {
+    console.error("[Paystack Init Error]:", paystackErr);
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: "FAILED" },
+    });
+    return NextResponse.json(
+      { error: paystackErr.message || "Failed to initialize payment with Paystack" },
       { status: 400 }
     );
   }

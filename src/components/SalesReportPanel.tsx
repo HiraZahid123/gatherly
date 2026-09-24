@@ -110,11 +110,7 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
             <Banknote className="w-4 h-4 text-emerald-400" />
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">Payout & Settlement</p>
           </div>
-          {data.hasStripeConnected ? (
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-bold border border-emerald-500/20 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Stripe Auto
-            </span>
-          ) : balanceDue === 0 && netEarnings > 0 ? (
+          {balanceDue === 0 && netEarnings > 0 ? (
             <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 text-[10px] font-bold border border-blue-500/20 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" /> Fully Settled
             </span>
@@ -125,29 +121,16 @@ export default function SalesReportPanel({ eventId, primaryColor = "#6366f1" }: 
           )}
         </div>
 
-        {data.hasStripeConnected && data.stripeBalance ? (
-          <div className="flex items-center gap-6 pt-1">
-            <div>
-              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Stripe Available</p>
-              <p className="text-sm font-black text-green-400">{fmt(data.stripeBalance.available)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] text-white/30 uppercase tracking-widest font-bold">Stripe Pending</p>
-              <p className="text-sm font-black text-white/60">{fmt(data.stripeBalance.pending)}</p>
-            </div>
+        <div className="grid grid-cols-2 gap-4 pt-1">
+          <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+            <p className="text-[9px] text-white/40 uppercase font-black tracking-wider">Amount Paid to You</p>
+            <p className="text-sm font-black text-white mt-0.5">{fmt(totalPaidOut)}</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 pt-1">
-            <div className="p-3 bg-black/40 rounded-xl border border-white/5">
-              <p className="text-[9px] text-white/40 uppercase font-black tracking-wider">Amount Paid to You</p>
-              <p className="text-sm font-black text-white mt-0.5">{fmt(totalPaidOut)}</p>
-            </div>
-            <div className="p-3 bg-black/40 rounded-xl border border-white/5">
-              <p className="text-[9px] text-amber-400/80 uppercase font-black tracking-wider">Remaining Balance</p>
-              <p className="text-sm font-black text-amber-400 mt-0.5">{fmt(balanceDue)}</p>
-            </div>
+          <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+            <p className="text-[9px] text-amber-400/80 uppercase font-black tracking-wider">Remaining Balance</p>
+            <p className="text-sm font-black text-amber-400 mt-0.5">{fmt(balanceDue)}</p>
           </div>
-        )}
+        </div>
 
         {/* Payout receipts if any recorded */}
         {data.payoutHistory?.length > 0 && (

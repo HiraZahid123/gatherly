@@ -7,7 +7,7 @@ import {
     CommissionType,
     maskSecret,
     isMaskedSecret,
-    validateStripeKeyFormat
+    validatePaystackKeyFormat
 } from "@/lib/platformSettings";
 
 export async function GET() {
@@ -15,20 +15,15 @@ export async function GET() {
         await verifyAdmin();
         const settings = await getCommissionSettings();
 
-        // Check active keys including env fallbacks
-        const activePublishable = settings.stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
-        const activeSecret = settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || "";
-        const activeWebhook = settings.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET || "";
+        const activePaystackPublic = settings.paystackPublicKey || process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "";
+        const activePaystackSecret = settings.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY || "";
 
         const maskedSettings = {
             ...settings,
-            stripePublishableKey: settings.stripePublishableKey || (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY : ""),
-            stripeSecretKey: maskSecret(settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || ""),
-            stripeWebhookSecret: maskSecret(settings.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET || ""),
-            hasCustomKeys: Boolean(settings.stripePublishableKey || settings.stripeSecretKey),
-            hasEnvKeys: Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_SECRET_KEY),
-            isConfigured: Boolean(activePublishable && activeSecret),
-            isLive: activePublishable.startsWith("pk_live_") || activeSecret.startsWith("sk_live_"),
+            paystackPublicKey: settings.paystackPublicKey || (process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY : ""),
+            paystackSecretKey: maskSecret(settings.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY || ""),
+            isPaystackConfigured: Boolean(activePaystackPublic && activePaystackSecret),
+            isPaystackLive: activePaystackPublic.startsWith("pk_live_") || activePaystackSecret.startsWith("sk_live_"),
         };
 
         return NextResponse.json({ success: true, settings: maskedSettings });
@@ -77,23 +72,16 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Validate Stripe Keys if provided
-        if (body.stripePublishableKey !== undefined && body.stripePublishableKey.trim() !== "") {
-            const val = validateStripeKeyFormat("publishable", body.stripePublishableKey);
+        // Validate Paystack Keys if provided
+        if (body.paystackPublicKey !== undefined && body.paystackPublicKey.trim() !== "") {
+            const val = validatePaystackKeyFormat("public", body.paystackPublicKey);
             if (!val.valid) {
                 return NextResponse.json({ error: val.error }, { status: 400 });
             }
         }
 
-        if (body.stripeSecretKey !== undefined && body.stripeSecretKey.trim() !== "" && !isMaskedSecret(body.stripeSecretKey)) {
-            const val = validateStripeKeyFormat("secret", body.stripeSecretKey);
-            if (!val.valid) {
-                return NextResponse.json({ error: val.error }, { status: 400 });
-            }
-        }
-
-        if (body.stripeWebhookSecret !== undefined && body.stripeWebhookSecret.trim() !== "" && !isMaskedSecret(body.stripeWebhookSecret)) {
-            const val = validateStripeKeyFormat("webhook", body.stripeWebhookSecret);
+        if (body.paystackSecretKey !== undefined && body.paystackSecretKey.trim() !== "" && !isMaskedSecret(body.paystackSecretKey)) {
+            const val = validatePaystackKeyFormat("secret", body.paystackSecretKey);
             if (!val.valid) {
                 return NextResponse.json({ error: val.error }, { status: 400 });
             }
@@ -108,27 +96,22 @@ export async function POST(req: NextRequest) {
                 fixedAmount: body.fixedAmount !== undefined ? Number(body.fixedAmount) : undefined,
                 currency: body.currency || "ngn",
                 payoutScheduleNote: body.payoutScheduleNote,
-                stripePublishableKey: body.stripePublishableKey,
-                stripeSecretKey: body.stripeSecretKey,
-                stripeWebhookSecret: body.stripeWebhookSecret,
-                clearStripeKeys: Boolean(body.clearStripeKeys),
+                paystackPublicKey: body.paystackPublicKey,
+                paystackSecretKey: body.paystackSecretKey,
+                clearPaystackKeys: Boolean(body.clearPaystackKeys),
             },
             adminIdentifier
         );
 
-        const activePublishable = updated.stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
-        const activeSecret = updated.stripeSecretKey || process.env.STRIPE_SECRET_KEY || "";
-        const activeWebhook = updated.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET || "";
+        const activePaystackPublic = updated.paystackPublicKey || process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "";
+        const activePaystackSecret = updated.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY || "";
 
         const maskedUpdated = {
             ...updated,
-            stripePublishableKey: updated.stripePublishableKey || (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY : ""),
-            stripeSecretKey: maskSecret(updated.stripeSecretKey || process.env.STRIPE_SECRET_KEY || ""),
-            stripeWebhookSecret: maskSecret(updated.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET || ""),
-            hasCustomKeys: Boolean(updated.stripePublishableKey || updated.stripeSecretKey),
-            hasEnvKeys: Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_SECRET_KEY),
-            isConfigured: Boolean(activePublishable && activeSecret),
-            isLive: activePublishable.startsWith("pk_live_") || activeSecret.startsWith("sk_live_"),
+            paystackPublicKey: updated.paystackPublicKey || (process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY : ""),
+            paystackSecretKey: maskSecret(updated.paystackSecretKey || process.env.PAYSTACK_SECRET_KEY || ""),
+            isPaystackConfigured: Boolean(activePaystackPublic && activePaystackSecret),
+            isPaystackLive: activePaystackPublic.startsWith("pk_live_") || activePaystackSecret.startsWith("sk_live_"),
         };
 
         return NextResponse.json({
@@ -143,4 +126,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-

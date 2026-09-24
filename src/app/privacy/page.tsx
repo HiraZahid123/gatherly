@@ -99,7 +99,7 @@ You can control or disable cookies through your browser settings. Note that disa
         subsections: [
             {
                 heading: "Service Providers",
-                body: "Trusted third-party vendors that help operate the Platform, including cloud hosting (e.g. Vercel, Hostinger), email delivery (SMTP/Hostinger), WhatsApp/SMS dispatch, payment gateways (Stripe), and analytics providers.",
+                body: "Trusted third-party vendors that help operate the Platform, including cloud hosting (e.g. Vercel, Hostinger), email delivery (SMTP/Hostinger), WhatsApp/SMS dispatch, payment gateways (Paystack), and analytics providers.",
             },
             {
                 heading: "Legal Requirements",

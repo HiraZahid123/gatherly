@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { createPaystackRefund } from "@/lib/paystack";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,18 +31,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This order has already been refunded" }, { status: 400 });
     }
 
-    // Attempt Stripe refund if payment intent exists
-    let stripeRefundId: string | null = null;
-    if (order.stripePaymentIntentId) {
+    // Attempt Paystack gateway refund
+    let refundGatewayId: string | null = null;
+    const ref = order.stripePaymentIntentId || order.stripeChargeId;
+
+    if (ref) {
       try {
-        const refund = await stripe.refunds.create({
-          payment_intent: order.stripePaymentIntentId,
-          reason: reason === "duplicate" ? "duplicate" : "requested_by_customer",
+        const refundRes = await createPaystackRefund({
+          transaction: ref,
+          merchantNote: reason || "Refund requested by administrator",
         });
-        stripeRefundId = refund.id;
-      } catch (stripeErr: any) {
-        console.warn(`[Refund] Stripe refund API notice for order ${orderId}:`, stripeErr.message);
-        // If it's already refunded in Stripe or another non-fatal gateway response, proceed with updating local ledger
+        refundGatewayId = String(refundRes.data?.id || "");
+      } catch (paystackErr: any) {
+        console.warn(`[Refund] Paystack refund API notice for order ${orderId}:`, paystackErr.message);
       }
     }
 
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Order successfully refunded and ticket returned to inventory.",
-      stripeRefundId,
+      refundGatewayId,
     });
   } catch (err: any) {
     console.error("[api/admin/revenue/refund]", err);

@@ -31,13 +31,12 @@ interface EventEarning {
   netEarnings: number;
   totalPaidOut: number;
   balanceDue: number;
-  status: "STRIPE_AUTO" | "FULLY_PAID" | "PARTIAL" | "PENDING";
+  status: "FULLY_PAID" | "PARTIAL" | "PENDING";
   currency: string;
   payoutHistory: any[];
 }
 
 interface PayoutsData {
-  hasStripeConnect: boolean;
   totals: {
     totalGrossRevenue: number;
     totalRefundedAmount?: number;
@@ -193,7 +192,7 @@ export default function CreatorPayoutsSection() {
               {fmt(data.totals.totalPaidToUser)}
             </p>
             <p className="text-[11px] text-white/40">
-              Disbursed via bank transfer / Stripe
+              Disbursed via bank transfer / Paystack
             </p>
           </div>
 
@@ -356,7 +355,7 @@ export default function CreatorPayoutsSection() {
                         <span className="font-bold text-white">
                           {fmt(event.totalPaidOut, event.currency)}
                         </span>
-                        {event.balanceDue > 0 && event.status !== "STRIPE_AUTO" && (
+                        {event.balanceDue > 0 && (
                           <p className="text-[10px] text-amber-400 mt-0.5">
                             Due: {fmt(event.balanceDue, event.currency)}
                           </p>
@@ -367,12 +366,7 @@ export default function CreatorPayoutsSection() {
                     {/* Status & View Receipts */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        {event.status === "STRIPE_AUTO" ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Stripe Auto Payout</span>
-                          </span>
-                        ) : event.status === "FULLY_PAID" ? (
+                        {event.status === "FULLY_PAID" ? (
                           <button
                             type="button"
                             onClick={() => setSelectedEvent(event)}
@@ -510,7 +504,7 @@ export default function CreatorPayoutsSection() {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Disbursed (Paid Out)</p>
             <p className="text-lg font-black text-black">{fmt(data.totals.totalPaidToUser)}</p>
-            <p className="text-[9px] text-gray-500">Direct Bank / Stripe</p>
+            <p className="text-[9px] text-gray-500">Direct Bank / Paystack</p>
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Pending Balance Due</p>

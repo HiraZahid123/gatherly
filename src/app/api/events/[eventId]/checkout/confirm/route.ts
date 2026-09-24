@@ -1,78 +1,105 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { verifyPaystackTransaction } from "@/lib/paystack";
 import crypto from "crypto";
 
 interface Params { params: Promise<{ eventId: string }> }
 
 export async function POST(req: NextRequest, { params }: Params) {
   const { eventId } = await params;
-  const { paymentIntentId } = await req.json();
+  const body = await req.json();
+  const { reference, paymentIntentId } = body;
 
-  if (!paymentIntentId)
-    return NextResponse.json({ error: "paymentIntentId required" }, { status: 400 });
-
-  // Verify with Stripe
-  const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-  if (pi.status !== "succeeded")
-    return NextResponse.json({ error: "Payment not confirmed" }, { status: 400 });
-
-  const order = await prisma.order.findUnique({
-    where: { stripePaymentIntentId: paymentIntentId },
-    include: { ticketTier: true },
-  });
-
-  if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
-  if (order.eventId !== eventId)
-    return NextResponse.json({ error: "Event mismatch" }, { status: 400 });
-
-  // Idempotent: if already completed, return existing RSVP
-  if (order.status === "COMPLETED") {
-    const rsvp = await prisma.rSVP.findFirst({ where: { orderId: order.id } });
-    return NextResponse.json({ rsvp, order });
+  const effectiveRef = reference || paymentIntentId;
+  if (!effectiveRef) {
+    return NextResponse.json({ error: "Transaction reference is required" }, { status: 400 });
   }
 
-  const result = await prisma.$transaction(async (tx) => {
-    const updatedOrder = await tx.order.update({
-      where: { id: order.id },
-      data: { status: "COMPLETED", stripeChargeId: pi.latest_charge as string },
-    });
+  try {
+    const verifyRes = await verifyPaystackTransaction(effectiveRef);
+    if (verifyRes.data.status === "success") {
+      const order = await prisma.order.findFirst({
+        where: {
+          OR: [
+            { stripePaymentIntentId: effectiveRef },
+            ...(verifyRes.data.metadata?.orderId ? [{ id: verifyRes.data.metadata.orderId }] : []),
+          ],
+        },
+        include: { ticketTier: true },
+      });
 
-    await tx.ticketTier.update({
-      where: { id: order.ticketTierId },
-      data: { quantitySold: { increment: order.quantity } },
-    });
+      if (!order) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
 
-    const qrToken = crypto.randomUUID();
-    const existing = await tx.rSVP.findFirst({
-      where: {
-        eventId: order.eventId,
-        OR: [
-          ...(order.userId ? [{ userId: order.userId }] : []),
-          ...(order.guestEmail ? [{ guestEmail: order.guestEmail }] : []),
-        ],
-      },
-    });
+      if (order.eventId !== eventId) {
+        return NextResponse.json({ error: "Event mismatch" }, { status: 400 });
+      }
 
-    const rsvp = existing
-      ? await tx.rSVP.update({
-          where: { id: existing.id },
-          data: { status: "ACCEPTED", qrToken, orderId: order.id },
-        })
-      : await tx.rSVP.create({
+      // Idempotent: if already completed, return existing RSVP
+      if (order.status === "COMPLETED") {
+        const rsvp = await prisma.rSVP.findFirst({ where: { orderId: order.id } });
+        return NextResponse.json({ rsvp, order });
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        const updatedOrder = await tx.order.update({
+          where: { id: order.id },
           data: {
-            eventId: order.eventId,
-            userId: order.userId ?? undefined,
-            guestName: order.guestName,
-            guestEmail: order.guestEmail,
-            status: "ACCEPTED",
-            qrToken,
-            orderId: order.id,
+            status: "COMPLETED",
+            stripePaymentIntentId: effectiveRef,
+            stripeChargeId: String(verifyRes.data.id),
           },
         });
 
-    return { rsvp, order: updatedOrder };
-  });
+        await tx.ticketTier.update({
+          where: { id: order.ticketTierId },
+          data: { quantitySold: { increment: order.quantity } },
+        });
 
-  return NextResponse.json(result);
+        const qrToken = crypto.randomUUID();
+        const existing = await tx.rSVP.findFirst({
+          where: {
+            eventId: order.eventId,
+            OR: [
+              ...(order.userId ? [{ userId: order.userId }] : []),
+              ...(order.guestEmail ? [{ guestEmail: order.guestEmail }] : []),
+            ],
+          },
+        });
+
+        const rsvp = existing
+          ? await tx.rSVP.update({
+              where: { id: existing.id },
+              data: { status: "ACCEPTED", qrToken, orderId: order.id },
+            })
+          : await tx.rSVP.create({
+              data: {
+                eventId: order.eventId,
+                userId: order.userId ?? undefined,
+                guestName: order.guestName,
+                guestEmail: order.guestEmail,
+                status: "ACCEPTED",
+                qrToken,
+                orderId: order.id,
+              },
+            });
+
+        return { rsvp, order: updatedOrder };
+      });
+
+      return NextResponse.json(result);
+    } else {
+      return NextResponse.json(
+        { error: verifyRes.data.gateway_response || "Payment verification failed" },
+        { status: 400 }
+      );
+    }
+  } catch (paystackErr: any) {
+    console.error("[Checkout Confirm] Paystack verification error:", paystackErr?.message);
+    return NextResponse.json(
+      { error: paystackErr.message || "Failed to confirm payment with Paystack" },
+      { status: 400 }
+    );
+  }
 }
