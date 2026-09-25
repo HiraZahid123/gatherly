@@ -63,8 +63,11 @@ export async function POST(
                     <a href="${eventUrl}" style="display:inline-block;background:#ffffff;color:#000000;font-weight:700;padding:12px 28px;border-radius:999px;text-decoration:none;font-size:14px">
                         View Event →
                     </a>
-                    <p style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:32px">
-                        You're receiving this because you're on the guest list for this event on jollywitme.
+                    <p style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;margin-top:28px">
+                        From the JollyWitMe Team ✨
+                    </p>
+                    <p style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:8px">
+                        You're receiving this because you're on the guest list for this event on JollyWitMe.
                     </p>
                 </div>
             `,

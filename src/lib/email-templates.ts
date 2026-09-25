@@ -39,7 +39,8 @@ export function getReminderEmailHtml(eventTitle: string, eventUrl: string, start
             </div>
         </div>
         <div style="background: #fafafa; padding: 24px; text-align: center; border-top: 1px solid #eaeaea;">
-            <p style="margin: 0; font-size: 12px; color: #888888;">Powered by Event Platform</p>
+            <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #111827;">From the JollyWitMe Team ✨</p>
+            <p style="margin: 0; font-size: 12px; color: #888888;">Powered by JollyWitMe</p>
         </div>
     </div>
     `;

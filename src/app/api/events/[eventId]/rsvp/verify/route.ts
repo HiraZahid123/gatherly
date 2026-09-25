@@ -176,10 +176,14 @@ export async function POST(
                         </div>
                         ` : ''}
 
-                        <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 40px; text-transform: uppercase; letter-spacing: 0.1em;">
-                            See you soon!<br>
-                            The ${event.title} Team
-                        </p>
+                        <div style="margin-top: 40px; text-align: center;">
+                            <p style="margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); font-weight: 700;">
+                                See you soon!
+                            </p>
+                            <p style="margin: 0; font-size: 14px; font-weight: 700; color: #ffffff;">
+                                From the JollyWitMe Team ✨
+                            </p>
+                        </div>
                     </div>
                 `
             }).catch(error => console.error("RSVP Verify Email Error:", error));

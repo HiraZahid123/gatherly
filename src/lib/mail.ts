@@ -205,7 +205,7 @@ export async function sendTicketConfirmationEmail(params: TicketConfirmationEmai
         <tr>
             <td style="padding: 24px 32px 28px; background-color: #0e0f14; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
                 <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.75);">
-                    from the <strong style="color: #ffffff;">Jolly Team</strong> ✨
+                    From the <strong style="color: #ffffff;">JollyWitMe Team</strong> ✨
                 </p>
                 <p style="margin: 0; font-size: 11px; color: rgba(255, 255, 255, 0.35);">
                     Powered by <a href="https://jollywitme.com" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 700;">JollyWitMe</a> · Moments that matter
@@ -308,7 +308,7 @@ export async function sendAnnouncementBroadcastEmail(params: AnnouncementBroadca
         <tr>
             <td style="padding: 24px 32px 28px; background-color: #0e0f14; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
                 <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.75);">
-                    from the <strong style="color: #ffffff;">Jolly Team</strong> ✨
+                    From the <strong style="color: #ffffff;">JollyWitMe Team</strong> ✨
                 </p>
                 <p style="margin: 0; font-size: 11px; color: rgba(255, 255, 255, 0.35);">
                     Powered by <a href="https://jollywitme.com" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 700;">JollyWitMe</a> · Moments that matter

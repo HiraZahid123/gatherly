@@ -139,14 +139,113 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
     };
 
     const handleDownloadQR = async () => {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${rsvpResult?.qrToken}`;
+        if (!rsvpResult?.qrToken) return;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(rsvpResult.qrToken)}&margin=15`;
+        try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = qrUrl;
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+
+            const canvas = document.createElement("canvas");
+            const width = 600;
+            const height = 800;
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+
+            if (ctx) {
+                // Background
+                ctx.fillStyle = "#0a0a0b";
+                ctx.fillRect(0, 0, width, height);
+
+                // Top accent gradient bar
+                const grad = ctx.createLinearGradient(0, 0, width, 0);
+                grad.addColorStop(0, "#10b981");
+                grad.addColorStop(1, "#3b82f6");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, width, 8);
+
+                // Brand header
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("JollyWitMe", width / 2, 58);
+
+                // Event title
+                ctx.fillStyle = "#10b981";
+                ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
+                const displayTitle = event?.title && event.title.length > 35 ? event.title.slice(0, 32) + "..." : (event?.title || "Event Ticket");
+                ctx.fillText(displayTitle, width / 2, 92);
+
+                // Guest Info
+                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+                ctx.font = "14px -apple-system, BlinkMacSystemFont, sans-serif";
+                const guestText = formData.email ? `Ticket sent to ${formData.email}` : "Official Entry Ticket";
+                ctx.fillText(guestText, width / 2, 120);
+
+                // White Card
+                const cardX = 90;
+                const cardY = 150;
+                const cardW = 420;
+                const cardH = 460;
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                if (typeof ctx.roundRect === "function") {
+                    ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+                } else {
+                    ctx.rect(cardX, cardY, cardW, cardH);
+                }
+                ctx.fill();
+
+                // Draw QR Code
+                const qrSize = 380;
+                ctx.drawImage(img, cardX + 20, cardY + 20, qrSize, qrSize);
+
+                // Card Footer inside white card
+                ctx.fillStyle = "#111827";
+                ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("JollyWitMe • Official Ticket", width / 2, cardY + 430);
+
+                // Token code
+                ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.font = "12px monospace";
+                ctx.fillText(`Code: ${rsvpResult.qrToken}`, width / 2, 650);
+
+                // Sign-off
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.fillText("from the Jolly Team ✨", width / 2, 710);
+
+                ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+                ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
+                ctx.fillText("Powered by JollyWitMe · Moments that matter", width / 2, 740);
+
+                const dataUrl = canvas.toDataURL("image/png");
+                const a = document.createElement("a");
+                a.href = dataUrl;
+                a.download = `Ticket-${(event?.title || "event").replace(/\s+/g, "-")}-JollyWitMe.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+        } catch (err) {
+            console.error("Canvas ticket generation failed, falling back to direct QR:", err);
+        }
+
+        // Fallback: direct QR download
         try {
             const response = await fetch(qrUrl);
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = `Ticket-${event.title.replace(/\s+/g, '-')}.png`;
+            a.download = `Ticket-${(event?.title || "event").replace(/\s+/g, "-")}.png`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -548,26 +647,38 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                 animate="center"
                                 exit="exit"
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="text-center space-y-8"
+                                className="text-center space-y-6"
                             >
-                                <div className="space-y-6">
+                                <div className="space-y-5">
+                                    {/* JollyWitMe Brand Identity Header */}
+                                    <div className="flex items-center justify-center pt-0.5">
+                                        <img
+                                            src="/logo/logo-full.webp"
+                                            alt="JollyWitMe"
+                                            className="h-7 w-auto max-w-[130px] object-contain"
+                                            onError={(e) => {
+                                                (e.currentTarget as HTMLElement).style.display = "none";
+                                            }}
+                                        />
+                                    </div>
+
                                     {/* Status & Message */}
-                                    <div className="space-y-2">
-                                        <div className="flex items-baseline justify-center gap-3">
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-baseline justify-center gap-2.5">
                                             <div className={`w-2 h-2 rounded-full ${
                                                 status === "ACCEPTED" ? "bg-green-500" :
                                                 status === "MAYBE" ? "bg-amber-500" :
                                                 status === "WAITLISTED" ? "bg-emerald-500" :
                                                 "bg-white"
                                             }`} />
-                                            <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
+                                            <h2 className="text-xl font-bold tracking-tight text-white uppercase">
                                                 {status === "ACCEPTED" ? "You're In!" :
                                                  status === "MAYBE" || status === "PENDING" ? "Sorted!" :
                                                  status === "WAITLISTED" ? "Waitlisted" : "Done!"}
                                             </h2>
                                         </div>
                                         
-                                        <p className="text-white/40 font-medium max-w-[240px] mx-auto text-[10px] leading-[1.4]">
+                                        <p className="text-white/40 font-medium max-w-[260px] mx-auto text-[11px] leading-[1.4]">
                                             {status === "ACCEPTED" ? (
                                                 <>Ticket sent to <span className="text-white font-bold">{formData.email}</span></>
                                             ) : status === "MAYBE" || status === "PENDING" ? (
@@ -582,13 +693,18 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
 
                                     {/* Simple QR Area */}
                                     {(status === "ACCEPTED" || status === "MAYBE" || status === "PENDING") && (
-                                        <div className="pt-0 flex flex-col items-center gap-4">
-                                            <div className="bg-white p-2.5 rounded-2xl shadow-2xl">
+                                        <div className="pt-0 flex flex-col items-center gap-3.5">
+                                            <div className="bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center">
                                                 <img
                                                     src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${rsvpResult?.qrToken}`}
                                                     alt="Entry QR"
                                                     className="w-44 h-44 sm:w-48 sm:h-48"
                                                 />
+                                                <div className="pt-2 mt-1 border-t border-black/10 w-full flex items-center justify-center gap-1.5 text-black/60 text-[10px] font-bold tracking-wide">
+                                                    <span>JollyWitMe</span>
+                                                    <span>•</span>
+                                                    <span className="text-black/40 font-medium">Entry Ticket</span>
+                                                </div>
                                             </div>
 
                                             <button
@@ -603,6 +719,13 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                                 <a href={calendarLinks?.google} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Google</a>
                                                 <a href={calendarLinks?.ics} className="hover:text-white transition-colors">Apple</a>
                                                 <a href={calendarLinks?.outlook} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Outlook</a>
+                                            </div>
+
+                                            {/* Jolly Team Footer */}
+                                            <div className="flex items-center justify-center gap-1.5 text-white/40 text-[11px] font-medium pt-1">
+                                                <span>from the</span>
+                                                <span className="font-bold text-white tracking-wide">Jolly Team</span>
+                                                <span>✨</span>
                                             </div>
                                         </div>
                                     )}

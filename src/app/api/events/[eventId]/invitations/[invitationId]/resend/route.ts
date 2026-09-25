@@ -55,6 +55,7 @@ export async function POST(
                     <div style="margin: 30px 0;">
                         <a href="${inviteLink}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">View Invitation</a>
                     </div>
+                    <p style="color: #4b5563; font-size: 13px; margin-top: 24px; font-weight: 600;">From the JollyWitMe Team ✨</p>
                 </div>
             `
         });

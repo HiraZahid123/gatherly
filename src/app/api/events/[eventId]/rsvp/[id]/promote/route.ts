@@ -70,6 +70,7 @@ export async function POST(
                         <div style="text-align: center; margin: 32px 0;">
                              <a href="${qrUrl}" style="display: inline-block; background: #ffffff; color: #000000; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 900; text-transform: uppercase;">View Ticket</a>
                         </div>
+                        <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600; margin-top: 32px;">From the JollyWitMe Team ✨</p>
                     </div>
                 `
             }).catch(e => console.error("Promotion email error", e));
