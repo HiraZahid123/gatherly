@@ -101,14 +101,28 @@ export default async function DedicatedPhotosPage({ params, searchParams }: Dedi
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <span className="hidden md:inline-block text-xs font-medium text-white/50 max-w-[200px] truncate">
+                <div className="flex items-center gap-3">
+                    <span className="hidden md:inline-block text-xs font-medium text-white/50 max-w-[220px] truncate">
                         {event.title}
                     </span>
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
                         <Sparkles className="w-3 h-3 text-emerald-400" />
                         <span>Dedicated Album</span>
                     </div>
+
+                    {session?.user && (
+                        <div className="flex items-center gap-2 pl-2 border-l border-white/10">
+                            {session.user.image ? (
+                                <div className="w-7 h-7 rounded-full overflow-hidden relative border border-white/20">
+                                    <Image src={session.user.image} alt={session.user.name || "User"} fill className="object-cover" />
+                                </div>
+                            ) : (
+                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-[10px] font-bold">
+                                    {session.user.name?.[0]?.toUpperCase() || "U"}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </header>
 

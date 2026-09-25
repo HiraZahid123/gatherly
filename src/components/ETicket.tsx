@@ -92,18 +92,15 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
 
           {/* JollyWitMe Brand Identity */}
           <div className="px-6 pt-5 pb-1 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <img
                 src="/logo/logo-full.webp"
                 alt="JollyWitMe"
-                className="h-6 w-auto object-contain"
+                className="h-7 w-auto max-w-[130px] object-contain"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
               />
-              <span className="text-xs font-black tracking-tight text-white/90">
-                JollyWitMe
-              </span>
             </div>
             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

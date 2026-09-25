@@ -113,9 +113,8 @@ export async function sendTicketConfirmationEmail(params: TicketConfirmationEmai
                     <tr>
                         <td align="center">
                             <div style="display: inline-block; vertical-align: middle;">
-                                <a href="https://jollywitme.com" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                                    <img src="https://jollywitme.com/logo/logo-full.webp" alt="JollyWitMe" height="34" style="height: 34px; width: auto; max-width: 160px; vertical-align: middle; border: 0;" onerror="this.style.display='none'" />
-                                    <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #22c55e; vertical-align: middle; margin-left: 8px;">JollyWitMe</span>
+                                <a href="https://jollywitme.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                                    <img src="https://jollywitme.com/logo/logo-full.webp" alt="JollyWitMe" height="38" style="height: 38px; width: auto; max-width: 190px; vertical-align: middle; border: 0; display: block; margin: 0 auto;" />
                                 </a>
                             </div>
                             <div style="margin-top: 8px;">
@@ -266,9 +265,8 @@ export async function sendAnnouncementBroadcastEmail(params: AnnouncementBroadca
                     <tr>
                         <td align="center">
                             <div style="display: inline-block; vertical-align: middle;">
-                                <a href="https://jollywitme.com" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                                    <img src="https://jollywitme.com/logo/logo-full.webp" alt="JollyWitMe" height="34" style="height: 34px; width: auto; max-width: 160px; vertical-align: middle; border: 0;" onerror="this.style.display='none'" />
-                                    <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #22c55e; vertical-align: middle; margin-left: 8px;">JollyWitMe</span>
+                                <a href="https://jollywitme.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                                    <img src="https://jollywitme.com/logo/logo-full.webp" alt="JollyWitMe" height="38" style="height: 38px; width: auto; max-width: 190px; vertical-align: middle; border: 0; display: block; margin: 0 auto;" />
                                 </a>
                             </div>
                             <div style="margin-top: 8px;">

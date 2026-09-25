@@ -46,11 +46,12 @@ export default function Navbar() {
     const isHomePage = pathname === "/";
     const isDashboard = pathname === "/dashboard";
     const isAdminPage = pathname.startsWith("/admin");
+    const isPhotosPage = pathname.includes("/e/") && pathname.endsWith("/photos");
     const isHelpPage = pathname.startsWith("/help") || pathname.startsWith("/blog");
     const isCreationPage = pathname === "/events/create" || pathname === "/cards/create";
-    const showHomeBack = !isHomePage && !isDashboard && !isAdminPage && pathname !== "/profile/edit";
+    const showHomeBack = !isHomePage && !isDashboard && !isAdminPage && !isPhotosPage && pathname !== "/profile/edit";
 
-    if (isDashboard || isAdminPage) return null;
+    if (isDashboard || isAdminPage || isPhotosPage) return null;
 
     // Determine config based on scroll state
     const navClasses = isHelpPage 
