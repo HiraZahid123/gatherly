@@ -172,7 +172,12 @@ export default function TicketCheckoutDrawer({
   }, [event.id, guestName, guestEmail, selectedTier, onSuccess]);
 
   const totalAmount = selectedTier ? (selectedTier.price * quantity) / 100 : 0;
-  const remaining = selectedTier ? selectedTier.quantity - selectedTier.quantitySold : 0;
+  const effectiveCapacity = event?.capacity || event?.theme?.settings?.rsvp?.capacity || null;
+  const acceptedCount = event?.rsvpCount ?? event?._count?.rsvps ?? 0;
+  const eventSpotsLeft = effectiveCapacity ? Math.max(0, effectiveCapacity - acceptedCount) : Infinity;
+
+  const tierRemaining = selectedTier ? Math.max(0, selectedTier.quantity - selectedTier.quantitySold) : 0;
+  const remaining = Math.min(tierRemaining, eventSpotsLeft);
 
   const slideVariants = {
     enter: (d: number) => ({ x: d > 0 ? 40 : -40, opacity: 0 }),
@@ -272,7 +277,9 @@ export default function TicketCheckoutDrawer({
 
                     <div className="space-y-2.5">
                       {tiers.map((t) => {
-                        const isSoldOut = t.quantitySold >= t.quantity;
+                        const tierRem = Math.max(0, t.quantity - t.quantitySold);
+                        const effectiveRem = Math.min(tierRem, eventSpotsLeft);
+                        const isSoldOut = effectiveRem <= 0;
                         const isSelected = selectedTier?.id === t.id;
                         const price = t.price === 0 ? "Free" : `₦${(t.price / 100).toLocaleString()} NGN`;
 
@@ -296,11 +303,11 @@ export default function TicketCheckoutDrawer({
                                   </span>
                                   {isSoldOut ? (
                                     <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                                      Sold Out
+                                      {eventSpotsLeft <= 0 ? "Event Full" : "Sold Out"}
                                     </span>
                                   ) : (
                                     <span className="text-[10px] text-white/40 font-mono">
-                                      {t.quantity - t.quantitySold} left
+                                      {effectiveRem} left
                                     </span>
                                   )}
                                 </div>

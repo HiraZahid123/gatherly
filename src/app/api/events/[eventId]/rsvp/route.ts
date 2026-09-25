@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rsvpSubmitSchema } from "@/lib/validation";
 import { generateQRToken, promoteNextFromWaitlist } from "@/lib/rsvp";
-import { sendEmail } from "@/lib/mail";
+import { sendEmail, sendTicketConfirmationEmail } from "@/lib/mail";
 import { generateGoogleCalendarUrl, generateOutlookUrl } from "@/lib/calendar";
 import { createNotification } from "@/lib/notifications";
 
@@ -190,47 +190,21 @@ export async function POST(
             (global as any).io.to(`event-${eventId}`).emit('rsvp-update', { rsvpId: rsvp.id });
         }
 
-        // 7. Send confirmation emails (async)
-        if (finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") {
+        // 7. Send confirmation emails (async) with permanent JollyWitMe identity
+        const emailRecipient = guestEmail || session?.user?.email;
+        if ((finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") && emailRecipient) {
             const isAccepted = finalStatus === "ACCEPTED";
-            const qrUrl = `${process.env.NEXTAUTH_URL}/e/${event.slug}?ticket=${qrToken}`;
-
-            sendEmail({
-                to: guestEmail,
-                subject: isAccepted
-                    ? `You're going to ${event.title}! 🎉`
-                    : `You're on the waitlist for ${event.title}`,
-                html: `
-                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
-                        <h1 style="color: #000; margin-bottom: 24px;">${isAccepted ? "You're in!" : "Waitlist Confirmed"}</h1>
-                        <p style="font-size: 16px; line-height: 1.6; color: #444;">
-                            ${isAccepted
-                        ? `Your RSVP for <strong>${event.title}</strong> has been confirmed. We've attached your entry ticket below.`
-                        : `You've been added to the waitlist for <strong>${event.title}</strong> at position #${waitlistPosition}. We'll notify you automatically if a spot opens up!`}
-                        </p>
-                        
-                        ${isAccepted ? `
-                        <div style="margin: 32px 0; padding: 24px; background: #f9f9f9; border-radius: 8px; text-align: center;">
-                            <p style="margin-bottom: 16px; font-weight: bold; color: #000;">YOUR ENTRY QR CODE</p>
-                            <a href="${qrUrl}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 20px;">View Ticket</a>
-                            
-                            <p style="margin: 10px 0; font-size: 14px; font-weight: bold; color: #000;">MANUAL ENTRY CODE: ${qrToken}</p>
-                            
-                            <p style="margin: 20px 0 10px; font-size: 12px; color: #666; font-weight: bold; text-transform: uppercase;">Add to Calendar</p>
-                            <div style="display: flex; justify-content: center; gap: 10px;">
-                                <a href="${generateGoogleCalendarUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 13px; color: #4285F4; text-decoration: none; font-weight: bold; margin: 0 10px;">Google</a>
-                                <a href="${generateOutlookUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 13px; color: #0078D4; text-decoration: none; font-weight: bold; margin: 0 10px;">Outlook</a>
-                            </div>
-                        </div>
-                        ` : ''}
-
-                        <p style="font-size: 14px; color: #888; margin-top: 32px;">
-                            See you soon!<br>
-                            The ${event.title} Team
-                        </p>
-                    </div>
-                `
-            }).catch(error => console.error("RSVP Email Error:", error));
+            sendTicketConfirmationEmail({
+                to: emailRecipient,
+                guestName: guestName || session?.user?.name || undefined,
+                eventTitle: event.title,
+                eventSlug: event.slug,
+                qrToken: (rsvp.qrToken || qrToken || "") as string,
+                startDate: event.startDate,
+                location: event.location,
+                isWaitlist: !isAccepted,
+                waitlistPosition: waitlistPosition || undefined
+            }).catch(error => console.error("RSVP Confirmation Email Error:", error));
         }
 
         // 8. Auto-Promote logic

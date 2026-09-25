@@ -29,7 +29,28 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const remaining = tier.quantity - tier.quantitySold;
   if (remaining < quantity)
-    return NextResponse.json({ error: `Only ${remaining} ticket(s) remaining` }, { status: 400 });
+    return NextResponse.json({ error: `Only ${remaining} ticket(s) remaining for this tier` }, { status: 400 });
+
+  // Event capacity validation: Total confirmed guests and ticket sales cannot exceed event capacity
+  const effectiveCapacity = event.capacity || (event.theme as any)?.settings?.rsvp?.capacity || null;
+  if (effectiveCapacity && effectiveCapacity > 0) {
+    const acceptedCount = await prisma.rSVP.count({
+      where: { eventId, status: "ACCEPTED" }
+    });
+    const spotsLeft = Math.max(0, effectiveCapacity - acceptedCount);
+    if (spotsLeft <= 0) {
+      return NextResponse.json(
+        { error: "This event has reached maximum capacity. No more tickets are available." },
+        { status: 400 }
+      );
+    }
+    if (quantity > spotsLeft) {
+      return NextResponse.json(
+        { error: `Only ${spotsLeft} spot(s) remaining for this event (Capacity limit: ${effectiveCapacity}).` },
+        { status: 400 }
+      );
+    }
+  }
 
   const totalAmount = tier.price * quantity; // In kobo (e.g. ₦1,000 = 100,000 kobo)
   const { platformFee, details: feeDetails } = await calculatePlatformFee(totalAmount, quantity);

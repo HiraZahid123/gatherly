@@ -6,6 +6,7 @@ import { Plus, Trash2, Loader2, Ticket, DollarSign, Users } from "lucide-react";
 
 interface TicketTierManagerProps {
   eventId: string;
+  eventCapacity?: number | null;
   primaryColor?: string;
   onTiersChange?: () => void;
 }
@@ -21,7 +22,7 @@ interface Tier {
   isActive: boolean;
 }
 
-export default function TicketTierManager({ eventId, primaryColor = "#6366f1", onTiersChange }: TicketTierManagerProps) {
+export default function TicketTierManager({ eventId, eventCapacity, primaryColor = "#6366f1", onTiersChange }: TicketTierManagerProps) {
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,6 +72,18 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
     if (isNaN(parsedQty) || parsedQty <= 0) {
       setError("Quantity must be at least 1");
       return;
+    }
+
+    if (eventCapacity && eventCapacity > 0) {
+      const currentAllocated = tiers.filter(t => t.isActive).reduce((sum, t) => sum + t.quantity, 0);
+      if (parsedQty > eventCapacity) {
+        setError(`Ticket quantity (${parsedQty}) cannot exceed overall event capacity (${eventCapacity} spots).`);
+        return;
+      }
+      if (currentAllocated + parsedQty > eventCapacity) {
+        setError(`Total tickets across tiers (${currentAllocated + parsedQty}) would exceed event capacity (${eventCapacity} spots). You only have ${Math.max(0, eventCapacity - currentAllocated)} spot(s) remaining to allocate.`);
+        return;
+      }
     }
 
     setSaving(true);
@@ -155,6 +168,18 @@ export default function TicketTierManager({ eventId, primaryColor = "#6366f1", o
 
   return (
     <div className="space-y-4">
+      {eventCapacity && eventCapacity > 0 && (
+        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+          <span className="text-white/60 font-medium flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-white/40" />
+            Event Capacity Limit:
+          </span>
+          <span className="font-bold text-white">
+            {tiers.filter((t) => t.isActive).reduce((sum, t) => sum + t.quantity, 0)} / {eventCapacity} tickets allocated
+          </span>
+        </div>
+      )}
+
       {/* Tier list */}
       <AnimatePresence>
         {tiers.map((tier) => (

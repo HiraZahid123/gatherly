@@ -1983,58 +1983,64 @@ function CreateEventContent() {
 
             {/* ── Mobile Bottom Action Bar (visible only on < lg screens) ── */}
             {!isPreviewMode && (
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[80] bg-black/80 backdrop-blur-xl border-t border-white/10 px-4 py-3 flex items-center gap-3">
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[80] bg-[#0a0a0c]/95 backdrop-blur-2xl border-t border-white/10 px-2 sm:px-4 py-2.5 flex items-center justify-between gap-1.5 sm:gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
                     {/* Sidebar shortcut buttons */}
-                    <button
-                        onClick={() => handleSidebarClick("Theme")}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                        <Palette className="w-5 h-5 text-white/70" />
-                        <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Theme</span>
-                    </button>
-                    <button
-                        onClick={() => handleSidebarClick("Effect")}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                        <Sparkles className="w-5 h-5 text-white/70" />
-                        <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Effect</span>
-                    </button>
-                    <button
-                        onClick={() => handleSidebarClick("Settings")}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                        <Settings className="w-5 h-5 text-white/70" />
-                        <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Settings</span>
-                    </button>
-                    <button
-                        onClick={handleSaveDraft}
-                        disabled={isSavingDraft}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                        {isSavingDraft ? <Loader2 className="w-5 h-5 text-amber-400 animate-spin" /> : <Bookmark className="w-5 h-5 text-amber-400" />}
-                        <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Draft</span>
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                        <button
+                            onClick={() => handleSidebarClick("Theme")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Theme"
+                        >
+                            <Palette className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Theme</span>
+                        </button>
+                        <button
+                            onClick={() => handleSidebarClick("Effect")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Effect"
+                        >
+                            <Sparkles className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Effect</span>
+                        </button>
+                        <button
+                            onClick={() => handleSidebarClick("Settings")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Settings"
+                        >
+                            <Settings className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Settings</span>
+                        </button>
+                        <button
+                            onClick={handleSaveDraft}
+                            disabled={isSavingDraft}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Save Draft"
+                        >
+                            {isSavingDraft ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin" /> : <Bookmark className="w-4 h-4 text-amber-400" />}
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Draft</span>
+                        </button>
+                    </div>
 
-                    {/* Publish / Sign in — full-width primary CTA */}
+                    {/* Publish / Sign in — prominent CTA, guaranteed visibility */}
                     <button
                         onClick={() => handleSidebarClick(session ? "Publish" : "Sign in")}
                         disabled={isLoading}
-                        className="flex-1 flex items-center justify-center gap-2 bg-white text-black font-black py-3 rounded-xl text-sm hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 shrink-0 flex items-center justify-center gap-1.5 bg-white text-black font-black py-2.5 px-3 rounded-xl text-xs sm:text-sm hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-white/10 whitespace-nowrap"
                     >
                         {isLoading ? (
                             <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                 <span>Publishing…</span>
                             </>
                         ) : session ? (
                             <>
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-3.5 h-3.5 text-black" />
                                 <span>Publish</span>
                             </>
                         ) : (
                             <>
-                                <LogIn className="w-4 h-4" />
-                                <span>Sign in to Publish</span>
+                                <LogIn className="w-3.5 h-3.5 text-black" />
+                                <span>Sign In</span>
                             </>
                         )}
                     </button>

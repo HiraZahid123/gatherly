@@ -387,6 +387,30 @@ export default function PublicEventClient({
         }
     };
 
+    const handleEditComment = async (commentId: string, content: string) => {
+        const res = await fetch(`/api/comments/${commentId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content }),
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Failed to update comment");
+        }
+        fetchComments();
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        const res = await fetch(`/api/comments/${commentId}`, {
+            method: "DELETE",
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Failed to delete comment");
+        }
+        fetchComments();
+    };
+
     const handleGuestAction = async (rsvpId: string, status: 'ACCEPTED' | 'DECLINED') => {
         if (!event?.id) return;
         try {
@@ -751,7 +775,7 @@ export default function PublicEventClient({
                     </div>
 
                     <div className="w-full pt-8 border-t border-white/10">
-                        <PhotoAlbum eventId={event.id} isHost={isHost} primaryColor={primaryColor} />
+                        <PhotoAlbum eventId={event.id} eventSlug={event.slug} isHost={isHost} primaryColor={primaryColor} />
                     </div>
 
                     <div className="w-full pt-8 border-t border-white/10">
@@ -765,6 +789,9 @@ export default function PublicEventClient({
                                 createdAt: g.updatedAt || new Date().toISOString()
                             }))}
                             onPostComment={handlePostComment}
+                            onEditComment={handleEditComment}
+                            onDeleteComment={handleDeleteComment}
+                            isHost={hasAdminAccess}
                             primaryColor={primaryColor}
                         />
                     </div>
@@ -983,29 +1010,30 @@ export default function PublicEventClient({
             </main>
 
             {/* Mobile Sticky Floating Action Bar */}
-            <div className="fixed bottom-4 left-4 right-4 z-40 lg:hidden flex items-center gap-2 p-2 bg-[#121216]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom-4">
+            <div className="fixed bottom-4 left-3 right-3 sm:left-4 sm:right-4 z-40 lg:hidden flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-[#121216]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom-4">
                 {hasAdminAccess ? (
                     <>
                         <button
                             onClick={() => router.push(`/events/${event.id}/edit`)}
-                            className="flex-1 py-3.5 px-3 bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm"
+                            className="flex-1 py-3 px-2 bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm whitespace-nowrap"
                         >
-                            <Edit3 className="w-4 h-4 text-emerald-400" />
-                            <span>Edit Event</span>
+                            <Edit3 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Edit</span>
                         </button>
                         <button
                             onClick={() => setIsShareOpen(true)}
-                            className="flex-1 py-3.5 px-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all"
+                            className="flex-1 py-3 px-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-black font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all whitespace-nowrap"
                         >
-                            <Share2 className="w-4 h-4" />
+                            <Share2 className="w-3.5 h-3.5 shrink-0" />
                             <span>Share</span>
                         </button>
                         <button
                             onClick={() => { setSettingsTab("Hosts"); setIsSettingsOpen(true); }}
-                            className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center flex-shrink-0 active:scale-95 transition-all"
+                            className="flex-1 py-3 px-2 bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm whitespace-nowrap"
                             title="Event Settings"
                         >
-                            <Settings className="w-4 h-4 text-gray-300" />
+                            <Settings className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Settings</span>
                         </button>
                     </>
                 ) : (

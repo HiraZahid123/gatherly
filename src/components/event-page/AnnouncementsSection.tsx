@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Megaphone, Trash2, Pin, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Megaphone, Trash2, Pin, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 import Image from "next/image";
 
 interface Announcement {
@@ -39,6 +40,7 @@ export default function AnnouncementsSection({
     const [loading, setLoading] = useState(true);
     const [text, setText] = useState("");
     const [isPinned, setIsPinned] = useState(false);
+    const [notifyGuests, setNotifyGuests] = useState(true);
     const [posting, setPosting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [expanded, setExpanded] = useState(true);
@@ -75,16 +77,25 @@ export default function AnnouncementsSection({
             const res = await fetch(`/api/events/${eventId}/announcements`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: text.trim(), isPinned }),
+                body: JSON.stringify({ content: text.trim(), isPinned, notifyGuests }),
             });
             const data = await res.json();
             if (data.success) {
                 setAnnouncements((prev) => [data.announcement, ...prev]);
                 setText("");
                 setIsPinned(false);
+                if (notifyGuests && data.notificationsSent) {
+                    const { sms, email } = data.notificationsSent;
+                    toast.success(`Announcement posted! Notified guests via Text Blast (${sms}) & Email (${email})`);
+                } else {
+                    toast.success("Announcement posted!");
+                }
+            } else {
+                toast.error(data.error || "Failed to post announcement");
             }
         } catch (e) {
             console.error("Failed to post announcement", e);
+            toast.error("Failed to post announcement");
         } finally {
             setPosting(false);
         }
@@ -147,23 +158,40 @@ export default function AnnouncementsSection({
                                     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handlePost();
                                 }}
                             />
-                            <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                <button
-                                    onClick={() => setIsPinned((v) => !v)}
-                                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
-                                        isPinned
-                                            ? "bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/40"
-                                            : "text-white/30 hover:text-white/60 hover:bg-white/5"
-                                    }`}
-                                >
-                                    <Pin className="w-3 h-3" />
-                                    Pin
-                                </button>
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsPinned((v) => !v)}
+                                        className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                                            isPinned
+                                                ? "bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/40"
+                                                : "text-white/30 hover:text-white/60 hover:bg-white/5"
+                                        }`}
+                                    >
+                                        <Pin className="w-3 h-3" />
+                                        Pin
+                                    </button>
+
+                                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-white/70 hover:text-white transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            checked={notifyGuests}
+                                            onChange={(e) => setNotifyGuests(e.target.checked)}
+                                            className="rounded border-white/20 bg-white/10 text-amber-500 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-amber-500"
+                                        />
+                                        <span className="flex items-center gap-1.5 text-[11px] text-amber-400/90 font-medium">
+                                            <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                                            Text Blast & Email Guests
+                                        </span>
+                                    </label>
+                                </div>
 
                                 <button
+                                    type="button"
                                     onClick={handlePost}
                                     disabled={!text.trim() || posting}
-                                    className="flex items-center gap-2 px-4 py-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:pointer-events-none text-black text-xs font-bold rounded-lg transition-colors"
+                                    className="flex items-center gap-2 px-4 py-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:pointer-events-none text-black text-xs font-bold rounded-lg transition-colors ml-auto"
                                 >
                                     {posting ? (
                                         <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />

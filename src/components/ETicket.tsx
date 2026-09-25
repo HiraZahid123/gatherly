@@ -90,8 +90,29 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
             style={{ background: `linear-gradient(90deg, ${primaryColor}, ${primaryColor}88)` }}
           />
 
+          {/* JollyWitMe Brand Identity */}
+          <div className="px-6 pt-5 pb-1 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img
+                src="/logo/logo-full.webp"
+                alt="JollyWitMe"
+                className="h-6 w-auto object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <span className="text-xs font-black tracking-tight text-white/90">
+                JollyWitMe
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Verified Ticket
+            </div>
+          </div>
+
           {/* Header */}
-          <div className="p-6 pb-4 space-y-1">
+          <div className="p-6 pt-2 pb-4 space-y-1">
             <p
               className="text-[9px] font-black uppercase tracking-[0.4em]"
               style={{ color: primaryColor }}
@@ -163,7 +184,7 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
           </div>
 
           {/* QR section */}
-          <div className="p-6 pt-5 flex flex-col items-center gap-4">
+          <div className="p-6 pt-5 flex flex-col items-center gap-3">
             <div className="bg-white p-3 rounded-2xl shadow-2xl">
               <img
                 src={qrUrl}
@@ -171,9 +192,14 @@ export default function ETicket({ event, rsvp, order, primaryColor = "#6366f1", 
                 className="w-36 h-36"
               />
             </div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-white/20 text-center">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 text-center">
               Show this QR code at the door
             </p>
+            <div className="pt-3 border-t border-white/10 w-full flex items-center justify-center gap-1.5 text-white/50 text-[11px] font-medium">
+              <span>from the</span>
+              <span className="font-bold text-white tracking-wide">Jolly Team</span>
+              <span>✨</span>
+            </div>
           </div>
 
           {/* Bottom band */}

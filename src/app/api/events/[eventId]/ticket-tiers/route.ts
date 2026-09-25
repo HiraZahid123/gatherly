@@ -53,6 +53,27 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Quantity must be greater than 0" }, { status: 400 });
     }
 
+    const effectiveCapacity = event.capacity || (themeData?.settings?.rsvp?.capacity ? Number(themeData.settings.rsvp.capacity) : null);
+    if (effectiveCapacity && effectiveCapacity > 0) {
+      if (numQty > effectiveCapacity) {
+        return NextResponse.json({
+          error: `Ticket quantity (${numQty}) cannot exceed overall event capacity (${effectiveCapacity} spots). Please increase event capacity or reduce ticket quantity.`
+        }, { status: 400 });
+      }
+
+      // Check sum of all active tiers
+      const existingTiers = await prisma.ticketTier.findMany({
+        where: { eventId, isActive: true },
+        select: { quantity: true },
+      });
+      const currentTierTotal = existingTiers.reduce((acc, t) => acc + t.quantity, 0);
+      if (currentTierTotal + numQty > effectiveCapacity) {
+        return NextResponse.json({
+          error: `Total tickets across all tiers (${currentTierTotal + numQty}) would exceed event capacity (${effectiveCapacity} spots). You have ${Math.max(0, effectiveCapacity - currentTierTotal)} ticket spot(s) left to allocate.`
+        }, { status: 400 });
+      }
+    }
+
     const tier = await prisma.ticketTier.create({
       data: {
         eventId,

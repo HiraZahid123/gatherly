@@ -177,8 +177,9 @@ export default function EventSettingsModal({
 
         // Handle RSVP capacity sync if needed
         if (section === "rsvp" && key === "capacity") {
-            // Ensure it's a number or null
-            updatedEvent.theme.settings.rsvp.capacity = value === "" ? null : Number(value);
+            const parsed = value === "" ? null : Number(value);
+            updatedEvent.theme.settings.rsvp.capacity = parsed;
+            updatedEvent.capacity = parsed;
         }
 
         onUpdate(updatedEvent);
@@ -270,6 +271,7 @@ export default function EventSettingsModal({
                                 </div>
                                 <TicketTierManager 
                                     eventId={event?.id || ""} 
+                                    eventCapacity={event?.capacity ?? event?.theme?.settings?.rsvp?.capacity ?? null}
                                     primaryColor={primaryColor} 
                                     onTiersChange={() => {
                                         if (!event?.isPaid && onUpdate) {

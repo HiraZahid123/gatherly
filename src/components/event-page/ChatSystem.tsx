@@ -167,9 +167,9 @@ export default function ChatSystem({ eventId, eventName, externalRecipient }: Ch
                 <button
                     onClick={() => setIsOpen(true)}
                     aria-label="Open Chat"
-                    className="fixed bottom-6 right-6 z-50 p-4 bg-emerald-600 text-white rounded-full shadow-2xl hover:bg-emerald-500 transition-all group animate-bounce"
+                    className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-40 p-3.5 sm:p-4 bg-emerald-600 text-white rounded-full shadow-2xl hover:bg-emerald-500 active:scale-95 transition-all group"
                 >
-                    <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black"></div>
                 </button>
             )}
@@ -180,7 +180,7 @@ export default function ChatSystem({ eventId, eventName, externalRecipient }: Ch
                         initial={{ opacity: 0, y: 100, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 100, scale: 0.9 }}
-                        className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-48px)] h-[550px] max-h-[calc(100vh-100px)] bg-[#1a1b1e] border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden backdrop-blur-xl"
+                        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 w-96 max-w-[calc(100vw-32px)] h-[550px] max-h-[calc(100vh-120px)] bg-[#1a1b1e] border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden backdrop-blur-xl"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">

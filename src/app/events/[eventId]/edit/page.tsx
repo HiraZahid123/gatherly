@@ -14,7 +14,7 @@ import CoverImageGallery from "@/components/CoverImageGallery";
 import EffectSelector from "@/components/EffectSelector";
 import ThemeSelector from "@/components/ThemeSelector";
 import { VIBE_THEMES } from "@/lib/theme";
-import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert, Bookmark, Loader2 } from "lucide-react";
+import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert, Bookmark, Loader2, Palette, Sparkles, Settings, CheckCircle } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
@@ -813,6 +813,67 @@ export default function EditEventPage() {
                     </div>
                 </div>
             </main>
+
+            {/* ── Mobile Bottom Action Bar (visible only on < lg screens) ── */}
+            {!isPreviewMode && (
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[80] bg-[#0a0a0c]/95 backdrop-blur-2xl border-t border-white/10 px-2 sm:px-4 py-2.5 flex items-center justify-between gap-1.5 sm:gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+                    {/* Sidebar shortcut buttons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                        <button
+                            onClick={() => handleSidebarClick("Theme")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Theme"
+                        >
+                            <Palette className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Theme</span>
+                        </button>
+                        <button
+                            onClick={() => handleSidebarClick("Effect")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Effect"
+                        >
+                            <Sparkles className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Effect</span>
+                        </button>
+                        <button
+                            onClick={() => handleSidebarClick("Settings")}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Settings"
+                        >
+                            <Settings className="w-4 h-4 text-white/80" />
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Settings</span>
+                        </button>
+                        <button
+                            onClick={handleSaveDraft}
+                            disabled={isSavingDraft}
+                            className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all min-w-[46px]"
+                            title="Save Draft"
+                        >
+                            {isSavingDraft ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin" /> : <Bookmark className="w-4 h-4 text-amber-400" />}
+                            <span className="text-[8px] font-bold text-white/50 uppercase tracking-wider">Draft</span>
+                        </button>
+                    </div>
+
+                    {/* Save Changes button */}
+                    <button
+                        onClick={() => handleSidebarClick("Publish")}
+                        disabled={isLoading}
+                        className="flex-1 shrink-0 flex items-center justify-center gap-1.5 bg-white text-black font-black py-2.5 px-3 rounded-xl text-xs sm:text-sm hover:bg-white/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-white/10 whitespace-nowrap"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Saving…</span>
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle className="w-3.5 h-3.5 text-black" />
+                                <span>Save Changes</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
 
             {/* Floating Sidebar (Fixed Right) */}
             <div className={`hidden lg:block fixed right-0 top-1/2 -translate-y-1/2 z-[60] animate-in fade-in slide-in-from-right-8 duration-1000 delay-400 ${isPreviewMode ? 'hidden' : ''}`}>

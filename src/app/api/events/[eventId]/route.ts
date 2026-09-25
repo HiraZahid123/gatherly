@@ -50,6 +50,11 @@ export async function PATCH(
             where: { id: eventId },
             data: {
                 theme: body.theme || event.theme,
+                capacity: body.capacity !== undefined
+                    ? (body.capacity ? Number(body.capacity) : null)
+                    : (body.theme?.settings?.rsvp?.capacity !== undefined
+                        ? (body.theme.settings.rsvp.capacity ? Number(body.theme.settings.rsvp.capacity) : null)
+                        : event.capacity),
                 rsvpDeadline: body.rsvpDeadline !== undefined ? (body.rsvpDeadline ? new Date(body.rsvpDeadline) : null) : event.rsvpDeadline,
                 checkInWindowStart: body.checkInWindowStart !== undefined ? body.checkInWindowStart : event.checkInWindowStart,
                 maxCheckIns: body.maxCheckIns !== undefined ? body.maxCheckIns : event.maxCheckIns,

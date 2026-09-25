@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { sendBulkSms } from "@/lib/sms";
+import { sendAnnouncementBroadcastEmail } from "@/lib/mail";
 
 // GET — Fetch all announcements for an event (public)
 export async function GET(
@@ -53,7 +55,7 @@ export async function POST(
         }
 
         const body = await req.json();
-        const { content, isPinned = false } = body;
+        const { content, isPinned = false, notifyGuests = true } = body;
         if (!content?.trim()) {
             return NextResponse.json({ success: false, error: "Content is required" }, { status: 400 });
         }
@@ -65,18 +67,94 @@ export async function POST(
 
         const eventWithGuests = await prisma.event.findUnique({
             where: { id: eventId },
-            select: { title: true, slug: true, hostId: true, rsvps: { where: { userId: { not: null } }, select: { userId: true } } },
+            select: {
+                title: true,
+                slug: true,
+                hostId: true,
+                host: { select: { name: true } },
+                rsvps: {
+                    where: { status: { not: "DECLINED" } },
+                    select: {
+                        userId: true,
+                        guestEmail: true,
+                        guestName: true,
+                        guestPhone: true,
+                        user: { select: { email: true, name: true, phone: true } },
+                    },
+                },
+            },
         });
-        const guestIds = [...new Set((eventWithGuests?.rsvps || []).map((rsvp) => rsvp.userId).filter((id): id is string => Boolean(id)))];
-        await Promise.all(guestIds.filter((userId) => userId !== session.user!.id).map((userId) => createNotification({
-            userId,
-            title: `Update from ${eventWithGuests?.title || "your event"}`,
-            message: content.trim(),
-            type: "ANNOUNCEMENT",
-            link: `/e/${eventWithGuests?.slug || eventId}`,
-        })));
 
-        return NextResponse.json({ success: true, announcement });
+        let inAppCount = 0;
+        let smsCount = 0;
+        let emailCount = 0;
+
+        if (notifyGuests && eventWithGuests) {
+            // 1. In-App Notifications
+            const guestIds = [...new Set((eventWithGuests.rsvps || []).map((rsvp) => rsvp.userId).filter((id): id is string => Boolean(id)))];
+            const inAppPromises = guestIds
+                .filter((userId) => userId !== session.user!.id)
+                .map((userId) =>
+                    createNotification({
+                        userId,
+                        title: `Update from ${eventWithGuests.title || "your event"}`,
+                        message: content.trim(),
+                        type: "ANNOUNCEMENT",
+                        link: `/e/${eventWithGuests.slug || eventId}`,
+                    }).catch((err) => console.error("In-app notification error:", err))
+                );
+            await Promise.all(inAppPromises);
+            inAppCount = guestIds.length;
+
+            // 2. Text Blast (SMS)
+            const phoneNumbers = [...new Set(
+                (eventWithGuests.rsvps || [])
+                    .map((r) => r.guestPhone || r.user?.phone)
+                    .filter((p): p is string => Boolean(p && p.trim()))
+            )];
+
+            if (phoneNumbers.length > 0) {
+                const smsMessage = `[JollyWitMe] Update for ${eventWithGuests.title}: ${content.trim()}`;
+                try {
+                    smsCount = await sendBulkSms(phoneNumbers, smsMessage);
+                } catch (smsErr) {
+                    console.error("Text Blast SMS error:", smsErr);
+                }
+            }
+
+            // 3. Email Blast
+            const emailMap = new Map<string, string>();
+            for (const r of eventWithGuests.rsvps || []) {
+                const email = r.guestEmail || r.user?.email;
+                const name = r.guestName || r.user?.name || "Guest";
+                if (email && email.includes("@")) {
+                    emailMap.set(email.toLowerCase(), name);
+                }
+            }
+
+            const emailPromises = Array.from(emailMap.entries()).map(([toEmail, guestName]) =>
+                sendAnnouncementBroadcastEmail({
+                    to: toEmail,
+                    guestName,
+                    eventTitle: eventWithGuests.title || "Event",
+                    eventSlug: eventWithGuests.slug || eventId,
+                    announcementContent: content.trim(),
+                    hostName: eventWithGuests.host?.name || session.user.name || "The Host",
+                }).catch((err) => console.error(`Email blast error for ${toEmail}:`, err))
+            );
+            await Promise.all(emailPromises);
+            emailCount = emailMap.size;
+        }
+
+        return NextResponse.json({
+            success: true,
+            announcement,
+            notificationsSent: {
+                inApp: inAppCount,
+                sms: smsCount,
+                email: emailCount,
+            },
+        });
     } catch (error) {
         console.error("POST /announcements error:", error);
         return NextResponse.json({ success: false, error: "Failed to create announcement" }, { status: 500 });

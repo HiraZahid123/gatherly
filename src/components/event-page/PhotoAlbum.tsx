@@ -1,26 +1,30 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Camera, Image as ImageIcon, Link as LinkIcon, X, Loader2, ChevronLeft, ChevronRight, ZoomIn, Download } from "lucide-react";
+import { Camera, Image as ImageIcon, Link as LinkIcon, X, Loader2, ChevronLeft, ChevronRight, ZoomIn, Download, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { compressImage } from "@/lib/compressImage";
+import { useSession } from "next-auth/react";
 
 interface Photo {
     id: string;
     url: string;
     createdAt: string;
+    userId?: string;
     user?: { name: string; image?: string };
 }
 
 interface PhotoAlbumProps {
     eventId: string;
+    eventSlug?: string;
     isHost?: boolean;
     primaryColor?: string;
     allowGuestUpload?: boolean;
 }
 
-export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed", allowGuestUpload = true }: PhotoAlbumProps) {
+export default function PhotoAlbum({ eventId, eventSlug, isHost, primaryColor = "#7c3aed", allowGuestUpload = true }: PhotoAlbumProps) {
+    const { data: session } = useSession();
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
@@ -93,10 +97,32 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed", 
         }
     };
 
+    const handleDeletePhoto = async (photoId: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this photo?")) return;
+        try {
+            const res = await fetch(`/api/events/${eventId}/photos?photoId=${photoId}`, {
+                method: "DELETE"
+            });
+            const data = await res.json();
+            if (data.success) {
+                setPhotos(prev => prev.filter(p => p.id !== photoId));
+                setLightboxIndex(null);
+                toast.success("Photo deleted successfully");
+            } else {
+                toast.error(data.error || "Failed to delete photo");
+            }
+        } catch {
+            toast.error("Error deleting photo");
+        }
+    };
+
     const copyAlbumLink = async () => {
         try {
-            await navigator.clipboard.writeText(window.location.href);
-            toast.success("Album link copied!");
+            const targetSlug = eventSlug || (typeof window !== "undefined" ? window.location.pathname.split("/")[2] : "");
+            const albumUrl = `${window.location.origin}/e/${targetSlug}/photos`;
+            await navigator.clipboard.writeText(albumUrl);
+            toast.success("Dedicated album link copied!");
         } catch {
             toast.error("Failed to copy link");
         }
@@ -152,8 +178,17 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed", 
                                 loading="lazy"
                             />
                             {/* Hover overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
-                                <div className="flex justify-end">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
+                                <div className="flex justify-end gap-1.5">
+                                    {(isHost || (session?.user?.id && photo.userId === session.user.id)) && (
+                                        <button
+                                            onClick={(e) => handleDeletePhoto(photo.id, e)}
+                                            className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md bg-red-500/40 hover:bg-red-500/70 border border-red-500/30 text-white transition-all active:scale-90"
+                                            title="Delete photo"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
                                     <div
                                         className="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md bg-white/10 border border-white/20"
                                     >
@@ -249,6 +284,8 @@ export default function PhotoAlbum({ eventId, isHost, primaryColor = "#7c3aed", 
                         photos={photos}
                         index={lightboxIndex}
                         primaryColor={primaryColor}
+                        canDelete={isHost || (!!session?.user?.id && photos[lightboxIndex]?.userId === session.user.id)}
+                        onDelete={handleDeletePhoto}
                         onClose={() => setLightboxIndex(null)}
                         onPrev={() => setLightboxIndex(i => i !== null ? Math.max(i - 1, 0) : null)}
                         onNext={() => setLightboxIndex(i => i !== null ? Math.min(i + 1, photos.length - 1) : null)}
@@ -265,6 +302,8 @@ function Lightbox({
     photos,
     index,
     primaryColor,
+    canDelete,
+    onDelete,
     onClose,
     onPrev,
     onNext,
@@ -272,6 +311,8 @@ function Lightbox({
     photos: Photo[];
     index: number;
     primaryColor: string;
+    canDelete?: boolean;
+    onDelete: (id: string, e?: React.MouseEvent) => void;
     onClose: () => void;
     onPrev: () => void;
     onNext: () => void;
@@ -321,9 +362,20 @@ function Lightbox({
                         rel="noopener noreferrer"
                         onClick={e => e.stopPropagation()}
                         className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                        title="Download photo"
                     >
                         <Download className="w-4 h-4 text-white/70" />
                     </a>
+                    {canDelete && (
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            onClick={(e) => onDelete(photo.id, e)}
+                            className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 transition-colors"
+                            title="Delete photo"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </motion.button>
+                    )}
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={onClose}

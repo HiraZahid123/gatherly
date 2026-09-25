@@ -144,14 +144,35 @@ export default function ReadonlyEventSummary({ event, onShare, onEdit, isHost }:
 
 
                 {/* Capacity */}
-                <div className="flex items-center gap-4 px-6 py-4 text-white/80 group">
-                    <div className="w-5 h-5 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
-                    </div>
-                    <span className="text-base font-bold tracking-tight">
-                        {event.capacity ? `${event.capacity} spots available` : "Unlimited spots"}
-                    </span>
-                </div>
+                {(() => {
+                    const effectiveCapacity = event.capacity || event.theme?.settings?.rsvp?.capacity || null;
+                    if (!effectiveCapacity) {
+                        return (
+                            <div className="flex items-center gap-4 px-6 py-4 text-white/80 group">
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
+                                </div>
+                                <span className="text-base font-bold tracking-tight">Unlimited spots</span>
+                            </div>
+                        );
+                    }
+                    const accepted = event.rsvpCount ?? event._count?.rsvps ?? 0;
+                    const spotsLeft = Math.max(0, effectiveCapacity - accepted);
+                    const isSoldOut = spotsLeft === 0;
+
+                    return (
+                        <div className="flex items-center gap-4 px-6 py-4 text-white/80 group">
+                            <div className="w-5 h-5 flex items-center justify-center">
+                                <Users className={`w-5 h-5 ${isSoldOut ? 'text-rose-400' : 'text-white/40'} group-hover:text-white transition-colors`} />
+                            </div>
+                            <span className={`text-base font-bold tracking-tight ${isSoldOut ? 'text-rose-400' : ''}`}>
+                                {isSoldOut
+                                    ? `Sold out (0 / ${effectiveCapacity} spots left)`
+                                    : `${spotsLeft} of ${effectiveCapacity} spots available`}
+                            </span>
+                        </div>
+                    );
+                })()}
 
                 {/* Cost */}
                 {event.theme?.settings?.cost && (

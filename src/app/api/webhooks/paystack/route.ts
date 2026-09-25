@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPaystackSignature } from "@/lib/paystack";
+import { sendTicketConfirmationEmail } from "@/lib/mail";
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
           break;
         }
 
+        let qrToken = crypto.randomUUID();
         await prisma.$transaction(async (tx) => {
           await tx.order.update({
             where: { id: order.id },
@@ -64,7 +66,6 @@ export async function POST(req: NextRequest) {
           });
 
           // Create or update RSVP → ACCEPTED
-          const qrToken = crypto.randomUUID();
           const existing = await tx.rSVP.findFirst({
             where: {
               eventId: order.eventId,
@@ -94,6 +95,19 @@ export async function POST(req: NextRequest) {
             });
           }
         });
+
+        if (order.guestEmail) {
+          sendTicketConfirmationEmail({
+            to: order.guestEmail,
+            guestName: order.guestName || undefined,
+            eventTitle: order.event.title,
+            eventSlug: order.event.slug,
+            qrToken: qrToken || order.id,
+            startDate: order.event.startDate,
+            location: order.event.location,
+            ticketTierName: order.ticketTier?.name,
+          }).catch(err => console.error("[Paystack Webhook] Failed to send ticket confirmation email:", err));
+        }
 
         console.log(`[Paystack Webhook] Order ${order.id} successfully completed via Paystack.`);
         break;

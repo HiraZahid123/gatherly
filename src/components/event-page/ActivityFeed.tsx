@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef, useMemo, memo } from "react";
 import NextImage from "next/image";
 import { useSession } from "next-auth/react";
-import { Send, Image as ImageIcon, CornerDownRight, X, MoreHorizontal } from "lucide-react";
+import { Send, Image as ImageIcon, CornerDownRight, X, MoreHorizontal, Edit2, Trash2, Check, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GifPicker from "@/components/ui/GifPicker";
+import { toast } from "sonner";
 
 interface Comment {
     id: string;
@@ -34,6 +35,9 @@ interface ActivityFeedProps {
     comments: Comment[];
     rsvps: RSVPActivity[];
     onPostComment: (content: string, type?: "TEXT" | "GIF" | "STICKER", mediaUrl?: string, parentId?: string) => Promise<void>;
+    onEditComment?: (commentId: string, content: string) => Promise<void>;
+    onDeleteComment?: (commentId: string) => Promise<void>;
+    isHost?: boolean;
     primaryColor?: string;
 }
 
@@ -42,6 +46,9 @@ export default function ActivityFeed({
     comments,
     rsvps,
     onPostComment,
+    onEditComment,
+    onDeleteComment,
+    isHost = false,
     primaryColor = "#7c3aed",
 }: ActivityFeedProps) {
     const { data: session } = useSession();
@@ -117,6 +124,46 @@ export default function ActivityFeed({
         setReplyText("");
         setIsPostingReply(false);
         setReplyingTo(null);
+    };
+
+    const handleEdit = async (commentId: string, content: string) => {
+        try {
+            if (onEditComment) {
+                await onEditComment(commentId, content);
+            } else {
+                const res = await fetch(`/api/comments/${commentId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content }),
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || "Failed to edit comment");
+                }
+            }
+            toast.success("Comment updated");
+        } catch (e: any) {
+            toast.error(e.message || "Failed to update comment");
+        }
+    };
+
+    const handleDelete = async (commentId: string) => {
+        try {
+            if (onDeleteComment) {
+                await onDeleteComment(commentId);
+            } else {
+                const res = await fetch(`/api/comments/${commentId}`, {
+                    method: "DELETE",
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || "Failed to delete comment");
+                }
+            }
+            toast.success("Comment deleted");
+        } catch (e: any) {
+            toast.error(e.message || "Failed to delete comment");
+        }
     };
 
     return (
@@ -213,6 +260,9 @@ export default function ActivityFeed({
                                 }}
                                 onReplyGifSelect={handleMediaSelect}
                                 setGifPickerTarget={setGifPickerTarget}
+                                onEditComment={handleEdit}
+                                onDeleteComment={handleDelete}
+                                isHost={isHost}
                             />
                         )}
                     </motion.div>
@@ -242,6 +292,9 @@ function CommentThread({
     onReplyGifClick,
     onReplyGifSelect,
     setGifPickerTarget,
+    onEditComment,
+    onDeleteComment,
+    isHost = false,
 }: {
     comment: Comment & { itemType: "comment" };
     session: any;
@@ -260,6 +313,9 @@ function CommentThread({
     onReplyGifClick: () => void;
     onReplyGifSelect: (url: string, type: "GIF" | "STICKER") => void;
     setGifPickerTarget: (v: string) => void;
+    onEditComment: (commentId: string, content: string) => Promise<void>;
+    onDeleteComment: (commentId: string) => Promise<void>;
+    isHost?: boolean;
 }) {
     const isReplying = replyingTo?.id === comment.id;
     const replies = comment.replies || [];
@@ -274,6 +330,9 @@ function CommentThread({
                 isTopLevel
                 onReply={session ? onReply : undefined}
                 isReplying={isReplying}
+                onEditComment={onEditComment}
+                onDeleteComment={onDeleteComment}
+                isHost={isHost}
             />
 
             {/* Replies */}
@@ -298,6 +357,9 @@ function CommentThread({
                                     mounted={mounted}
                                     primaryColor={primaryColor}
                                     isTopLevel={false}
+                                    onEditComment={onEditComment}
+                                    onDeleteComment={onDeleteComment}
+                                    isHost={isHost}
                                 />
                             </motion.div>
                         ))}
@@ -394,6 +456,9 @@ const CommentBubble = memo(function CommentBubble({
     isTopLevel,
     onReply,
     isReplying,
+    onEditComment,
+    onDeleteComment,
+    isHost = false,
 }: {
     comment: Comment;
     session: any;
@@ -402,14 +467,51 @@ const CommentBubble = memo(function CommentBubble({
     isTopLevel: boolean;
     onReply?: () => void;
     isReplying?: boolean;
+    onEditComment: (commentId: string, content: string) => Promise<void>;
+    onDeleteComment: (commentId: string) => Promise<void>;
+    isHost?: boolean;
 }) {
-    const [showActions, setShowActions] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(comment.content || "");
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const isAuthor = Boolean(
+        (session?.user?.id && comment.userId && session.user.id === comment.userId) ||
+        (session?.user?.id && comment.user?.id && session.user.id === comment.user.id) ||
+        (session?.user?.email && (comment.user as any)?.email && session.user.email === (comment.user as any).email)
+    );
+    const canEdit = isAuthor && (comment.type === "TEXT" || comment.type === "comment");
+    const canDelete = isAuthor || isHost;
+
+    const handleSaveEdit = async () => {
+        if (!editContent.trim() || isSaving) return;
+        setIsSaving(true);
+        try {
+            await onEditComment(comment.id, editContent.trim());
+            setIsEditing(false);
+        } catch {
+            // Error notification is handled in ActivityFeed
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteClick = async () => {
+        if (isDeleting) return;
+        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+        setIsDeleting(true);
+        try {
+            await onDeleteComment(comment.id);
+        } catch {
+            // Error handled in ActivityFeed
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
-        <div
-            className="flex gap-3 group/comment relative"
-            onMouseLeave={() => setShowActions(false)}
-        >
+        <div className="flex gap-3 group/comment relative">
             <div className="flex-shrink-0 mt-1">
                 <UserAvatar user={comment.user} size={isTopLevel ? "md" : "sm"} />
             </div>
@@ -424,33 +526,105 @@ const CommentBubble = memo(function CommentBubble({
                     </span>
                 </div>
 
-                {/* Content */}
-                {comment.type === "TEXT" || comment.type === "comment" ? (
-                    <div
-                        className="inline-block rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-white/90 text-sm leading-relaxed border border-white/5 max-w-full"
-                        style={{ background: "rgba(255,255,255,0.05)" }}
-                    >
-                        {comment.content}
+                {/* Content or Edit Form */}
+                {isEditing ? (
+                    <div className="mt-1 space-y-2 max-w-full">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleSaveEdit();
+                                    if (e.key === "Escape") {
+                                        setIsEditing(false);
+                                        setEditContent(comment.content);
+                                    }
+                                }}
+                                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40"
+                                autoFocus
+                            />
+                            <button
+                                type="button"
+                                onClick={handleSaveEdit}
+                                disabled={isSaving || !editContent.trim()}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-green-600 hover:bg-green-500 disabled:opacity-50 flex items-center gap-1 transition-colors"
+                            >
+                                {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                Save
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setEditContent(comment.content);
+                                }}
+                                disabled={isSaving}
+                                className="p-1.5 rounded-lg text-xs text-white/50 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
                     </div>
-                ) : (comment.type === "GIF" || comment.type === "STICKER") && comment.mediaUrl ? (
-                    <div className="rounded-2xl rounded-tl-sm overflow-hidden inline-block max-w-[180px] shadow-lg border border-white/10">
-                        {/* GIF/sticker src is from Tenor CDN — use native img with lazy for external animated content */}
-                        <img src={comment.mediaUrl} alt={comment.type} className="w-full h-auto" loading="lazy" decoding="async" />
-                    </div>
-                ) : null}
-
-                {/* Reply button */}
-                {isTopLevel && onReply && (
-                    <motion.button
-                        onClick={onReply}
-                        className="flex items-center gap-1 mt-1 opacity-0 group-hover/comment:opacity-100 transition-all duration-200 text-[11px] font-bold"
-                        style={{ color: isReplying ? primaryColor : "rgba(255,255,255,0.35)" }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <CornerDownRight className="w-3 h-3" />
-                        {isReplying ? "Replying" : "Reply"}
-                    </motion.button>
+                ) : (
+                    <>
+                        {comment.type === "TEXT" || comment.type === "comment" ? (
+                            <div
+                                className="inline-block rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-white/90 text-sm leading-relaxed border border-white/5 max-w-full"
+                                style={{ background: "rgba(255,255,255,0.05)" }}
+                            >
+                                {comment.content}
+                            </div>
+                        ) : (comment.type === "GIF" || comment.type === "STICKER") && comment.mediaUrl ? (
+                            <div className="rounded-2xl rounded-tl-sm overflow-hidden inline-block max-w-[180px] shadow-lg border border-white/10">
+                                <img src={comment.mediaUrl} alt={comment.type} className="w-full h-auto" loading="lazy" decoding="async" />
+                            </div>
+                        ) : null}
+                    </>
                 )}
+
+                {/* Actions row: Reply, Edit, Delete */}
+                <div className="flex items-center gap-3 pt-1">
+                    {isTopLevel && onReply && (
+                        <motion.button
+                            onClick={onReply}
+                            className="flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover/comment:opacity-100 transition-all duration-200 text-[11px] font-bold"
+                            style={{ color: isReplying ? primaryColor : "rgba(255,255,255,0.4)" }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <CornerDownRight className="w-3 h-3" />
+                            {isReplying ? "Replying" : "Reply"}
+                        </motion.button>
+                    )}
+
+                    {canEdit && !isEditing && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setEditContent(comment.content);
+                                setIsEditing(true);
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-white/40 hover:text-white opacity-80 sm:opacity-0 sm:group-hover/comment:opacity-100 transition-all duration-200"
+                            title="Edit comment"
+                        >
+                            <Edit2 className="w-3 h-3" />
+                            Edit
+                        </button>
+                    )}
+
+                    {canDelete && !isEditing && (
+                        <button
+                            type="button"
+                            onClick={handleDeleteClick}
+                            disabled={isDeleting}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-red-400/60 hover:text-red-400 opacity-80 sm:opacity-0 sm:group-hover/comment:opacity-100 transition-all duration-200 disabled:opacity-30"
+                            title="Delete comment"
+                        >
+                            {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                            Delete
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

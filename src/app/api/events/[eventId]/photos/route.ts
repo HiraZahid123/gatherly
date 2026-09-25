@@ -158,3 +158,72 @@ export async function POST(
         );
     }
 }
+
+// DELETE: Delete a photo (author or host)
+export async function DELETE(
+    request: NextRequest,
+    props: { params: Promise<{ eventId: string }> }
+) {
+    const params = await props.params;
+    try {
+        const session = await auth();
+        const { eventId } = params;
+
+        const userId = session?.user?.id;
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        let photoId = searchParams.get("photoId");
+
+        if (!photoId) {
+            try {
+                const body = await request.json();
+                photoId = body.photoId;
+            } catch {
+                // fall through
+            }
+        }
+
+        if (!photoId) {
+            return NextResponse.json({ error: "photoId is required" }, { status: 400 });
+        }
+
+        const event = await prisma.event.findUnique({
+            where: { id: eventId },
+            select: { hostId: true }
+        });
+
+        if (!event) {
+            return NextResponse.json({ error: "Event not found" }, { status: 404 });
+        }
+
+        const photo = await (prisma as any).photo.findUnique({
+            where: { id: photoId }
+        });
+
+        if (!photo) {
+            return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+        }
+
+        const isHost = event.hostId === userId;
+        const isAuthor = photo.userId === userId;
+
+        if (!isHost && !isAuthor) {
+            return NextResponse.json({ error: "You do not have permission to delete this photo" }, { status: 403 });
+        }
+
+        await (prisma as any).photo.delete({
+            where: { id: photoId }
+        });
+
+        return NextResponse.json({ success: true, photoId });
+    } catch (error) {
+        console.error("Photo Delete error:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Internal Server Error" },
+            { status: 500 }
+        );
+    }
+}

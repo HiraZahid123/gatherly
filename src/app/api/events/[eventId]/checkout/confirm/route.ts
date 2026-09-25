@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPaystackTransaction } from "@/lib/paystack";
+import { sendTicketConfirmationEmail } from "@/lib/mail";
 import crypto from "crypto";
 
 interface Params { params: Promise<{ eventId: string }> }
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             ...(verifyRes.data.metadata?.orderId ? [{ id: verifyRes.data.metadata.orderId }] : []),
           ],
         },
-        include: { ticketTier: true },
+        include: { ticketTier: true, event: true },
       });
 
       if (!order) {
@@ -94,6 +95,19 @@ export async function POST(req: NextRequest, { params }: Params) {
 
         return { rsvp, order: updatedOrder };
       });
+
+      if (order.guestEmail) {
+        sendTicketConfirmationEmail({
+          to: order.guestEmail,
+          guestName: order.guestName || undefined,
+          eventTitle: order.event.title,
+          eventSlug: order.event.slug,
+          qrToken: result.rsvp.qrToken || order.id,
+          startDate: order.event.startDate,
+          location: order.event.location,
+          ticketTierName: order.ticketTier?.name,
+        }).catch(err => console.error("[Checkout Confirm] Failed to send ticket confirmation email:", err));
+      }
 
       return NextResponse.json(result);
     } else {
