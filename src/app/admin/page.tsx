@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                                             {new Date(event.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <Link href={`/e/${event.slug}`} target="_blank" className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors ml-auto">
+                                            <Link href={`/e/${event.slug || event.id}`} target="_blank" className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors ml-auto">
                                                 <ArrowUpRight className="w-4 h-4 text-white/40" />
                                             </Link>
                                         </td>

@@ -94,6 +94,7 @@ export default function EventForm({
         endDate: initialData?.endDate || "",
         capacity: initialData?.capacity || "",
         visibility: initialData?.visibility || "PUBLIC",
+        isPrivate: (initialData as any)?.isPrivate ?? ((initialData as any)?.theme?.settings?.privacy?.isPrivate ?? (initialData?.visibility === "PRIVATE")),
         coverImage: (initialData as any)?.coverImage || "",
         vibeId: (initialData as any)?.theme?.vibeId || "classic",
         rsvp_going: (initialData as any)?.theme?.rsvpLabels?.going || "Going",
@@ -169,6 +170,11 @@ export default function EventForm({
                 if (initialData.endDate !== undefined && initialData.endDate !== prev.endDate) updates.endDate = initialData.endDate || "";
                 if (initialData.capacity !== undefined && initialData.capacity !== prev.capacity) updates.capacity = initialData.capacity ?? "";
                 if (initialData.visibility !== undefined && initialData.visibility !== prev.visibility) updates.visibility = initialData.visibility || "PUBLIC";
+                if ((initialData as any).isPrivate !== undefined && (initialData as any).isPrivate !== prev.isPrivate) {
+                    updates.isPrivate = (initialData as any).isPrivate;
+                } else if (initialData.visibility !== undefined && (initialData.visibility === "PRIVATE") !== prev.isPrivate) {
+                    updates.isPrivate = initialData.visibility === "PRIVATE";
+                }
                 if ((initialData as any).coverImage !== undefined && (initialData as any).coverImage !== prev.coverImage) updates.coverImage = (initialData as any).coverImage || "";
                 if ((initialData as any).isPaid !== undefined && (initialData as any).isPaid !== prev.isPaid) updates.isPaid = (initialData as any).isPaid || false;
                 if ((initialData as any).theme?.links !== undefined) updates.links = (initialData as any).theme.links || [];
@@ -530,6 +536,41 @@ export default function EventForm({
                             checked={formData.isPaid}
                             onChange={(e) => {
                                 const newData = { ...formData, isPaid: e.target.checked };
+                                setFormData(newData);
+                                onDataChange?.(newData);
+                            }}
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-white/10 rounded-full relative peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-1 after:left-1 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
+
+                {/* Private Event Toggle */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
+                    <div className="flex items-center gap-4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white/40 shrink-0">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <div>
+                            <p className="text-base font-bold text-white/70">Private Event</p>
+                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-0.5">
+                                Only invited guests can view and RSVP
+                            </p>
+                        </div>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="isPrivate"
+                            checked={!!formData.isPrivate}
+                            onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                const newData = {
+                                    ...formData,
+                                    isPrivate: isChecked,
+                                    visibility: (isChecked ? "PRIVATE" : "PUBLIC") as "PUBLIC" | "PRIVATE" | "UNLISTED"
+                                };
                                 setFormData(newData);
                                 onDataChange?.(newData);
                             }}
@@ -946,6 +987,31 @@ export default function EventForm({
                         </svg>
                         <span className={`text-xs font-bold ${formData.requireApproval ? "text-white" : "text-white/80 group-hover:text-white"}`}>
                             Require Guest Approval
+                        </span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const newValue = !formData.isPrivate;
+                            const newData = {
+                                ...formData,
+                                isPrivate: newValue,
+                                visibility: (newValue ? "PRIVATE" : "PUBLIC") as "PUBLIC" | "PRIVATE" | "UNLISTED"
+                            };
+                            setFormData(newData);
+                            onDataChange?.(newData);
+                        }}
+                        className={`flex items-center gap-2.5 px-4 sm:px-5 py-3.5 border rounded-2xl transition-all text-left group shrink-0 ${formData.isPrivate
+                            ? "bg-white/15 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                            : "bg-white/5 border-white/10 hover:bg-white/10"
+                            }`}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 transition-colors ${formData.isPrivate ? "text-emerald-400" : "text-white/40 group-hover:text-white"}`}>
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span className={`text-xs font-bold ${formData.isPrivate ? "text-white" : "text-white/80 group-hover:text-white"}`}>
+                            Private Event
                         </span>
                     </button>
                     <button

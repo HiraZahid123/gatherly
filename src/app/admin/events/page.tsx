@@ -242,7 +242,7 @@ export default function EventsManagement() {
                                     <td className="px-8 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                             <a
-                                                href={`/e/${event.slug}`}
+                                                href={`/e/${event.slug || event.id}`}
                                                 target="_blank"
                                                 title="View Event"
                                                 className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all"

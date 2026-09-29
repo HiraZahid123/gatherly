@@ -5,11 +5,17 @@ import { notFound } from "next/navigation";
 
 const getEventBySlug = (slug: string) => unstable_cache(
     async () => {
-        if (!slug || slug === "undefined") return null;
+        if (!slug || slug === "undefined" || slug === "null") return null;
+        let decoded = slug;
+        try {
+            decoded = decodeURIComponent(slug);
+        } catch (_) {}
         return prisma.event.findFirst({
             where: {
                 OR: [
-                    { slug },
+                    { slug: { equals: decoded, mode: "insensitive" } },
+                    { slug: { equals: slug, mode: "insensitive" } },
+                    { id: decoded },
                     { id: slug }
                 ]
             },
@@ -33,62 +39,64 @@ interface PublicEventPageProps {
 export default async function PublicEventPage({ params, searchParams }: PublicEventPageProps) {
     try {
         const { slug } = await params;
-    const { inviteToken } = await searchParams;
+        const { inviteToken } = await searchParams;
 
-    const { auth } = await import("@/lib/auth");
-    const session = await auth();
+        const { auth } = await import("@/lib/auth");
+        const session = await auth();
 
-    // Fetch essential data — cached 5 min; session/privacy checks remain dynamic
-    const event = await getEventBySlug(slug);
+        // Fetch essential data — cached 5 min; session/privacy checks remain dynamic
+        const event = await getEventBySlug(slug);
 
-    if (!event) {
-        notFound();
-    }
+        if (!event) {
+            notFound();
+        }
 
-    // Hidden events are only accessible by the host
-    if (event.isHidden && session?.user?.id !== event.hostId) {
-        notFound();
-    }
+        const isHost = !!session?.user?.id && session.user.id === event.hostId;
+        const isAdmin = session?.user?.role === "ADMIN";
 
-    // Parse theme if it's a string (Move up so we can use it for restricted screen)
-    if (event.theme && typeof event.theme === 'string') {
-        try {
-            event.theme = JSON.parse(event.theme);
-        } catch (e) {
-            console.error("Failed to parse event theme", e);
+        // Hidden events are accessible by the host and platform admins
+        if (event.isHidden && !isHost && !isAdmin) {
+            notFound();
+        }
+
+        // Parse theme if it's a string (Move up so we can use it for restricted screen)
+        if (event.theme && typeof event.theme === 'string') {
+            try {
+                event.theme = JSON.parse(event.theme);
+            } catch (e) {
+                console.error("Failed to parse event theme", e);
+                event.theme = { settings: {} };
+            }
+        } else if (!event.theme) {
             event.theme = { settings: {} };
         }
-    } else if (!event.theme) {
-        event.theme = { settings: {} };
-    }
-    
-    const theme: any = event.theme;
-    if (!theme.settings) theme.settings = {};
-    theme.settings.reminders = event.reminders;
+        
+        const theme: any = event.theme;
+        if (!theme.settings) theme.settings = {};
+        theme.settings.reminders = event.reminders;
 
-    // Check Permissions for Private Events
-    if (event.visibility === "PRIVATE") {
-        const isHost = session?.user?.id === event.hostId;
-        let isInvited = false;
+        // Check Permissions for Private Events
+        if (event.visibility === "PRIVATE") {
+            let isInvited = false;
 
-        if (!isHost) {
-            const invitation = await (prisma as any).invitation.findFirst({
-                where: {
-                    eventId: event.id,
-                    OR: [
-                        { token: inviteToken || "invalid-token" },
-                        { email: session?.user?.email || "invalid-email" }
-                    ]
-                }
-            });
-            isInvited = !!invitation;
+            if (!isHost && !isAdmin) {
+                const invitation = await (prisma as any).invitation.findFirst({
+                    where: {
+                        eventId: event.id,
+                        OR: [
+                            { token: inviteToken || "invalid-token" },
+                            { email: session?.user?.email || "invalid-email" }
+                        ]
+                    }
+                });
+                isInvited = !!invitation;
+            }
+
+            if (!isHost && !isAdmin && !isInvited) {
+                const EventRestricted = (await import("@/components/event-page/EventRestricted")).default;
+                return <EventRestricted theme={event.theme} />;
+            }
         }
-
-        if (!isHost && !isInvited) {
-            const EventRestricted = (await import("@/components/event-page/EventRestricted")).default;
-            return <EventRestricted theme={event.theme} />;
-        }
-    }
 
     // Fetch guests, comments, and ticket tiers in parallel.
     // Caps: 50 RSVPs (ACCEPTED first) and 30 comments for initial paint.
@@ -153,6 +161,14 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
         />
     );
     } catch (error: any) {
+        // If it's a Next.js internal control error (notFound or redirect), rethrow it
+        if (
+            error?.digest?.startsWith?.("NEXT_") ||
+            error?.message?.includes?.("NEXT_HTTP_ERROR_FALLBACK") ||
+            error?.message?.includes?.("NEXT_REDIRECT")
+        ) {
+            throw error;
+        }
         console.error("Server component crash:", error);
         return (
             <div className="min-h-screen bg-black text-white p-20 font-mono">

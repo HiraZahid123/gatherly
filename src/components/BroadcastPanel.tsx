@@ -51,8 +51,8 @@ export default function BroadcastPanel({ eventId, eventTitle }: BroadcastPanelPr
                 <div className="flex items-start gap-3 text-white/80">
                     <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                     <div className="text-sm space-y-1">
-                        <p className="font-semibold text-white">Broadcast via Email + SMS</p>
-                        <p>Your message will be sent by <strong>email</strong> to all chosen guests. Guests who provided a phone number will also receive an <strong>SMS</strong>.</p>
+                        <p className="font-semibold text-white">Broadcast via Email</p>
+                        <p>Your message will be sent by <strong>email</strong> to all chosen guests.</p>
                     </div>
                 </div>
             </div>

@@ -203,9 +203,9 @@ function CreateEventContent() {
         const submitData = {
             ...data,
             coverImage: coverImage, // Guarantee the cover image selected in the sidebar is sent!
-            // Extract core settings from the settings state
-            isPrivate: settings.privacy?.isPrivate,
-            visibility: settings.privacy?.isPrivate ? "PRIVATE" : (data.visibility || settings.privacy?.visibility || "PUBLIC"),
+            // Extract core settings from the form and settings state
+            isPrivate: data.isPrivate !== undefined ? data.isPrivate : settings.privacy?.isPrivate,
+            visibility: (data.isPrivate || settings.privacy?.isPrivate) ? "PRIVATE" : (data.visibility || settings.privacy?.visibility || "PUBLIC"),
             guestListHidden: settings.privacy?.guestListHidden,
             capacity: data.capacity,
             // isPaid comes directly from the form toggle — no cost-based inference
@@ -287,8 +287,8 @@ function CreateEventContent() {
                 startDate: parseDateToIso(pendingData?.startDate) || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
                 endDate: parseDateToIso(pendingData?.endDate),
                 rsvpDeadline: parseDateToIso(pendingData?.rsvpDeadline) ?? null,
-                visibility: settings.privacy?.isPrivate ? "PRIVATE" : (pendingData?.visibility || settings.privacy?.visibility || "PUBLIC"),
-                isPrivate: settings.privacy?.isPrivate ?? false,
+                visibility: (pendingData?.isPrivate || settings.privacy?.isPrivate) ? "PRIVATE" : (pendingData?.visibility || settings.privacy?.visibility || "PUBLIC"),
+                isPrivate: pendingData?.isPrivate !== undefined ? pendingData.isPrivate : (settings.privacy?.isPrivate ?? false),
                 guestListHidden: settings.privacy?.guestListHidden ?? false,
                 capacity: pendingData?.capacity && Number(pendingData.capacity) > 0 ? Number(pendingData.capacity) : undefined,
                 isPaid: pendingData?.isPaid === true,
@@ -371,7 +371,7 @@ function CreateEventContent() {
         }
 
         // Sync redundant fields to settings source of truth
-        if (data.capacity !== undefined || data.visibility !== undefined || data.requireApproval !== undefined) {
+        if (data.capacity !== undefined || data.visibility !== undefined || data.requireApproval !== undefined || data.isPrivate !== undefined) {
             setSettings(prev => ({
                 ...prev,
                 rsvp: {
@@ -381,7 +381,8 @@ function CreateEventContent() {
                 },
                 privacy: {
                     ...prev.privacy,
-                    visibility: data.visibility !== undefined ? data.visibility : prev.privacy.visibility,                    isPrivate: data.visibility === "PRIVATE" ? true : (data.visibility === "PUBLIC" ? false : prev.privacy.isPrivate)
+                    visibility: data.isPrivate !== undefined ? (data.isPrivate ? "PRIVATE" : "PUBLIC") : (data.visibility !== undefined ? data.visibility : prev.privacy.visibility),
+                    isPrivate: data.isPrivate !== undefined ? data.isPrivate : (data.visibility === "PRIVATE" ? true : (data.visibility === "PUBLIC" ? false : prev.privacy.isPrivate))
                 },
             }));
         }

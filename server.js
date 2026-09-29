@@ -5,9 +5,9 @@ const { parse } = require('url');
 const next = require('next');
 const { Server } = require('socket.io');
 
-// Force production mode if not in dev
-if (process.env.NODE_ENV !== 'development') {
-  process.env.NODE_ENV = 'production';
+// Default to development if not explicitly set to production
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = process.env.npm_lifecycle_event === 'start' ? 'production' : 'development';
 }
 
 // 🩺 Diagnostic Checks for Hostinger
