@@ -14,13 +14,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "/concerts",
         "/housewarmings",
         "/events",
-        "/events/create",
         "/blog",
         "/help",
         "/contact",
-        "/auth/signin",
-        "/auth/signup",
-        "/auth/forgot-password",
         // Help Center Category & Article routes
         "/help/getting-started",
         "/help/getting-started/signing-up",

@@ -7,6 +7,16 @@ const __dirname = path.dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.jollywitme.com' }],
+        destination: 'https://jollywitme.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
   // output: 'standalone', // DISABLING STANDALONE FOR SHARED HOSTING COMPATIBILITY
   // reactCompiler: false, // DEPRECATED in Next 15 config root
   serverExternalPackages: ['jimp', 'socket.io', 'socket.io-adapter', 'socket.io-parser', '@whiskeysockets/baileys', '@hapi/boom'],
