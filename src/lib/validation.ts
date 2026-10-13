@@ -45,6 +45,11 @@ export const phoneSchema = z
     .regex(/^[\d\s\-\+\(\)]+$/, "Invalid phone number format")
     .optional();
 
+const rsvpPhoneSchema = phoneSchema.refine(
+    (phone) => !phone || /^[1-9]\d{7,14}$/.test(phone.replace(/\D/g, "")),
+    "Include the country calling code, for example +234 801 234 5678"
+);
+
 /**
  * Profile update validation schema
  */
@@ -351,21 +356,33 @@ export const rsvpSubmitSchema = z.object({
         .min(1, "Name is required")
         .max(100, "Name is too long")
         .refine(noHtml, { message: "HTML tags are not allowed" }),
-    guestEmail: z.string().email("Invalid email address").toLowerCase(),
+    guestEmail: z.string().email("Invalid email address").toLowerCase().optional().or(z.literal("")),
+    guestPhone: rsvpPhoneSchema.or(z.literal("")),
     inviteToken: z.string().optional(),
     captchaToken: z.string().optional(),
+}).refine((data) => Boolean(data.guestEmail || data.guestPhone), {
+    message: "Provide an email address or phone number",
+    path: ["guestPhone"],
 });
 
 export const rsvpVerifySchema = z.object({
-    guestEmail: z.string().email("Invalid email address").toLowerCase(),
+    guestEmail: z.string().email("Invalid email address").toLowerCase().optional().or(z.literal("")),
+    guestPhone: rsvpPhoneSchema.or(z.literal("")),
     otp: z.string().length(6, "OTP must be 6 digits"),
     status: z.enum(["ACCEPTED", "DECLINED", "MAYBE", "WAITLISTED"]),
     guestName: z.string().min(1, "Name is required"),
     captchaToken: z.string().optional(),
+}).refine((data) => Boolean(data.guestEmail || data.guestPhone), {
+    message: "Provide the email address or phone number used for verification",
+    path: ["guestPhone"],
 });
 
 export const rsvpResendSchema = z.object({
-    guestEmail: z.string().email("Invalid email address").toLowerCase(),
+    guestEmail: z.string().email("Invalid email address").toLowerCase().optional().or(z.literal("")),
+    guestPhone: rsvpPhoneSchema.or(z.literal("")),
+}).refine((data) => Boolean(data.guestEmail || data.guestPhone), {
+    message: "Provide an email address or phone number",
+    path: ["guestPhone"],
 });
 
 export const checkInSchema = z.object({

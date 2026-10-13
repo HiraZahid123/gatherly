@@ -26,7 +26,9 @@ export async function POST(
             );
         }
 
-        const { status, guestName, guestEmail, inviteToken, captchaToken } = validation.data;
+        const { status, guestName, guestEmail, guestPhone, inviteToken, captchaToken } = validation.data;
+        const contactEmail = guestEmail || session?.user?.email || "";
+        const contactPhone = guestPhone || (session?.user as any)?.phone || "";
 
         // 1.5 Verify CAPTCHA (only for guests/public)
         if (!session) {
@@ -101,8 +103,9 @@ export async function POST(
                 where: {
                     eventId,
                     OR: [
-                        { token: inviteToken },
-                        { email: guestEmail }
+                        ...(inviteToken ? [{ token: inviteToken }] : []),
+                        ...(contactEmail ? [{ email: contactEmail }] : []),
+                        ...(contactPhone ? [{ phone: contactPhone }] : [])
                     ]
                 }
             });
@@ -139,27 +142,20 @@ export async function POST(
 
         // 5. Handle authenticated vs Guest RSVP entry
         // 🔑 Merge logic: If user is logged in, check if a guest record exists for this email
-        let existingRSVP = null;
-        if (session?.user?.id) {
-            existingRSVP = await (prisma as any).rSVP.findFirst({
-                where: {
-                    eventId,
-                    OR: [
-                        { userId: session.user.id },
-                        { guestEmail: guestEmail }
-                    ]
-                }
-            });
-        } else {
-            existingRSVP = await (prisma as any).rSVP.findFirst({
-                where: { eventId, guestEmail }
-            });
-        }
+        const existingConditions = [
+            ...(session?.user?.id ? [{ userId: session.user.id }] : []),
+            ...(contactEmail ? [{ guestEmail: contactEmail }] : []),
+            ...(contactPhone ? [{ guestPhone: contactPhone }] : []),
+        ];
+        const existingRSVP = await (prisma as any).rSVP.findFirst({
+            where: { eventId, OR: existingConditions }
+        });
 
         const rsvpData = {
             status: finalStatus as any,
             guestName,
-            guestEmail,
+            guestEmail: contactEmail || null,
+            guestPhone: contactPhone || null,
             waitlistPosition,
             qrToken: qrToken || existingRSVP?.qrToken || undefined,
             userId: session?.user?.id || undefined,
@@ -191,7 +187,7 @@ export async function POST(
         }
 
         // 7. Send confirmation emails (async) with permanent JollyWitMe identity
-        const emailRecipient = guestEmail || session?.user?.email;
+        const emailRecipient = contactEmail;
         if ((finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") && emailRecipient) {
             const isAccepted = finalStatus === "ACCEPTED";
             sendTicketConfirmationEmail({

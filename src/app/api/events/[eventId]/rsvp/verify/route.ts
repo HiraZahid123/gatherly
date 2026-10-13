@@ -5,6 +5,7 @@ import { rsvpVerifySchema } from "@/lib/validation";
 import { generateQRToken, promoteNextFromWaitlist } from "@/lib/rsvp";
 import { sendEmail } from "@/lib/mail";
 import { generateGoogleCalendarUrl, generateOutlookUrl } from "@/lib/calendar";
+import { formatPhone } from "@/lib/otp";
 
 export async function POST(
     request: NextRequest,
@@ -21,7 +22,9 @@ export async function POST(
             return NextResponse.json({ error: "Invalid data", details: validation.error.format() }, { status: 400 });
         }
 
-        const { guestEmail, otp, status, guestName, captchaToken } = validation.data;
+        const { guestEmail, guestPhone, otp, status, guestName, captchaToken } = validation.data;
+        const verifyByPhone = !guestEmail && Boolean(guestPhone);
+        const phone = guestPhone ? formatPhone(guestPhone) : "";
 
         // 1.5 Verify CAPTCHA (only for guests/public)
         if (!session) {
@@ -39,7 +42,7 @@ export async function POST(
         const existingRSVP = await prisma.rSVP.findFirst({
             where: {
                 eventId,
-                guestEmail
+                ...(verifyByPhone ? { guestPhone: phone } : { guestEmail })
             }
         });
 
@@ -94,7 +97,10 @@ export async function POST(
             const invitation = await prisma.invitation.findFirst({
                 where: {
                     eventId,
-                    email: guestEmail
+                    OR: [
+                        ...(guestEmail ? [{ email: guestEmail }] : []),
+                        ...(phone ? [{ phone }] : []),
+                    ]
                 }
             });
 
@@ -133,6 +139,7 @@ export async function POST(
             data: {
                 status: finalStatus,
                 guestName,
+                guestPhone: phone || existingRSVP.guestPhone,
                 waitlistPosition,
                 qrToken,
                 otpCode: null, // Clear OTP after use
@@ -141,7 +148,7 @@ export async function POST(
         });
 
         // Send confirmation emails (async)
-        if (finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") {
+        if ((finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") && guestEmail) {
             const isAccepted = finalStatus === "ACCEPTED";
             const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
             const qrUrl = `${baseUrl}/e/${event.slug}?ticket=${qrToken}`;

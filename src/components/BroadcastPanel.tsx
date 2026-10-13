@@ -35,7 +35,11 @@ export default function BroadcastPanel({ eventId, eventTitle }: BroadcastPanelPr
                 throw new Error(data.error || "Failed to send broadcast");
             }
 
-            toast.success(`Message sent to ${data.recipientCount} guests!`);
+            if (data.warning) {
+                toast.warning(data.warning);
+            } else {
+                toast.success(`Sent ${data.emailCount} emails and ${data.whatsappCount} WhatsApp messages`);
+            }
             setLastSentCount(data.recipientCount);
             setMessage(""); // Clear message after success
         } catch (error: any) {
@@ -51,8 +55,8 @@ export default function BroadcastPanel({ eventId, eventTitle }: BroadcastPanelPr
                 <div className="flex items-start gap-3 text-white/80">
                     <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                     <div className="text-sm space-y-1">
-                        <p className="font-semibold text-white">Broadcast via Email</p>
-                        <p>Your message will be sent by <strong>email</strong> to all chosen guests.</p>
+                        <p className="font-semibold text-white">Broadcast via Email and WhatsApp</p>
+                        <p>Email goes to guests with an email address; WhatsApp goes to guests with a verified phone number.</p>
                     </div>
                 </div>
             </div>

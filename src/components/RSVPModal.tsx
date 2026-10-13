@@ -36,6 +36,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
+        phone: user?.phone || "",
         otp: "",
         captchaToken: ""
     });
@@ -69,6 +70,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                     status: initialStatus,
                                     guestName: user.name || "",
                                     guestEmail: user.email || "",
+                                    guestPhone: user.phone || "",
                                 }),
                             });
                             const data = await response.json();
@@ -101,7 +103,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                 setStep("INTENT");
             }
             if (user) {
-                setFormData(prev => ({ ...prev, name: user.name || "", email: user.email || "" }));
+                setFormData(prev => ({ ...prev, name: user.name || "", email: user.email || "", phone: user.phone || "" }));
             }
         }
     }, [isOpen, user, myRSVP, initialStatus, event.id]);
@@ -290,7 +292,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
             const response = await fetch(`/api/events/${event.id}/rsvp/verify/send`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ guestEmail: formData.email }),
+                body: JSON.stringify({ guestEmail: formData.email, guestPhone: formData.phone }),
             });
             const data = await response.json();
             if (data.success) {
@@ -314,6 +316,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     guestEmail: formData.email,
+                    guestPhone: formData.phone,
                     otp: formData.otp,
                     status: status,
                     guestName: formData.name,
@@ -347,6 +350,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                     status: finalStatus,
                     guestName: formData.name,
                     guestEmail: formData.email,
+                    guestPhone: formData.phone,
                     captchaToken: formData.captchaToken
                 }),
             });
@@ -368,8 +372,8 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
 
     const handleDetailsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.name || !formData.email) {
-            setError("Name and email are required");
+        if (!formData.name || (!formData.email && !formData.phone)) {
+            setError("Enter your name and an email address or phone number");
             return;
         }
         sendVerification();
@@ -548,18 +552,28 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Email Address</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Email Address (optional)</label>
                                         <div className="relative group">
                                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-white/60 transition-colors" />
                                             <input
                                                 type="email"
-                                                required
                                                 placeholder="email@example.com"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                                                 className="w-full h-12 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 focus:bg-white/10 focus:border-white/20 outline-none text-white text-sm transition-all"
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Phone / WhatsApp (optional)</label>
+                                        <input
+                                            type="tel"
+                                            placeholder="+234 801 234 5678"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                            className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 focus:bg-white/10 focus:border-white/20 outline-none text-white text-sm transition-all"
+                                        />
                                     </div>
 
                                     {error && <p className="text-rose-500 text-sm font-bold text-center">{error}</p>}
@@ -574,7 +588,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
 
                                     <button
                                         type="submit"
-                                        disabled={loading || (!user && !formData.captchaToken)}
+                                        disabled={loading || (!user && !formData.captchaToken) || (!formData.email && !formData.phone)}
                                         className="w-full h-12 bg-white text-black font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-white/90 active:scale-95 transition-all flex items-center justify-center gap-2"
                                     >
                                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Continue"}
@@ -596,10 +610,10 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                             >
                                 <div className="text-center space-y-2">
                                     <h2 className="text-xl font-bold tracking-tight text-white uppercase">
-                                        Verify Email
+                                        Verify {formData.email ? "Email" : "WhatsApp"}
                                     </h2>
                                     <p className="text-white/40 font-medium text-[10px] uppercase tracking-widest leading-loose">
-                                        Check <span className="text-white">{formData.email}</span>
+                                        Check <span className="text-white">{formData.email || formData.phone}</span>
                                     </p>
                                 </div>
 

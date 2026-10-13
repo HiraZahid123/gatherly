@@ -142,20 +142,8 @@ class WhatsAppService {
     public async sendMessage(phone: string, text: string): Promise<boolean> {
         try {
             if (!this.sock || !this.isConnected) {
-                console.warn('[WhatsAppService] Cannot send message: Socket not connected. Trying to initialize...');
-                await this.init();
-
-                // Wait up to 5s if connecting
-                let retries = 0;
-                while (!this.isConnected && retries < 10) {
-                    await new Promise((r) => setTimeout(r, 500));
-                    retries++;
-                }
-
-                if (!this.sock || !this.isConnected) {
-                    console.error('[WhatsAppService] WhatsApp socket still not connected. Message not sent.');
-                    return false;
-                }
+                console.warn('[WhatsAppService] Message not sent: WhatsApp is not connected.');
+                return false;
             }
 
             // Sanitize phone number to standard WhatsApp JID format
@@ -163,7 +151,17 @@ class WhatsAppService {
             const jid = `${cleanDigits}@s.whatsapp.net`;
 
             console.log(`[WhatsAppService] Sending WhatsApp message to ${jid}...`);
-            await this.sock.sendMessage(jid, { text });
+            let timeout: ReturnType<typeof setTimeout> | undefined;
+            try {
+                await Promise.race([
+                    this.sock.sendMessage(jid, { text }),
+                    new Promise((_, reject) => {
+                        timeout = setTimeout(() => reject(new Error('WhatsApp send timed out')), 15000);
+                    }),
+                ]);
+            } finally {
+                if (timeout) clearTimeout(timeout);
+            }
             console.log(`[WhatsAppService] Message sent successfully to ${jid}!`);
             return true;
         } catch (error: any) {

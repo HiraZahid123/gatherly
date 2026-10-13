@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { broadcastSchema } from "@/lib/validation";
 import { sendEmail } from "@/lib/mail";
-import { sendBulkSms } from "@/lib/sms";
+import { formatPhone } from "@/lib/otp";
+import { getWhatsAppService } from "@/services/whatsapp";
 
 export async function POST(
     request: NextRequest,
@@ -66,14 +67,33 @@ export async function POST(
 
         const rsvps = await (prisma as any).rSVP.findMany({
             where: rsvpWhere,
-            select: { guestEmail: true, guestName: true, guestPhone: true }
+            select: {
+                guestEmail: true,
+                guestName: true,
+                guestPhone: true,
+                user: { select: { email: true, phone: true } },
+            }
         });
 
-        const emails = rsvps.map((r: any) => r.guestEmail).filter((e: any): e is string => !!e);
-        const phones = rsvps.map((r: any) => r.guestPhone).filter((p: any): p is string => !!p);
+        const emails: string[] = [...new Set<string>(rsvps
+            .map((r: any) => r.guestEmail || r.user?.email)
+            .filter((email: any): email is string => Boolean(email))
+            .map((email: string) => email.toLowerCase()))];
+        const phones: string[] = [...new Set<string>(rsvps
+            .map((r: any) => r.guestPhone || r.user?.phone)
+            .filter((phone: any): phone is string => Boolean(phone?.trim()))
+            .map((phone: string) => formatPhone(phone)))]
+            .filter((phone) => /^\+[1-9]\d{7,14}$/.test(phone));
 
         if (emails.length === 0 && phones.length === 0) {
             return NextResponse.json({ error: "No guests found for this audience" }, { status: 400 });
+        }
+
+        const whatsapp = getWhatsAppService();
+        if (phones.length > 0 && !whatsapp.getLastQR().isConnected) {
+            return NextResponse.json({
+                error: "WhatsApp is not connected. Open Admin > WhatsApp Bot, connect the gateway, then retry. No broadcast was sent."
+            }, { status: 503 });
         }
 
         let mappedAudience: "ALL" | "CONFIRMED" | "PENDING" = "ALL";
@@ -116,16 +136,30 @@ export async function POST(
             ));
         }
 
-        // 7. Send SMS to guests who have a phone number
-        const smsBody = `${event.title}: ${message}`;
-        const smsCount = await sendBulkSms(phones, smsBody);
+        // 7. Send WhatsApp messages to RSVP phone contacts.
+        const whatsappBody = `${event.title}: ${message}`;
+        let whatsappCount = 0;
+        let whatsappFailedCount = 0;
+        for (const phone of phones) {
+            if (await whatsapp.sendMessage(phone, whatsappBody)) {
+                whatsappCount++;
+            } else {
+                whatsappFailedCount++;
+                break;
+            }
+        }
+
+        const warning = whatsappFailedCount > 0
+            ? `WhatsApp delivery stopped after ${whatsappCount} messages. The failed recipient and remaining recipients may not have received it; check WhatsApp before retrying. Email delivery may already be complete.`
+            : undefined;
 
         return NextResponse.json({
             success: true,
             broadcastId: broadcast.id,
-            recipientCount: emails.length + phones.length,
+            recipientCount: emailCount + whatsappCount,
             emailCount,
-            smsCount,
+            whatsappCount,
+            warning,
         });
 
     } catch (error) {
