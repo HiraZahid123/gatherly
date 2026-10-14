@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth"; // Helper to get session server-side
 import { NextResponse } from "next/server";
 import { formatPhone } from "@/lib/otp";
+import { passwordSchema } from "@/lib/validation";
 
 export async function PUT(req: Request) {
     try {
@@ -35,9 +36,9 @@ export async function PUT(req: Request) {
         }
 
         if (password) {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-            if (!passwordRegex.test(password)) {
-                return NextResponse.json({ error: "Password must be at least 6 characters and include uppercase, number, and special character" }, { status: 400 });
+            const validation = passwordSchema.safeParse(password);
+            if (!validation.success) {
+                return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
             }
             const bcrypt = require('bcryptjs');
             updateData.password = await bcrypt.hash(password, 10);

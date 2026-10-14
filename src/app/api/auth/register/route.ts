@@ -22,18 +22,28 @@ export async function POST(req: Request) {
             );
         }
 
+        // Validate data and use the normalized email returned by the schema.
+        const validation = registerSchema.safeParse({ name, email, password });
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: validation.error.issues[0].message },
+                { status: 400 }
+            );
+        }
+        const normalizedEmail = validation.data.email;
+
         // Check if user already exists (email OR phone)
         const existingUser = await prisma.user.findFirst({
             where: {
                 OR: [
-                    { email },
+                    { email: normalizedEmail },
                     { phone }
                 ]
             },
         });
 
         if (existingUser) {
-            const field = existingUser.email === email ? "Email" : "Phone number";
+            const field = existingUser.email?.toLowerCase() === normalizedEmail ? "Email" : "Phone number";
             return NextResponse.json(
                 { error: `${field} already exists` },
                 { status: 400 }
@@ -82,15 +92,6 @@ export async function POST(req: Request) {
             imageUrl = `/uploads/avatars/${filename}`;
         }
 
-        // Validate data using registerSchema
-        const validation = registerSchema.safeParse({ name, email, password });
-        if (!validation.success) {
-            return NextResponse.json(
-                { error: validation.error.issues[0].message },
-                { status: 400 }
-            );
-        }
-
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
         const user = await prisma.user.create({
             data: {
                 name,
-                email,
+                email: normalizedEmail,
                 phone, // Save the phone number
                 password: hashedPassword,
                 role: "HOST", // Default role for new users
@@ -115,7 +116,7 @@ export async function POST(req: Request) {
 
             await prisma.verificationToken.create({
                 data: {
-                    identifier: email,
+                    identifier: normalizedEmail,
                     token: verificationToken,
                     expires,
                 },
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
             const verifyUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
             
             sendEmail({
-                to: email,
+                to: normalizedEmail,
                 subject: "Welcome to JollyWitMe — Please Verify Your Email",
                 html: `
                     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;">

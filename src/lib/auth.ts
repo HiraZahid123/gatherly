@@ -237,10 +237,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     });
                 }
 
-                if (user.role !== "ADMIN") {
-                    throw new Error("AdminAccessRequired");
-                }
-
                 return {
                     id: user.id,
                     email: user.email,
