@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventUpdateSchema } from "@/lib/validation";
@@ -124,7 +124,7 @@ export async function PATCH(
         if (title !== undefined) {
             updateData.title = title;
             // Regenerate slug if title changed
-            if (title !== existingEvent.title) {
+            if (title !== existingEvent.title && existingEvent.status === "DRAFT") {
                 updateData.slug = await generateUniqueSlug(title, eventId);
             }
         }
@@ -171,6 +171,62 @@ export async function PATCH(
                 },
             },
         });
+
+        // Notify confirmed guests if critical event details changed
+        const criticalFieldsChanged =
+            (title !== undefined && title !== existingEvent.title) ||
+            (startDate !== undefined && existingEvent.startDate?.toISOString() !== new Date(startDate).toISOString()) ||
+            (endDate !== undefined) ||
+            (location !== undefined && location !== existingEvent.location);
+
+        if (criticalFieldsChanged) {
+            const acceptedRsvps = await (prisma as any).rSVP.findMany({
+                where: { eventId, status: "ACCEPTED" },
+                select: {
+                    guestEmail: true,
+                    guestName: true,
+                    guestPhone: true,
+                    qrToken: true,
+                    user: { select: { email: true, name: true } }
+                }
+            });
+
+            const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+            const eventUrl = `${baseUrl}/e/${updatedEvent.slug}`;
+
+            const changedFields: string[] = [];
+            if (title !== undefined && title !== existingEvent.title) changedFields.push("event name");
+            if (startDate !== undefined) changedFields.push("date/time");
+            if (location !== undefined && location !== existingEvent.location) changedFields.push("location");
+
+            const changedSummary = changedFields.join(", ");
+
+            const { sendEmail } = await import("@/lib/mail");
+            for (const rsvp of acceptedRsvps) {
+                const email = rsvp.guestEmail || rsvp.user?.email;
+                const name = rsvp.guestName || rsvp.user?.name || "Guest";
+                if (!email) continue;
+
+                const ticketUrl = rsvp.qrToken ? `${eventUrl}?ticket=${rsvp.qrToken}` : eventUrl;
+                sendEmail({
+                    to: email,
+                    subject: `⚠️ Update: ${updatedEvent.title} details have changed`,
+                    html: `
+                        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0b;color:#ffffff;padding:32px;border-radius:16px">
+                            <h2 style="margin:0 0 8px;font-size:22px">Event Update Notice</h2>
+                            <p style="color:rgba(255,255,255,0.6);margin:0 0 24px">Hi ${name}, the host has updated the <strong>${updatedEvent.title}</strong> event. The following detail(s) changed: <strong>${changedSummary}</strong>.</p>
+                            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:24px">
+                                ${updatedEvent.startDate ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,0.7)">📅 <strong>New Date:</strong> ${new Date(updatedEvent.startDate).toLocaleString()}</p>` : ""}
+                                ${updatedEvent.location ? `<p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,0.7)">📍 <strong>Location:</strong> ${updatedEvent.location}</p>` : ""}
+                            </div>
+                            <p style="color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:24px">Your ticket is still valid. Click below to view the updated event details and access your entry pass.</p>
+                            <a href="${ticketUrl}" style="display:inline-block;background:#ffffff;color:#000000;font-weight:700;padding:12px 28px;border-radius:999px;text-decoration:none;font-size:14px">View Updated Event →</a>
+                            <p style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;margin-top:28px">From the JollyWitMe Team ✨</p>
+                        </div>
+                    `
+                }).catch(err => console.error(`Event update email error for ${email}:`, err));
+            }
+        }
 
         // Sync reminders if they were provided in the theme settings
         if (theme?.settings?.reminders !== undefined) {

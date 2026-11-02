@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
 import PublicEventClient from "@/components/event-page/PublicEventClient";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { AlertCircle, RefreshCw, Home } from "lucide-react";
 
 const getEventBySlug = (slug: string) => unstable_cache(
     async () => {
@@ -33,13 +35,18 @@ const getEventBySlug = (slug: string) => unstable_cache(
 
 interface PublicEventPageProps {
     params: Promise<{ slug: string }>;
-    searchParams: Promise<{ inviteToken?: string }>;
+    searchParams: Promise<{ inviteToken?: string; invite?: string; ticket?: string }>;
 }
 
 export default async function PublicEventPage({ params, searchParams }: PublicEventPageProps) {
+    let resolvedSlug = "";
     try {
         const { slug } = await params;
-        const { inviteToken } = await searchParams;
+        resolvedSlug = slug;
+        const rawSearchParams = await searchParams;
+        // Support both ?inviteToken= (legacy) and ?invite= (new invitation emails)
+        const inviteToken = rawSearchParams.inviteToken || rawSearchParams.invite;
+        const ticketToken = rawSearchParams.ticket;
 
         const { auth } = await import("@/lib/auth");
         const session = await auth();
@@ -80,16 +87,44 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
             let isInvited = false;
 
             if (!isHost && !isAdmin) {
-                const invitation = await (prisma as any).invitation.findFirst({
-                    where: {
-                        eventId: event.id,
-                        OR: [
-                            { token: inviteToken || "invalid-token" },
-                            { email: session?.user?.email || "invalid-email" }
-                        ]
+                // 1. If user arrived with a valid RSVP ticket token, they are already an approved attendee!
+                if (ticketToken) {
+                    const ticketRsvp = await (prisma as any).rSVP.findFirst({
+                        where: {
+                            eventId: event.id,
+                            qrToken: ticketToken,
+                            status: { in: ["ACCEPTED", "WAITLISTED"] }
+                        }
+                    });
+                    if (ticketRsvp) {
+                        isInvited = true;
                     }
-                });
-                isInvited = !!invitation;
+                }
+
+                // 2. Otherwise check invitations or session
+                if (!isInvited) {
+                    const orConditions: any[] = [];
+                    // Check token (from invite link)
+                    if (inviteToken) {
+                        orConditions.push({ token: inviteToken });
+                    }
+                    // Check signed-in user's email
+                    if (session?.user?.email) {
+                        orConditions.push({ email: session.user.email });
+                    }
+                    // Check signed-in user's phone
+                    const userPhone = (session?.user as any)?.phone;
+                    if (userPhone) {
+                        orConditions.push({ phone: userPhone });
+                    }
+
+                    if (orConditions.length > 0) {
+                        const invitation = await (prisma as any).invitation.findFirst({
+                            where: { eventId: event.id, OR: orConditions }
+                        });
+                        isInvited = !!invitation;
+                    }
+                }
             }
 
             if (!isHost && !isAdmin && !isInvited) {
@@ -98,68 +133,87 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
             }
         }
 
-    // Fetch guests, comments, and ticket tiers in parallel.
-    // Caps: 50 RSVPs (ACCEPTED first) and 30 comments for initial paint.
-    // Socket.io re-fetches full data client-side immediately on mount.
-    const [guestsData, commentsData, ticketTiersData] = await Promise.all([
-        (prisma as any).rSVP.findMany({
-            where: { eventId: event.id },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true
+        // Fetch guests, comments, and ticket tiers in parallel.
+        const [guestsData, commentsData, ticketTiersData] = await Promise.all([
+            (prisma as any).rSVP.findMany({
+                where: { eventId: event.id },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true
+                        }
                     }
-                }
-            },
-            orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-            take: 50,
-        }),
-        prisma.comment.findMany({
-            where: { eventId: event.id },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        image: true,
+                },
+                orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+                take: 50,
+            }),
+            prisma.comment.findMany({
+                where: { eventId: event.id },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true,
+                        },
                     },
                 },
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-            take: 30,
-        }),
-        prisma.ticketTier.findMany({
-            where: { eventId: event.id, isActive: true },
-            orderBy: { sortOrder: "asc" },
-        }),
-    ]);
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: 30,
+            }),
+            prisma.ticketTier.findMany({
+                where: { eventId: event.id, isActive: true },
+                orderBy: { sortOrder: "asc" },
+            }),
+        ]);
 
-    // Format guests (similar to the API logic)
-    const guests = guestsData.map((rsvp: any) => ({
-        id: rsvp.userId || rsvp.guestEmail || rsvp.id,
-        rsvpId: rsvp.id,
-        name: rsvp.user?.name || rsvp.guestName || "Guest",
-        email: rsvp.user?.email || rsvp.guestEmail, // Server component can handle this safely
-        image: rsvp.user?.image,
-        status: rsvp.status,
-        qrToken: rsvp.qrToken,
-        updatedAt: rsvp.updatedAt
-    }));
+        // If a ticket token was provided, ensure that guest's RSVP is included in guestsData so PublicEventClient can mount it
+        let guestsList = [...guestsData];
+        if (ticketToken && !guestsList.some((g: any) => g.qrToken === ticketToken)) {
+            const ticketRsvp = await (prisma as any).rSVP.findFirst({
+                where: { eventId: event.id, qrToken: ticketToken },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true
+                        }
+                    }
+                }
+            });
+            if (ticketRsvp) {
+                guestsList.unshift(ticketRsvp);
+            }
+        }
 
-    return (
-        <PublicEventClient
-            initialEvent={event}
-            initialGuests={guests}
-            initialComments={commentsData}
-            initialTicketTiers={ticketTiersData}
-            slug={slug}
-        />
-    );
+        // Format guests (similar to the API logic)
+        const guests = guestsList.map((rsvp: any) => ({
+            id: rsvp.userId || rsvp.guestEmail || rsvp.id,
+            rsvpId: rsvp.id,
+            name: rsvp.user?.name || rsvp.guestName || "Guest",
+            email: rsvp.user?.email || rsvp.guestEmail,
+            image: rsvp.user?.image,
+            status: rsvp.status,
+            qrToken: rsvp.qrToken,
+            updatedAt: rsvp.updatedAt
+        }));
+
+        return (
+            <PublicEventClient
+                initialEvent={event}
+                initialGuests={guests}
+                initialComments={commentsData}
+                initialTicketTiers={ticketTiersData}
+                slug={slug}
+            />
+        );
     } catch (error: any) {
         // If it's a Next.js internal control error (notFound or redirect), rethrow it
         if (
@@ -169,16 +223,51 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
         ) {
             throw error;
         }
-        console.error("Server component crash:", error);
+        console.error("Public event page error:", error);
+
         return (
-            <div className="min-h-screen bg-black text-white p-20 font-mono">
-                <h1 className="text-3xl text-red-500 font-bold mb-4">Server Component Crash</h1>
-                <p className="text-xl mb-8">The exact error details are below:</p>
-                <div className="bg-red-950/30 p-8 rounded border border-red-500/30 overflow-auto">
-                    <p className="font-bold text-red-400">{error.message}</p>
-                    <pre className="mt-4 text-sm text-gray-400">{error.stack}</pre>
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+                {/* Background Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+                {/* Glassmorphism Card */}
+                <div className="relative z-10 w-full max-w-md bg-black/40 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] text-center space-y-6">
+                    <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto text-emerald-400">
+                        <AlertCircle className="w-8 h-8" />
+                    </div>
+
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-black uppercase tracking-tight text-white">
+                            Unable to Load Event
+                        </h1>
+                        <p className="text-white/60 text-sm leading-relaxed">
+                            We're having trouble loading this event right now. Please check your connection and try refreshing the page.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <Link
+                            href={resolvedSlug ? `/e/${resolvedSlug}` : "/"}
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-white/90 active:scale-[0.98] transition-all shadow-lg"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            <span>Try Again</span>
+                        </Link>
+                        <Link
+                            href="/"
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 text-white/80 font-bold text-sm rounded-xl hover:bg-white/10 hover:text-white active:scale-[0.98] transition-all"
+                        >
+                            <Home className="w-4 h-4" />
+                            <span>Home</span>
+                        </Link>
+                    </div>
+
+                    {process.env.NODE_ENV === "development" && (
+                        <div className="mt-4 pt-4 border-t border-white/10 text-left">
+                            <p className="text-xs font-mono text-red-400 break-all">{error.message}</p>
+                        </div>
+                    )}
                 </div>
-                <p className="mt-8 text-gray-400">Please send a screenshot or paste this error to Antigravity so we can fix it.</p>
             </div>
         );
     }

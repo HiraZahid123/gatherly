@@ -129,7 +129,7 @@ function SignInContent() {
                 } else if (result.error === "UserNotFound") {
                     setError("No account found with this email address");
                 } else if (result.error === "PasswordNotSet") {
-                    setError("This account doesn't have a password. Please sign in with Google or use WhatsApp.");
+                    setError("This account doesn't have a password set yet. Click 'Forgot password?' below to set one now.");
                 } else if (result.error === "Configuration") {
                     setError("Invalid email or password");
                 } else {

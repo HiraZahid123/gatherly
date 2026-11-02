@@ -14,7 +14,7 @@ import CoverImageGallery from "@/components/CoverImageGallery";
 import EffectSelector from "@/components/EffectSelector";
 import ThemeSelector from "@/components/ThemeSelector";
 import { VIBE_THEMES } from "@/lib/theme";
-import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert, Bookmark, Loader2, Palette, Sparkles, Settings, CheckCircle } from "lucide-react";
+import { Copy, Plus, MoreHorizontal, MessageCircle, AlertCircle, Edit2, Clock, Trash2, ShieldAlert, Bookmark, Loader2, Palette, Sparkles, Settings, CheckCircle, ImageIcon } from "lucide-react";
 import EventSettingsModal from "@/components/EventSettingsModal";
 import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelector";
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
@@ -728,6 +728,27 @@ export default function EditEventPage() {
                             </div>
                         </div>
                     )}
+
+                    {/* Mobile cover thumbnail — visible on mobile (< lg), where the right preview column is hidden */}
+                    <div className="lg:hidden w-full aspect-video rounded-2xl overflow-hidden relative shadow-xl mb-6 border border-white/10 group">
+                        <Image
+                            src={coverImage}
+                            alt="Event cover"
+                            fill
+                            className="object-cover"
+                            unoptimized
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setIsGalleryOpen(true)}
+                            className="absolute inset-0 flex items-end justify-end p-3 bg-gradient-to-t from-black/70 via-transparent to-transparent"
+                        >
+                            <span className="bg-white text-black text-xs font-bold px-3.5 py-2 rounded-full shadow-lg flex items-center gap-1.5 active:scale-95 transition-all">
+                                <ImageIcon className="w-3.5 h-3.5 text-black" />
+                                Change Cover
+                            </span>
+                        </button>
+                    </div>
 
                     <div className={`space-y-2 ${isPastEvent ? "pointer-events-none opacity-60 cursor-not-allowed select-none" : ""}`}>
                         <EventForm

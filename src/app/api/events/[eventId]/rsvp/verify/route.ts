@@ -133,6 +133,34 @@ export async function POST(
             }
         }
 
+        // Link or auto-create User account
+        let resolvedUserId = existingRSVP.userId || session?.user?.id;
+        if (!resolvedUserId && (guestEmail || phone)) {
+            try {
+                const userOrConditions = [
+                    ...(guestEmail ? [{ email: guestEmail }] : []),
+                    ...(phone ? [{ phone }] : []),
+                ];
+                let matchedUser = await (prisma as any).user.findFirst({
+                    where: { OR: userOrConditions }
+                });
+
+                if (!matchedUser) {
+                    matchedUser = await (prisma as any).user.create({
+                        data: {
+                            name: guestName || "Guest",
+                            email: guestEmail || null,
+                            phone: phone || null,
+                            role: "GUEST",
+                        }
+                    });
+                }
+                resolvedUserId = matchedUser.id;
+            } catch (userErr) {
+                console.warn("Could not auto-create/link user in verify:", userErr);
+            }
+        }
+
         // Update the RSVP to verified status
         const rsvp = await prisma.rSVP.update({
             where: { id: existingRSVP.id },
@@ -142,6 +170,7 @@ export async function POST(
                 guestPhone: phone || existingRSVP.guestPhone,
                 waitlistPosition,
                 qrToken,
+                userId: resolvedUserId || undefined,
                 otpCode: null, // Clear OTP after use
                 otpExpires: null
             }
@@ -153,47 +182,111 @@ export async function POST(
             const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
             const qrUrl = `${baseUrl}/e/${event.slug}?ticket=${qrToken}`;
 
-            sendEmail({
-                to: guestEmail,
-                subject: isAccepted
-                    ? `You're going to ${event.title}! 🎉`
-                    : `You're on the waitlist for ${event.title}`,
-                html: `
-                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #ffffff; background: #000000; padding: 40px; border-radius: 16px;">
-                        <h1 style="font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; margin-bottom: 24px;">${isAccepted ? "You're in!" : "Waitlist"}</h1>
-                        <p style="font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px;">
-                            Hello ${guestName},<br><br>
-                            ${isAccepted
-                        ? `Your RSVP for <strong>${event.title}</strong> has been confirmed. We've attached your entry ticket below.`
-                        : `You've been added to the waitlist for <strong>${event.title}</strong> at position #${waitlistPosition}. We'll notify you automatically if a spot opens up!`}
-                        </p>
-                        
-                        ${isAccepted ? `
-                        <div style="margin: 32px 0; padding: 32px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; text-align: center;">
-                            <p style="margin-bottom: 20px; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.2em;">YOUR ENTRY QR CODE</p>
-                            <a href="${qrUrl}" style="display: inline-block; background: #ffffff; color: #000000; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px;">View Ticket</a>
+            (async () => {
+                let setPasswordUrl: string | undefined;
+                try {
+                    const userRecord = resolvedUserId
+                        ? await (prisma as any).user.findUnique({ where: { id: resolvedUserId }, select: { password: true } })
+                        : null;
+                    if (!userRecord?.password) {
+                        const { createPasswordResetToken } = await import("@/lib/tokens");
+                        const resetToken = await createPasswordResetToken(guestEmail);
+                        setPasswordUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
+                    }
+                } catch (tokenErr) {
+                    console.warn("Could not generate password link in verify route:", tokenErr);
+                }
 
-                            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;">
+                // 1. Send confirmation ticket email with password CTA
+                await sendEmail({
+                    to: guestEmail,
+                    subject: isAccepted
+                        ? `You're going to ${event.title}! 🎉`
+                        : `You're on the waitlist for ${event.title}`,
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #ffffff; background: #000000; padding: 40px; border-radius: 16px;">
+                            <h1 style="font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; margin-bottom: 24px;">${isAccepted ? "You're in!" : "Waitlist"}</h1>
+                            <p style="font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px;">
+                                Hello ${guestName},<br><br>
+                                ${isAccepted
+                            ? `Your RSVP for <strong>${event.title}</strong> has been confirmed. We've attached your entry ticket below.`
+                            : `You've been added to the waitlist for <strong>${event.title}</strong> at position #${waitlistPosition}. We'll notify you automatically if a spot opens up!`}
+                            </p>
+                            
+                            ${isAccepted ? `
+                            <div style="margin: 32px 0; padding: 32px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; text-align: center;">
+                                <p style="margin-bottom: 20px; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.2em;">YOUR ENTRY QR CODE</p>
+                                <a href="${qrUrl}" style="display: inline-block; background: #ffffff; color: #000000; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px;">View Ticket</a>
 
-                            <p style="margin-bottom: 16px; font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">Add to Calendar</p>
-                            <div style="display: flex; justify-content: center; gap: 16px;">
-                                <a href="${generateGoogleCalendarUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 12px; color: #ffffff; text-decoration: underline; font-weight: 700; margin: 0 8px;">Google</a>
-                                <a href="${generateOutlookUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 12px; color: #ffffff; text-decoration: underline; font-weight: 700; margin: 0 8px;">Outlook</a>
+                                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;">
+
+                                <p style="margin-bottom: 16px; font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">Add to Calendar</p>
+                                <div style="display: flex; justify-content: center; gap: 16px;">
+                                    <a href="${generateGoogleCalendarUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 12px; color: #ffffff; text-decoration: underline; font-weight: 700; margin: 0 8px;">Google</a>
+                                    <a href="${generateOutlookUrl({ title: event.title, description: event.description || '', location: event.location || '', startDate: event.startDate, endDate: event.endDate || undefined })}" style="font-size: 12px; color: #ffffff; text-decoration: underline; font-weight: 700; margin: 0 8px;">Outlook</a>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            ${setPasswordUrl ? `
+                            <div style="margin: 24px 0; padding: 24px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 12px; text-align: center;">
+                                <p style="margin: 0 0 6px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #ffffff;">Create Your Account Password</p>
+                                <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.5;">
+                                    We've created your JollyWitMe guest account. Set a password so you can sign in anytime and access your tickets.
+                                </p>
+                                <a href="${setPasswordUrl}" style="display: inline-block; background: #10b981; color: #000000; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; font-size: 13px;">
+                                    Set Password →
+                                </a>
+                            </div>
+                            ` : ''}
+
+                            <div style="margin-top: 40px; text-align: center;">
+                                <p style="margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); font-weight: 700;">
+                                    See you soon!
+                                </p>
+                                <p style="margin: 0; font-size: 14px; font-weight: 700; color: #ffffff;">
+                                    From the JollyWitMe Team ✨
+                                </p>
                             </div>
                         </div>
-                        ` : ''}
+                    `
+                });
 
-                        <div style="margin-top: 40px; text-align: center;">
-                            <p style="margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(255,255,255,0.4); font-weight: 700;">
-                                See you soon!
-                            </p>
-                            <p style="margin: 0; font-size: 14px; font-weight: 700; color: #ffffff;">
-                                From the JollyWitMe Team ✨
-                            </p>
-                        </div>
-                    </div>
-                `
-            }).catch(error => console.error("RSVP Verify Email Error:", error));
+                // 2. Also send dedicated Welcome / Password Setup email
+                if (setPasswordUrl) {
+                    await sendEmail({
+                        to: guestEmail,
+                        subject: `Set your password for JollyWitMe 🔑`,
+                        html: `
+                            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; color: #111827;">
+                                <div style="text-align: center; margin-bottom: 24px;">
+                                    <h1 style="color: #059669; font-size: 26px; font-weight: 800; margin: 0 0 8px 0;">JollyWitMe</h1>
+                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">Welcome to JollyWitMe!</p>
+                                </div>
+                                <div style="padding: 24px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6;">
+                                    <p style="color: #111827; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">
+                                        Hi <strong>${guestName}</strong>,
+                                    </p>
+                                    <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                                        We automatically created your JollyWitMe profile so you can manage your RSVPs, view your tickets, and chat with other guests. Please click below to create your password:
+                                    </p>
+                                    <div style="text-align: center; margin: 28px 0;">
+                                        <a href="${setPasswordUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 9999px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+                                            Set Your Password →
+                                        </a>
+                                    </div>
+                                    <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 20px 0 0 0; text-align: center;">
+                                        This link is secure and will expire in 1 hour.
+                                    </p>
+                                </div>
+                                <p style="color: #111827; font-size: 13px; margin-top: 24px; text-align: center; font-weight: 600;">
+                                    From the JollyWitMe Team ✨
+                                </p>
+                            </div>
+                        `
+                    }).catch(err => console.error("Welcome password email error:", err));
+                }
+            })().catch(error => console.error("RSVP Verify Email Error:", error));
         }
 
         return NextResponse.json({ success: true, rsvp });

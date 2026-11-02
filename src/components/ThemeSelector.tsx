@@ -478,12 +478,12 @@ export default function ThemeSelector({ isOpen, onClose, onSelect, currentTheme 
         : THEMES.filter(t => t.category === activeCategory);
 
     return (
-        <div className="fixed inset-0 z-[100] flex justify-end p-4 items-center pr-20">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center lg:justify-end p-0 sm:p-4 lg:pr-20">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-500" onClick={onClose} />
 
             {/* Side Panel (Animate from right) */}
-            <div className="relative w-full max-w-[340px] bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/10 rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] animate-in slide-in-from-right-8 duration-500">
+            <div className="relative w-full sm:max-w-[340px] max-h-[85vh] sm:max-h-[80vh] flex flex-col bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/10 rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom sm:slide-in-from-right-8 duration-300">
                 {/* Header */}
                 <div className="px-6 pt-6 pb-2">
                     <div className="flex items-center justify-between mb-1">

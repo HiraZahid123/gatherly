@@ -90,11 +90,7 @@ export async function POST(
         }
 
         const whatsapp = getWhatsAppService();
-        if (phones.length > 0 && !whatsapp.getLastQR().isConnected) {
-            return NextResponse.json({
-                error: "WhatsApp is not connected. Open Admin > WhatsApp Bot, connect the gateway, then retry. No broadcast was sent."
-            }, { status: 503 });
-        }
+        const whatsappConnected = whatsapp.getLastQR().isConnected;
 
         let mappedAudience: "ALL" | "CONFIRMED" | "PENDING" = "ALL";
         if (audience === "ACCEPTED") mappedAudience = "CONFIRMED";
@@ -136,21 +132,26 @@ export async function POST(
             ));
         }
 
-        // 7. Send WhatsApp messages to RSVP phone contacts.
+        // 7. Send WhatsApp messages to RSVP phone contacts (only if connected).
         const whatsappBody = `${event.title}: ${message}`;
         let whatsappCount = 0;
         let whatsappFailedCount = 0;
-        for (const phone of phones) {
-            if (await whatsapp.sendMessage(phone, whatsappBody)) {
-                whatsappCount++;
-            } else {
-                whatsappFailedCount++;
-                break;
+        if (whatsappConnected) {
+            for (const phone of phones) {
+                if (await whatsapp.sendMessage(phone, whatsappBody)) {
+                    whatsappCount++;
+                } else {
+                    whatsappFailedCount++;
+                    break;
+                }
             }
         }
 
+        const whatsappSkipped = phones.length > 0 && !whatsappConnected;
         const warning = whatsappFailedCount > 0
-            ? `WhatsApp delivery stopped after ${whatsappCount} messages. The failed recipient and remaining recipients may not have received it; check WhatsApp before retrying. Email delivery may already be complete.`
+            ? `WhatsApp delivery stopped after ${whatsappCount} messages. The failed recipient and remaining recipients may not have received it; check WhatsApp before retrying.`
+            : whatsappSkipped
+            ? `Emails sent successfully. WhatsApp was not connected so ${phones.length} phone recipient(s) did not receive a WhatsApp message. Go to Admin > WhatsApp Bot to connect and retry.`
             : undefined;
 
         return NextResponse.json({

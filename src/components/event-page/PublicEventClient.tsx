@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -19,6 +19,7 @@ import FloatingParticles from "@/components/FloatingParticles";
 import FlyerModal from "@/components/event-page/FlyerModal";
 import AnnouncementsSection from "@/components/event-page/AnnouncementsSection";
 import RSVPModal from "@/components/RSVPModal";
+import GuestListModal from "@/components/event-page/GuestListModal";
 import TicketCheckoutDrawer from "@/components/TicketCheckoutDrawer";
 import ETicket from "@/components/ETicket";
 import ShareEventModal from "@/components/event-page/ShareEventModal";
@@ -31,10 +32,10 @@ import { IMAGE_VFX_PRESETS, VIDEO_VFX_PRESETS } from "@/components/EffectSelecto
 import { ANIMATED_THEME_PRESETS } from "@/components/ThemeSelector";
 import SafeLottiePlayer from "@/components/SafeLottiePlayer";
 
-// Lazy-load EventSettingsModal — 31 Lucide icons, only needed when host opens Settings
+// Lazy-load EventSettingsModal â€” 31 Lucide icons, only needed when host opens Settings
 const EventSettingsModal = dynamic(() => import("@/components/EventSettingsModal"), { ssr: false });
 
-// Dynamically import InteractiveBackground (Three.js — client only)
+// Dynamically import InteractiveBackground (Three.js â€” client only)
 const InteractiveBackground = dynamic(
     () => import("@/components/InteractiveBackground"),
     { ssr: false }
@@ -70,6 +71,7 @@ export default function PublicEventClient({
     const router = useRouter();
     const { data: session } = useSession();
     const searchParams = useSearchParams();
+    const inviteToken = searchParams.get('inviteToken') || searchParams.get('invite') || undefined;
 
     // State
     const [event, setEvent] = useState(initialEvent);
@@ -95,6 +97,7 @@ export default function PublicEventClient({
     const [ticketTiers, setTicketTiers] = useState(initialTicketTiers);
     const [announceFocusTrigger, setAnnounceFocusTrigger] = useState(0);
     const [paidTicketData, setPaidTicketData] = useState<{ rsvp: any; order: any } | null>(null);
+    const [isGuestListModalOpen, setIsGuestListModalOpen] = useState(false);
 
     const fetchTicketTiers = async () => {
         if (!event?.id) return;
@@ -163,7 +166,7 @@ export default function PublicEventClient({
                 if (res.ok && data?.rsvp) {
                     setPaidTicketData({ rsvp: data.rsvp, order: data.order });
                     setMyRSVP(data.rsvp);
-                    setToastMessage("🎉 Payment successful! Your ticket is confirmed.");
+                    setToastMessage("ðŸŽ‰ Payment successful! Your ticket is confirmed.");
                     setShowToast(true);
                     fetchMyRSVP();
                     fetchGuests();
@@ -721,7 +724,7 @@ export default function PublicEventClient({
             )}
 
             <main className="relative z-10 mx-auto px-6 sm:px-10 pt-20 pb-48 grid grid-cols-1 lg:grid-cols-[1.2fr_380px] max-w-5xl gap-12 justify-center transition-all duration-700">
-                {/* Paid event — no tiers yet: host-only setup prompt */}
+                {/* Paid event â€” no tiers yet: host-only setup prompt */}
                 {hasAdminAccess && event.isPaid && ticketTiers.length === 0 && (
                     <div className="lg:col-span-2">
                         <button
@@ -729,14 +732,14 @@ export default function PublicEventClient({
                             className="w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 transition-all group"
                         >
                             <div className="flex items-center gap-3">
-                                <span className="text-amber-400 text-xl">🎟️</span>
+                                <span className="text-amber-400 text-xl">ðŸŽŸï¸</span>
                                 <div className="text-left">
                                     <p className="text-sm font-black text-amber-300">Ticket tiers not set up yet</p>
                                     <p className="text-[11px] text-amber-400/60 mt-0.5">Guests can't buy tickets until you add at least one tier.</p>
                                 </div>
                             </div>
                             <span className="text-xs font-black uppercase tracking-widest text-amber-300 group-hover:translate-x-1 transition-transform whitespace-nowrap">
-                                Create Tiers →
+                                Create Tiers â†’
                             </span>
                         </button>
                     </div>
@@ -762,7 +765,14 @@ export default function PublicEventClient({
                         <GuestListPreview
                             guests={guests}
                             totalCount={guests.filter(g => g.status === 'ACCEPTED').length}
-                            onViewAll={() => { setSettingsTab("RSVPs"); setIsSettingsOpen(true); }}
+                            onViewAll={() => {
+                                if (hasAdminAccess) {
+                                    setSettingsTab("RSVPs");
+                                    setIsSettingsOpen(true);
+                                } else {
+                                    setIsGuestListModalOpen(true);
+                                }
+                            }}
                             onSelectGuest={(guest) => {
                                 if (guest.userId && guest.userId !== session?.user?.id) {
                                     setSelectedGuestForChat({ id: guest.userId, name: guest.guestName, image: guest.image });
@@ -814,7 +824,7 @@ export default function PublicEventClient({
                                         <p className="text-xl font-black leading-tight">{event.title}</p>
                                         <p className="mt-1 text-xs font-semibold text-white/90">
                                             {event.startDate ? new Date(event.startDate).toLocaleDateString("en-NG", { dateStyle: "medium" }) : "Date to be announced"}
-                                            {event.startDate ? ` · ${new Date(event.startDate).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}` : ""}
+                                            {event.startDate ? ` Â· ${new Date(event.startDate).toLocaleTimeString("en-NG", { hour: "numeric", minute: "2-digit" })}` : ""}
                                         </p>
                                         {event.location && <p className="mt-0.5 text-xs text-white/80">{event.location}</p>}
                                     </div>
@@ -840,7 +850,7 @@ export default function PublicEventClient({
                                             <div key={tier.id} className="flex items-center justify-between px-3 py-2.5 bg-white/5 rounded-xl border border-white/8">
                                                 <span className="text-sm font-bold text-white">{tier.name}</span>
                                                 <span className="text-sm font-black" style={{ color: primaryColor }}>
-                                                    {tier.price === 0 ? "Free" : `₦${(tier.price / 100).toLocaleString()} NGN`}
+                                                    {tier.price === 0 ? "Free" : `â‚¦${(tier.price / 100).toLocaleString()} NGN`}
                                                 </span>
                                             </div>
                                         ))}
@@ -1128,6 +1138,14 @@ export default function PublicEventClient({
                 onRSVPSuccess={handleRSVPSuccess}
                 myRSVP={myRSVP}
                 initialStatus={rsvpInitialStatus}
+                inviteToken={inviteToken}
+            />
+
+            <GuestListModal
+                isOpen={isGuestListModalOpen}
+                onClose={() => setIsGuestListModalOpen(false)}
+                guests={guests}
+                eventTitle={event.title}
             />
 
             {event.isPaid && (
@@ -1153,7 +1171,7 @@ export default function PublicEventClient({
                             onClick={() => setPaidTicketData(null)}
                             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors z-10 text-sm font-bold"
                         >
-                            ✕
+                            âœ•
                         </button>
                         <ETicket
                             event={event}

@@ -61,6 +61,7 @@ interface TicketConfirmationEmailParams {
     ticketTierName?: string | null;
     isWaitlist?: boolean;
     waitlistPosition?: number;
+    setPasswordUrl?: string | null;
 }
 
 export async function sendTicketConfirmationEmail(params: TicketConfirmationEmailParams) {
@@ -74,7 +75,8 @@ export async function sendTicketConfirmationEmail(params: TicketConfirmationEmai
         location,
         ticketTierName,
         isWaitlist = false,
-        waitlistPosition
+        waitlistPosition,
+        setPasswordUrl
     } = params;
 
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
@@ -198,6 +200,21 @@ export async function sendTicketConfirmationEmail(params: TicketConfirmationEmai
                         View Your Ticket Online →
                     </a>
                 </div>
+
+                ${setPasswordUrl ? `
+                <!-- Set Password CTA -->
+                <div style="margin: 24px 0 0; padding: 20px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 14px; text-align: center;">
+                    <p style="margin: 0 0 6px; font-size: 13px; font-weight: bold; color: #ffffff;">
+                        Create Your Account Password
+                    </p>
+                    <p style="margin: 0 0 16px; font-size: 12px; color: rgba(255, 255, 255, 0.6); line-height: 1.5;">
+                        We created your guest profile. Set a password to easily log in anytime and view all your tickets.
+                    </p>
+                    <a href="${setPasswordUrl}" target="_blank" style="display: inline-block; background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 12px; font-weight: 700; text-decoration: none; padding: 10px 24px; border-radius: 10px;">
+                        Set Your Password →
+                    </a>
+                </div>
+                ` : ''}
             </td>
         </tr>
 

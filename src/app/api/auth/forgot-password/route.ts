@@ -47,12 +47,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (!user.password) {
-            return NextResponse.json(
-                { error: "This account was created using Google or WhatsApp and doesn't have a password set." },
-                { status: 400 }
-            );
-        }
+        // User has an account without a password (e.g. from RSVP/Google/Phone). Allow them to set a password.
 
         const email = user.email;
 

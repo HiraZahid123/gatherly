@@ -141,9 +141,36 @@ export async function POST(
         }
 
         // 5. Handle authenticated vs Guest RSVP entry
-        // 🔑 Merge logic: If user is logged in, check if a guest record exists for this email
+        let resolvedUserId = session?.user?.id;
+        if (!resolvedUserId && (contactEmail || contactPhone)) {
+            try {
+                const userOrConditions = [
+                    ...(contactEmail ? [{ email: contactEmail }] : []),
+                    ...(contactPhone ? [{ phone: contactPhone }] : []),
+                ];
+                let matchedUser = await (prisma as any).user.findFirst({
+                    where: { OR: userOrConditions }
+                });
+
+                if (!matchedUser) {
+                    matchedUser = await (prisma as any).user.create({
+                        data: {
+                            name: guestName || "Guest",
+                            email: contactEmail || null,
+                            phone: contactPhone || null,
+                            role: "GUEST",
+                        }
+                    });
+                }
+                resolvedUserId = matchedUser.id;
+            } catch (userErr) {
+                console.warn("Could not auto-create/link user for RSVP:", userErr);
+            }
+        }
+
+        // 🔑 Merge logic: Check if a guest record exists for this user/email/phone
         const existingConditions = [
-            ...(session?.user?.id ? [{ userId: session.user.id }] : []),
+            ...(resolvedUserId ? [{ userId: resolvedUserId }] : []),
             ...(contactEmail ? [{ guestEmail: contactEmail }] : []),
             ...(contactPhone ? [{ guestPhone: contactPhone }] : []),
         ];
@@ -158,7 +185,7 @@ export async function POST(
             guestPhone: contactPhone || null,
             waitlistPosition,
             qrToken: qrToken || existingRSVP?.qrToken || undefined,
-            userId: session?.user?.id || undefined,
+            userId: resolvedUserId || undefined,
         };
 
         const rsvp = await (prisma as any).rSVP.upsert({
@@ -190,17 +217,71 @@ export async function POST(
         const emailRecipient = contactEmail;
         if ((finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") && emailRecipient) {
             const isAccepted = finalStatus === "ACCEPTED";
-            sendTicketConfirmationEmail({
-                to: emailRecipient,
-                guestName: guestName || session?.user?.name || undefined,
-                eventTitle: event.title,
-                eventSlug: event.slug,
-                qrToken: (rsvp.qrToken || qrToken || "") as string,
-                startDate: event.startDate,
-                location: event.location,
-                isWaitlist: !isAccepted,
-                waitlistPosition: waitlistPosition || undefined
-            }).catch(error => console.error("RSVP Confirmation Email Error:", error));
+            
+            (async () => {
+                let setPasswordUrl: string | undefined;
+                try {
+                    const userRecord = resolvedUserId
+                        ? await (prisma as any).user.findUnique({ where: { id: resolvedUserId }, select: { password: true } })
+                        : null;
+                    if (!userRecord?.password) {
+                        const { createPasswordResetToken } = await import("@/lib/tokens");
+                        const resetToken = await createPasswordResetToken(emailRecipient);
+                        const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+                        setPasswordUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
+                    }
+                } catch (tokenErr) {
+                    console.warn("Could not generate password link for RSVP email:", tokenErr);
+                }
+
+                await sendTicketConfirmationEmail({
+                    to: emailRecipient,
+                    guestName: guestName || session?.user?.name || undefined,
+                    eventTitle: event.title,
+                    eventSlug: event.slug,
+                    qrToken: (rsvp.qrToken || qrToken || "") as string,
+                    startDate: event.startDate,
+                    location: event.location,
+                    isWaitlist: !isAccepted,
+                    waitlistPosition: waitlistPosition || undefined,
+                    setPasswordUrl
+                });
+
+                if (setPasswordUrl) {
+                    const { sendEmail } = await import("@/lib/mail");
+                    await sendEmail({
+                        to: emailRecipient,
+                        subject: `Set your password for JollyWitMe 🔑`,
+                        html: `
+                            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; color: #111827;">
+                                <div style="text-align: center; margin-bottom: 24px;">
+                                    <h1 style="color: #059669; font-size: 26px; font-weight: 800; margin: 0 0 8px 0;">JollyWitMe</h1>
+                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">Welcome to JollyWitMe!</p>
+                                </div>
+                                <div style="padding: 24px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6;">
+                                    <p style="color: #111827; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">
+                                        Hi <strong>${guestName || "there"}</strong>,
+                                    </p>
+                                    <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                                        We automatically created your JollyWitMe profile so you can manage your RSVPs, view your tickets, and chat with other guests. Please click below to create your password:
+                                    </p>
+                                    <div style="text-align: center; margin: 28px 0;">
+                                        <a href="${setPasswordUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 9999px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+                                            Set Your Password →
+                                        </a>
+                                    </div>
+                                    <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 20px 0 0 0; text-align: center;">
+                                        This link is secure and will expire in 1 hour.
+                                    </p>
+                                </div>
+                                <p style="color: #111827; font-size: 13px; margin-top: 24px; text-align: center; font-weight: 600;">
+                                    From the JollyWitMe Team ✨
+                                </p>
+                            </div>
+                        `
+                    }).catch(err => console.error("Welcome password email error:", err));
+                }
+            })().catch(error => console.error("RSVP Confirmation Email Error:", error));
         }
 
         // 8. Auto-Promote logic

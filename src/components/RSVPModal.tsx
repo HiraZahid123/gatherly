@@ -20,11 +20,12 @@ interface RSVPModalProps {
     onRSVPSuccess?: (data: any) => void;
     myRSVP?: any;
     initialStatus?: "ACCEPTED" | "MAYBE" | "DECLINED" | null;
+    inviteToken?: string;
 }
 
 type Step = "INTENT" | "DETAILS" | "VERIFY" | "SUCCESS";
 
-export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess, myRSVP, initialStatus }: RSVPModalProps) {
+export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess, myRSVP, initialStatus, inviteToken }: RSVPModalProps) {
     const [step, setStep] = useState<Step>("INTENT");
     const [direction, setDirection] = useState(1); // 1 for forward, -1 for back
     const [status, setStatus] = useState<"ACCEPTED" | "MAYBE" | "DECLINED" | "WAITLISTED" | "PENDING" | null>(null);
@@ -351,6 +352,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                     guestName: formData.name,
                     guestEmail: formData.email,
                     guestPhone: formData.phone,
+                    inviteToken: inviteToken,
                     captchaToken: formData.captchaToken
                 }),
             });
@@ -552,7 +554,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Email Address (optional)</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Email Address <span className="text-white/20">(required if no phone)</span></label>
                                         <div className="relative group">
                                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-white/60 transition-colors" />
                                             <input
@@ -566,7 +568,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Phone / WhatsApp (optional)</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 px-1">Phone / WhatsApp <span className="text-white/20">(required if no email)</span></label>
                                         <input
                                             type="tel"
                                             placeholder="+234 801 234 5678"
@@ -585,6 +587,8 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                             options={{ theme: 'dark' }}
                                         />
                                     </div>
+
+                                    <p className="text-[10px] text-white/30 text-center">At least one contact method (email or phone) is required to receive your ticket.</p>
 
                                     <button
                                         type="submit"
