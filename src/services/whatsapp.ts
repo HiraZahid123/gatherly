@@ -139,8 +139,30 @@ class WhatsAppService {
         return this.sendMessage(phone, message);
     }
 
+    public async ensureConnected(timeoutMs: number = 8000): Promise<boolean> {
+        if (this.isConnected && this.sock) return true;
+
+        if (!this.isInitializing) {
+            this.init().catch(err => {
+                console.log('[WhatsAppService] ensureConnected background init error:', err?.message);
+            });
+        }
+
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs) {
+            if (this.isConnected && this.sock) return true;
+            await new Promise(r => setTimeout(r, 400));
+        }
+        return this.isConnected;
+    }
+
     public async sendMessage(phone: string, text: string): Promise<boolean> {
         try {
+            if (!this.sock || !this.isConnected) {
+                console.log('[WhatsAppService] Socket not active. Attempting to ensure connection from DB credentials...');
+                await this.ensureConnected(8000);
+            }
+
             if (!this.sock || !this.isConnected) {
                 console.warn('[WhatsAppService] Message not sent: WhatsApp is not connected.');
                 return false;
@@ -246,7 +268,13 @@ const globalForWhatsApp = global as unknown as { whatsappService: WhatsAppServic
 
 export function getWhatsAppService(forceNew: boolean = false): WhatsAppService {
     if (forceNew || !globalForWhatsApp.whatsappService || (globalForWhatsApp.whatsappService as any).initStep?.includes('Disabled')) {
-        globalForWhatsApp.whatsappService = new WhatsAppService();
+        const service = new WhatsAppService();
+        globalForWhatsApp.whatsappService = service;
+        if (typeof window === 'undefined') {
+            service.init().catch(err => {
+                console.log('[WhatsAppService] Background auto-init error (safe to ignore if no session):', err?.message);
+            });
+        }
     }
     return globalForWhatsApp.whatsappService;
 }

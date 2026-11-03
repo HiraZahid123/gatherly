@@ -1,7 +1,8 @@
 /**
- * WhatsApp messaging utility — MOCKED for testing.
- * Prevents server crashes on Hostinger and avoids unofficial phone linking.
+ * WhatsApp messaging utility using Baileys.
  */
+
+import { getWhatsAppService } from "@/services/whatsapp";
 
 interface SendSmsOptions {
     to: string;
@@ -24,27 +25,31 @@ export function normalizePhone(raw: string): string {
 }
 
 /**
- * MOCKED: Simply logs the message to the console.
- * This allows the verification flow to work without needing a real WhatsApp connection.
+ * Send WhatsApp message using the active Baileys session.
  */
 export async function sendSms({ to, body }: SendSmsOptions): Promise<SmsResult> {
     try {
+        const whatsapp = getWhatsAppService();
+        const sent = await whatsapp.sendMessage(to, body);
+        if (sent) {
+            console.log(`[WhatsApp] Sent message successfully to ${to}`);
+            return { success: true };
+        }
+
         console.log("-----------------------------------------");
-        console.log(`[MOCK VERIFICATION]`);
+        console.log(`[WhatsApp Offline / Fallback]`);
         console.log(`TO: ${to}`);
         console.log(`MESSAGE: ${body}`);
         console.log("-----------------------------------------");
-        
-        // Always return success for testing
-        return { success: true };
+        return { success: false, error: "WhatsApp is not connected" };
     } catch (err: any) {
-        console.error("[Mock/sendSms] Error:", err.message);
-        return { success: false, error: err.message };
+        console.error("[sendSms] WhatsApp error:", err?.message || err);
+        return { success: false, error: err?.message || "Failed to send message" };
     }
 }
 
 /**
- * MOCKED: Send the same message to multiple recipients.
+ * Send the same message to multiple recipients.
  */
 export async function sendBulkSms(phones: string[], body: string): Promise<number> {
     let count = 0;

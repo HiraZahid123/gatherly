@@ -90,7 +90,10 @@ export async function POST(
         }
 
         const whatsapp = getWhatsAppService();
-        const whatsappConnected = whatsapp.getLastQR().isConnected;
+        let whatsappConnected = whatsapp.getLastQR().isConnected;
+        if (!whatsappConnected && phones.length > 0) {
+            whatsappConnected = await whatsapp.ensureConnected(8000);
+        }
 
         let mappedAudience: "ALL" | "CONFIRMED" | "PENDING" = "ALL";
         if (audience === "ACCEPTED") mappedAudience = "CONFIRMED";
@@ -142,7 +145,6 @@ export async function POST(
                     whatsappCount++;
                 } else {
                     whatsappFailedCount++;
-                    break;
                 }
             }
         }
