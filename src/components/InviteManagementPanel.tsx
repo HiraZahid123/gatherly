@@ -318,11 +318,13 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
                                             {invite.email ?? invite.phone}
                                         </p>
                                         <div className="flex items-center gap-2 mt-0.5">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest ${
+                                            <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${
                                                 invite.status === "ACCEPTED" ? "text-emerald-400" :
-                                                invite.status === "EXPIRED" ? "text-red-400" : "text-amber-400/70"
+                                                invite.status === "EXPIRED" ? "text-red-400" : "text-amber-400"
                                             }`}>
-                                                {invite.status}
+                                                {invite.status === "ACCEPTED" && <Check className="w-2.5 h-2.5 text-emerald-400" />}
+                                                {invite.status === "ACCEPTED" ? "RSVP Confirmed" :
+                                                 invite.status === "EXPIRED" ? "Expired" : "Awaiting RSVP"}
                                             </span>
                                             <span className="text-[9px] text-white/30 font-medium uppercase tracking-wider">
                                                 {invite.phone && !invite.email ? "SMS / WhatsApp" : "Email"}

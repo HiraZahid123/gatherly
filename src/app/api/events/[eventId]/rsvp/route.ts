@@ -78,6 +78,7 @@ export async function POST(
 
         // 3. Verify Privacy / Invitations
         const isHost = session?.user?.id === event.hostId;
+        let matchedInvitation: any = null;
         if (event.isPrivate) { 
             // Check if user is STAFF - staff cannot RSVP
             if (session?.user?.id) {
@@ -99,7 +100,7 @@ export async function POST(
             }
 
             // Check if invited by token OR by email
-            const invitation = await (prisma as any).invitation.findFirst({
+            matchedInvitation = await (prisma as any).invitation.findFirst({
                 where: {
                     eventId,
                     OR: [
@@ -110,7 +111,7 @@ export async function POST(
                 }
             });
 
-            if (!invitation && !isHost) {
+            if (!matchedInvitation && !isHost) {
                 return NextResponse.json(
                     { error: "This is a private event. An invitation is required." },
                     { status: 403 }
@@ -196,6 +197,14 @@ export async function POST(
                 eventId
             }
         });
+
+        // 6.5 If this RSVP was linked to an invitation, mark invitation as ACCEPTED
+        if (matchedInvitation?.id) {
+            await (prisma as any).invitation.update({
+                where: { id: matchedInvitation.id },
+                data: { status: "ACCEPTED" }
+            }).catch((e: any) => console.warn("Failed to mark invitation as ACCEPTED:", e));
+        }
 
         const notificationRecipients = [...new Set([
             event.hostId,

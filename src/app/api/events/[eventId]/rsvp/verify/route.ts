@@ -93,8 +93,9 @@ export async function POST(
         }
 
         // 🛡️ SECURITY: Double-check invitation for private events
+        let matchedInvitation: any = null;
         if (event.isPrivate) {
-            const invitation = await prisma.invitation.findFirst({
+            matchedInvitation = await prisma.invitation.findFirst({
                 where: {
                     eventId,
                     OR: [
@@ -104,7 +105,7 @@ export async function POST(
                 }
             });
 
-            if (!invitation) {
+            if (!matchedInvitation) {
                 return NextResponse.json(
                     { error: "This is a private event. An invitation is required." },
                     { status: 403 }
@@ -175,6 +176,14 @@ export async function POST(
                 otpExpires: null
             }
         });
+
+        // Mark invitation as ACCEPTED if matched
+        if (matchedInvitation?.id) {
+            await (prisma as any).invitation.update({
+                where: { id: matchedInvitation.id },
+                data: { status: "ACCEPTED" }
+            }).catch((e: any) => console.warn("Failed to mark invitation as ACCEPTED:", e));
+        }
 
         // Send confirmation emails (async)
         if ((finalStatus === "ACCEPTED" || finalStatus === "WAITLISTED") && guestEmail) {
