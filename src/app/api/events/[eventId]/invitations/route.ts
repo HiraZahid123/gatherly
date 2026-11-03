@@ -125,8 +125,11 @@ export async function POST(
                 const invitation = await (prisma as any).invitation.create({
                     data: { eventId, phone, token, expiresAt, status: "PENDING" }
                 });
-                const inviteLink = `${process.env.NEXTAUTH_URL}/e/${event.slug}?invite=${token}`;
-                const smsResult = await sendSms({ to: phone, body: `You're invited to ${event.title}! RSVP here: ${inviteLink}` });
+                const envUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://jollywitme.com").replace(/\/$/, "");
+                const baseUrl = envUrl.includes("localhost") || envUrl.includes("127.0.0.1") ? "https://jollywitme.com" : envUrl;
+                const inviteLink = `${baseUrl}/e/${event.slug}?invite=${token}`;
+                const whatsappMessage = `🎉 *You're invited to ${event.title}!*\n\nView your private invitation and RSVP here:\n${inviteLink}\n\n_(Tip: If the link is not clickable yet, reply to this message or save this number to your contacts)_`;
+                const smsResult = await sendSms({ to: phone, body: whatsappMessage });
                 if (smsResult.success) {
                     await prisma.invitation.update({ where: { id: invitation.id }, data: { sentAt: new Date() } });
                     return { contact: phone, type: "sms", status: "success" };

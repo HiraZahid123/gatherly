@@ -41,7 +41,9 @@ export async function POST(
             return NextResponse.json({ error: "Invitation has neither email nor phone number" }, { status: 400 });
         }
 
-        const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://jollywitme.com";
+        // Ensure links sent to external messengers always use a public domain that WhatsApp can turn into a clickable hyperlink
+        const envUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://jollywitme.com").replace(/\/$/, "");
+        const baseUrl = envUrl.includes("localhost") || envUrl.includes("127.0.0.1") ? "https://jollywitme.com" : envUrl;
         const inviteLink = `${baseUrl}/e/${invitation.event.slug}?invite=${invitation.token}`;
 
         let sendSuccess = false;
@@ -74,12 +76,19 @@ export async function POST(
             sendSuccess = emailResult.success;
             if (!sendSuccess) errorMessage = "Failed to deliver email through SMTP";
         } else if (invitation.phone) {
+            const whatsappMessage = `🎉 *Reminder: You're invited to ${invitation.event.title}!*
+
+View your private invitation and RSVP here:
+${inviteLink}
+
+_(Tip: If the link is not clickable yet, reply to this message or save this number to your contacts)_`;
+
             const smsResult = await sendSms({
                 to: invitation.phone,
-                body: `Reminder: You're invited to ${invitation.event.title}! RSVP here: ${inviteLink}`
+                body: whatsappMessage
             });
             sendSuccess = smsResult.success;
-            if (!sendSuccess) errorMessage = smsResult.error || "Failed to send SMS";
+            if (!sendSuccess) errorMessage = smsResult.error || "Failed to send WhatsApp message";
         }
 
         if (sendSuccess) {

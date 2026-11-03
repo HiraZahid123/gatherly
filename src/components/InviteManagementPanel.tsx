@@ -70,7 +70,10 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
 
     const getInviteUrl = (token?: string) => {
         if (!token) return "";
-        const origin = typeof window !== "undefined" ? window.location.origin : "https://jollywitme.com";
+        let origin = typeof window !== "undefined" ? window.location.origin : "https://jollywitme.com";
+        if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+            origin = "https://jollywitme.com";
+        }
         const slug = eventInfo?.slug || "";
         return `${origin}/e/${slug}?invite=${token}`;
     };
