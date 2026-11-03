@@ -40,7 +40,9 @@ export async function GET(
         return NextResponse.json({ 
             invitations,
             event: {
-                isPaid: event.isPaid
+                isPaid: event.isPaid,
+                slug: event.slug,
+                title: event.title
             }
         });
     } catch (error) {
