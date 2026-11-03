@@ -580,19 +580,22 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
 
                                     {error && <p className="text-rose-500 text-sm font-bold text-center">{error}</p>}
 
-                                    <div className="flex justify-center py-2">
-                                        <Turnstile
-                                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                                            onSuccess={(token) => setFormData(prev => ({ ...prev, captchaToken: token }))}
-                                            options={{ theme: 'dark' }}
-                                        />
-                                    </div>
+                                    {/* Only show Cloudflare Turnstile if a real production site key is configured (avoids the test-only banner) */}
+                                    {Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== "1x00000000000000000000AA") && (
+                                        <div className="flex justify-center py-2">
+                                            <Turnstile
+                                                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                                                onSuccess={(token) => setFormData(prev => ({ ...prev, captchaToken: token }))}
+                                                options={{ theme: 'dark' }}
+                                            />
+                                        </div>
+                                    )}
 
                                     <p className="text-[10px] text-white/30 text-center">At least one contact method (email or phone) is required to receive your ticket.</p>
 
                                     <button
                                         type="submit"
-                                        disabled={loading || (!user && !formData.captchaToken) || (!formData.email && !formData.phone)}
+                                        disabled={loading || (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== "1x00000000000000000000AA") && !user && !formData.captchaToken) || (!formData.email && !formData.phone)}
                                         className="w-full h-12 bg-white text-black font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-white/90 active:scale-95 transition-all flex items-center justify-center gap-2"
                                     >
                                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Continue"}

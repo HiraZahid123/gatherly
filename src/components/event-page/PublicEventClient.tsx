@@ -1091,7 +1091,25 @@ export default function PublicEventClient({
                     reminders: event.theme?.settings?.reminders || []
                 }}
                 guests={guests}
-                onUpdate={setEvent}
+                onUpdate={async (updatedEvent) => {
+                    setEvent(updatedEvent);
+                    if (event?.id) {
+                        try {
+                            await fetch(`/api/events/${event.id}`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    theme: updatedEvent.theme,
+                                    capacity: updatedEvent.capacity,
+                                    checkInWindowStart: updatedEvent.checkInWindowStart,
+                                    rsvpDeadline: updatedEvent.rsvpDeadline,
+                                }),
+                            });
+                        } catch (err) {
+                            console.error("Auto-save event update error:", err);
+                        }
+                    }
+                }}
                 onToggleRSVP={handleToggleRSVP}
                 onStyleChange={handleStyleChange}
                 onGuestAction={handleGuestAction}

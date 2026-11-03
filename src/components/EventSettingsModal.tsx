@@ -182,6 +182,12 @@ export default function EventSettingsModal({
             updatedEvent.capacity = parsed;
         }
 
+        // Handle checkInWindowStart sync
+        if (section === "checkInWindowStart" || key === "checkInWindowStart") {
+            const parsed = value === "" ? 60 : Number(value);
+            updatedEvent.checkInWindowStart = parsed;
+        }
+
         onUpdate(updatedEvent);
     };
 
@@ -258,7 +264,12 @@ export default function EventSettingsModal({
                             <StaffManagementPanel eventId={event?.id || ""} />
                         )}
                         {activeTab === "Scanner" && (
-                            <EventScannerPanel eventId={event?.id || ""} />
+                            <EventScannerPanel 
+                                eventId={event?.id || ""} 
+                                eventStartDate={event?.startDate}
+                                checkInWindowStart={event?.checkInWindowStart}
+                                onGateWindowChange={(newVal) => updateSetting("checkInWindowStart", null, newVal)}
+                            />
                         )}
                         {activeTab === "Messaging" && (
                             <BroadcastPanel eventId={event?.id || ""} eventTitle={event?.title || "the event"} />
@@ -625,6 +636,30 @@ export default function EventSettingsModal({
                                                     <div className="w-11 h-6 bg-white/5 peer-focus:outline-none rounded-full peer after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/10 after:border-white/5 after:border after:rounded-full after:h-5 after:w-5"></div>
                                                 </label>
                                             </div>
+                                        </div>
+
+                                        {/* Gate Open Time (Check-In Window) */}
+                                        <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                                            <div className="space-y-0.5">
+                                                <span className="text-[13px] font-bold block">Gate Open Time (Check-In)</span>
+                                                <p className="text-[10px] text-white/30 font-medium">When QR scanning opens before event start</p>
+                                            </div>
+                                            <select
+                                                disabled={!hasAdminAccess}
+                                                value={event?.checkInWindowStart !== undefined && event?.checkInWindowStart !== null ? Number(event.checkInWindowStart) : 60}
+                                                onChange={(e) => updateSetting("checkInWindowStart", null, parseInt(e.target.value))}
+                                                aria-label="Gate Open Time"
+                                                className="bg-white/5 border border-white/10 text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-none outline-none appearance-none transition-all focus:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                style={{ borderColor: `${primaryColor}30` }}
+                                            >
+                                                <option value={60} className="bg-[#1a0c0c]">1 hour before (Default)</option>
+                                                <option value={120} className="bg-[#1a0c0c]">2 hours before</option>
+                                                <option value={180} className="bg-[#1a0c0c]">3 hours before</option>
+                                                <option value={240} className="bg-[#1a0c0c]">4 hours before</option>
+                                                <option value={360} className="bg-[#1a0c0c]">6 hours before</option>
+                                                <option value={30} className="bg-[#1a0c0c]">30 minutes before</option>
+                                                <option value={0} className="bg-[#1a0c0c]">Anytime (Open now)</option>
+                                            </select>
                                         </div>
 
                                         {/* Plus Ones */}

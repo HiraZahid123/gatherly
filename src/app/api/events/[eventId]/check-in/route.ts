@@ -84,16 +84,28 @@ export async function POST(
         // 🛡️ SECURITY: Check if check-in window is open
         const now = new Date();
         const eventStart = new Date(eventData.startDate);
-        const windowStart = new Date(eventStart.getTime() - (eventData.checkInWindowStart || 60) * 60 * 1000);
+        const checkInWindowMinutes = eventData.checkInWindowStart !== null && eventData.checkInWindowStart !== undefined
+            ? Number(eventData.checkInWindowStart)
+            : 60;
 
-        if (now < windowStart) {
-            return NextResponse.json(
-                {
-                    error: "Check-in window is not open yet.",
-                    opensAt: windowStart.toISOString()
-                },
-                { status: 403 }
-            );
+        // If checkInWindowMinutes is 0 or negative, gate scanning is open anytime (no early cutoff)
+        if (checkInWindowMinutes > 0) {
+            const windowStart = new Date(eventStart.getTime() - checkInWindowMinutes * 60 * 1000);
+
+            if (now < windowStart) {
+                const hours = Math.round((checkInWindowMinutes / 60) * 10) / 10;
+                const windowDescription = checkInWindowMinutes >= 60
+                    ? `${hours} hour${hours !== 1 ? 's' : ''}`
+                    : `${checkInWindowMinutes} minutes`;
+                return NextResponse.json(
+                    {
+                        error: `Gate check-in is not open yet. Scanning opens ${windowDescription} before the event starts.`,
+                        opensAt: windowStart.toISOString(),
+                        windowStartMinutes: checkInWindowMinutes
+                    },
+                    { status: 403 }
+                );
+            }
         }
 
         if (previousScans >= maxCheckIns) {

@@ -56,7 +56,11 @@ export async function PATCH(
                         ? (body.theme.settings.rsvp.capacity ? Number(body.theme.settings.rsvp.capacity) : null)
                         : event.capacity),
                 rsvpDeadline: body.rsvpDeadline !== undefined ? (body.rsvpDeadline ? new Date(body.rsvpDeadline) : null) : event.rsvpDeadline,
-                checkInWindowStart: body.checkInWindowStart !== undefined ? body.checkInWindowStart : event.checkInWindowStart,
+                checkInWindowStart: body.checkInWindowStart !== undefined
+                    ? (body.checkInWindowStart !== null ? Number(body.checkInWindowStart) : 60)
+                    : (body.theme?.settings?.checkInWindowStart !== undefined
+                        ? (body.theme.settings.checkInWindowStart !== null ? Number(body.theme.settings.checkInWindowStart) : 60)
+                        : event.checkInWindowStart),
                 maxCheckIns: body.maxCheckIns !== undefined ? body.maxCheckIns : event.maxCheckIns,
                 // Add more fields as needed
             },

@@ -6,9 +6,66 @@ import { QrCode, UserCheck, XCircle, CheckCircle2, Loader2, Search, Users, Wifi,
 
 interface EventScannerPanelProps {
     eventId?: string;
+    eventStartDate?: string | Date;
+    checkInWindowStart?: number | null;
+    onGateWindowChange?: (newVal: number) => void;
 }
 
-export default function EventScannerPanel({ eventId }: EventScannerPanelProps) {
+export default function EventScannerPanel({
+    eventId,
+    eventStartDate,
+    checkInWindowStart,
+    onGateWindowChange
+}: EventScannerPanelProps) {
+    const [gateWindow, setGateWindow] = useState<number>(
+        checkInWindowStart !== null && checkInWindowStart !== undefined ? Number(checkInWindowStart) : 60
+    );
+    const [isUpdatingGate, setIsUpdatingGate] = useState(false);
+
+    useEffect(() => {
+        if (checkInWindowStart !== null && checkInWindowStart !== undefined) {
+            setGateWindow(Number(checkInWindowStart));
+        }
+    }, [checkInWindowStart]);
+
+    const handleGateWindowChange = async (minutes: number) => {
+        setGateWindow(minutes);
+        if (!eventId) return;
+        setIsUpdatingGate(true);
+        try {
+            await fetch(`/api/events/${eventId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ checkInWindowStart: minutes })
+            });
+            onGateWindowChange?.(minutes);
+        } catch (e) {
+            console.error("Failed to update gate open time:", e);
+        } finally {
+            setIsUpdatingGate(false);
+        }
+    };
+
+    const getGateStatus = () => {
+        if (gateWindow === 0) {
+            return { isOpen: true, label: "Gate open anytime (early check-in enabled)" };
+        }
+        if (!eventStartDate) {
+            const hours = Math.round((gateWindow / 60) * 10) / 10;
+            return { isOpen: true, label: `Scanning opens ${gateWindow >= 60 ? `${hours}h` : `${gateWindow}m`} before start` };
+        }
+        const start = new Date(eventStartDate);
+        const windowStart = new Date(start.getTime() - gateWindow * 60 * 1000);
+        const now = new Date();
+        if (now >= windowStart) {
+            return { isOpen: true, label: "Gate is currently OPEN for check-in" };
+        }
+        const hours = Math.round((gateWindow / 60) * 10) / 10;
+        return {
+            isOpen: false,
+            label: `Gate opens at ${windowStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (${gateWindow >= 60 ? `${hours}h` : `${gateWindow}m`} before event)`
+        };
+    };
     const [scanResult, setScanResult] = useState<{
         success: boolean;
         message: string;
@@ -300,6 +357,40 @@ export default function EventScannerPanel({ eventId }: EventScannerPanelProps) {
                     {scannerActive ? "Stop Camera" : "Launch Camera"}
                 </button>
             </div>
+
+            {/* Gate Open Time & Status Control */}
+            {(() => {
+                const status = getGateStatus();
+                return (
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${status.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Gate Status</span>
+                            </div>
+                            <p className="text-xs font-semibold text-white/80">{status.label}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-white/40 uppercase whitespace-nowrap">Gate Opens:</label>
+                            <select
+                                value={gateWindow}
+                                disabled={isUpdatingGate}
+                                onChange={(e) => handleGateWindowChange(Number(e.target.value))}
+                                aria-label="Gate open time before event"
+                                className="bg-black/60 border border-white/10 text-xs font-bold text-white px-3 py-1.5 rounded-xl outline-none cursor-pointer hover:border-white/20 transition-all [&>option]:bg-zinc-900 [&>option]:text-white"
+                            >
+                                <option value={60}>1h before (Default)</option>
+                                <option value={120}>2h before start</option>
+                                <option value={180}>3h before start</option>
+                                <option value={240}>4h before start</option>
+                                <option value={360}>6h before start</option>
+                                <option value={30}>30m before start</option>
+                                <option value={0}>Anytime (Open now)</option>
+                            </select>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Main Scanner Area */}
             <div className="relative aspect-square max-w-sm mx-auto bg-white/5 rounded-3xl overflow-hidden border border-white/10 flex items-center justify-center">

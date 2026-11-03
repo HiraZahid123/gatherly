@@ -129,7 +129,15 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
 
             if (!isHost && !isAdmin && !isInvited) {
                 const EventRestricted = (await import("@/components/event-page/EventRestricted")).default;
-                return <EventRestricted theme={event.theme} />;
+                return (
+                    <EventRestricted
+                        theme={event.theme}
+                        eventTitle={event.title}
+                        userEmail={session?.user?.email || null}
+                        isLoggedIn={!!session?.user}
+                        slug={slug}
+                    />
+                );
             }
         }
 

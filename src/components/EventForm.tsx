@@ -207,7 +207,7 @@ export default function EventForm({
         }
     }, [initialData]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
 
         let newData: any;
@@ -623,18 +623,24 @@ export default function EventForm({
                 <div className="grid grid-cols-2 border-b border-white/5 last:border-b-0">
                     <div className="px-6 py-4 border-r border-white/5 group hover:bg-white/[0.01] transition-all">
                         <div className="flex flex-col">
-                            <label htmlFor="checkInWindowStart" className="text-[10px] font-black uppercase tracking-widest text-white/20">Check-in Window (Min)</label>
-                            <input
-                                type="number"
+                            <label htmlFor="checkInWindowStart" className="text-[10px] font-black uppercase tracking-widest text-white/20">Gate Open Time (Check-In)</label>
+                            <select
                                 id="checkInWindowStart"
                                 name="checkInWindowStart"
                                 value={formData.checkInWindowStart}
                                 onChange={handleChange}
-                                aria-label="Check-in Window in Minutes"
-                                title="Check-in Window (Minutes)"
-                                className="bg-transparent border-none outline-none w-full text-base font-bold text-white/40 placeholder:text-white/20"
-                                placeholder="60"
-                            />
+                                aria-label="Gate Open Time / Check-in Window"
+                                title="Gate Open Time"
+                                className="bg-transparent border-none outline-none w-full text-sm font-bold text-white/80 [&>option]:bg-zinc-900 [&>option]:text-white cursor-pointer mt-1"
+                            >
+                                <option value={60}>1 hour before start (Default)</option>
+                                <option value={120}>2 hours before start</option>
+                                <option value={180}>3 hours before start</option>
+                                <option value={240}>4 hours before start</option>
+                                <option value={360}>6 hours before start</option>
+                                <option value={30}>30 minutes before start</option>
+                                <option value={0}>Anytime (No restriction)</option>
+                            </select>
                         </div>
                     </div>
                     <div className="px-6 py-4 group hover:bg-white/[0.01] transition-all">
