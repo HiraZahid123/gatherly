@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Phone, Trash2, RefreshCw, Loader2, Send, Copy, Check, MessageSquare, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, Trash2, RefreshCw, Loader2, Send, Copy, Check, MessageSquare, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 
 interface Invitation {
     id: string;
@@ -28,6 +28,46 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
     const [resendingId, setResendingId] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<{ type: "success" | "warning" | "error"; message: string } | null>(null);
+    const [hasContactPicker, setHasContactPicker] = useState(false);
+
+    useEffect(() => {
+        if (
+            typeof window !== "undefined" &&
+            "contacts" in navigator &&
+            "ContactsManager" in window
+        ) {
+            setHasContactPicker(true);
+        }
+    }, []);
+
+    const handlePickContacts = async () => {
+        try {
+            const props = ["tel", "name"];
+            const opts = { multiple: true };
+            const contacts = await (navigator as any).contacts.select(props, opts);
+            if (contacts && contacts.length > 0) {
+                const numbers = contacts
+                    .flatMap((c: any) => c.tel || [])
+                    .filter(Boolean)
+                    .map((n: string) => n.trim());
+                if (numbers.length > 0) {
+                    setPhoneInput(prev => {
+                        const existing = prev ? prev.split(",").map(s => s.trim()).filter(Boolean) : [];
+                        const merged = Array.from(new Set([...existing, ...numbers]));
+                        return merged.join(", ");
+                    });
+                    setFeedback({
+                        type: "success",
+                        message: `Added ${numbers.length} contact number(s) from your device!`
+                    });
+                }
+            }
+        } catch (err: any) {
+            if (err?.name !== "AbortError") {
+                console.warn("Contact picker error:", err);
+            }
+        }
+    };
 
     const fetchInvitations = async () => {
         try {
@@ -228,6 +268,21 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
                     </button>
                 </div>
 
+                {/* Optional Contact Picker Button for supported browsers (Android / Web) */}
+                {activeTab === "phone" && hasContactPicker && (
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="button"
+                            onClick={handlePickContacts}
+                            className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold transition-all active:scale-95"
+                        >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            <span>Pick from Phone Contacts</span>
+                        </button>
+                        <span className="text-[10px] text-white/30 hidden sm:inline">Select contacts directly from your device</span>
+                    </div>
+                )}
+
                 {/* Input Row */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     {activeTab === "email" ? (
@@ -280,7 +335,9 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
                 <p className="text-[10px] text-white/30 font-medium">
                     {activeTab === "email"
                         ? "Separate multiple emails with commas · Invitation emails are dispatched automatically."
-                        : "Separate multiple numbers with commas · include country code e.g. +234 or +92"}
+                        : hasContactPicker
+                            ? "Tip: Tap 'Pick from Phone Contacts' to choose directly from your device, or enter numbers separated by commas."
+                            : "Separate multiple numbers with commas · include country code e.g. +234 or +92. (Direct device contact picker is supported on Android Chrome and coming to the native Mobile App)."}
                 </p>
             </div>
 

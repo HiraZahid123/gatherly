@@ -22,8 +22,9 @@ export async function POST(
             return NextResponse.json({ error: "Invalid data", details: validation.error.format() }, { status: 400 });
         }
 
-        const { guestEmail, guestPhone, otp, status, guestName, captchaToken } = validation.data;
-        const verifyByPhone = !guestEmail && Boolean(guestPhone);
+        const { guestEmail, guestPhone, otp, status, guestName, captchaToken, inviteToken } = validation.data;
+        const normalizedEmail = guestEmail ? guestEmail.trim().toLowerCase() : "";
+        const verifyByPhone = !normalizedEmail && Boolean(guestPhone);
         const phone = guestPhone ? formatPhone(guestPhone) : "";
 
         // 1.5 Verify CAPTCHA (only for guests/public)
@@ -42,7 +43,12 @@ export async function POST(
         const existingRSVP = await prisma.rSVP.findFirst({
             where: {
                 eventId,
-                ...(verifyByPhone ? { guestPhone: phone } : { guestEmail })
+                ...(verifyByPhone ? { guestPhone: phone } : {
+                    OR: [
+                        { guestEmail: normalizedEmail },
+                        { guestEmail: { equals: normalizedEmail, mode: "insensitive" } }
+                    ]
+                })
             }
         });
 
@@ -67,6 +73,7 @@ export async function POST(
                 id: true,
                 capacity: true,
                 isPrivate: true,
+                visibility: true,
                 title: true,
                 slug: true,
                 description: true,
@@ -94,12 +101,17 @@ export async function POST(
 
         // 🛡️ SECURITY: Double-check invitation for private events
         let matchedInvitation: any = null;
-        if (event.isPrivate) {
-            matchedInvitation = await prisma.invitation.findFirst({
+        const isPrivate = event.isPrivate || (event as any).visibility === "PRIVATE";
+        if (isPrivate) {
+            matchedInvitation = await (prisma as any).invitation.findFirst({
                 where: {
                     eventId,
                     OR: [
-                        ...(guestEmail ? [{ email: guestEmail }] : []),
+                        ...(inviteToken ? [{ token: inviteToken.trim() }] : []),
+                        ...(normalizedEmail ? [
+                            { email: normalizedEmail },
+                            { email: { equals: normalizedEmail, mode: "insensitive" } }
+                        ] : []),
                         ...(phone ? [{ phone }] : []),
                     ]
                 }

@@ -19,26 +19,32 @@ export async function POST(
             return NextResponse.json({ error: "Invalid email" }, { status: 400 });
         }
 
-        const { guestEmail, guestPhone } = validation.data;
-        const verifyByPhone = !guestEmail && Boolean(guestPhone);
+        const { guestEmail, guestPhone, inviteToken } = validation.data;
+        const normalizedEmail = guestEmail ? guestEmail.trim().toLowerCase() : "";
+        const verifyByPhone = !normalizedEmail && Boolean(guestPhone);
         const phone = guestPhone ? formatPhone(guestPhone) : "";
 
         const event = await prisma.event.findUnique({
             where: { id: eventId },
-            select: { title: true, isPrivate: true }
+            select: { title: true, isPrivate: true, visibility: true }
         });
 
         if (!event) {
             return NextResponse.json({ error: "Event not found" }, { status: 404 });
         }
 
+        const isPrivate = event.isPrivate || event.visibility === "PRIVATE";
         // 🛡️ SECURITY: Only allow OTP if invited to private event
-        if (event.isPrivate) {
-            const invitation = await prisma.invitation.findFirst({
+        if (isPrivate) {
+            const invitation = await (prisma as any).invitation.findFirst({
                 where: {
                     eventId,
                     OR: [
-                        ...(guestEmail ? [{ email: guestEmail }] : []),
+                        ...(inviteToken ? [{ token: inviteToken.trim() }] : []),
+                        ...(normalizedEmail ? [
+                            { email: normalizedEmail },
+                            { email: { equals: normalizedEmail, mode: "insensitive" } }
+                        ] : []),
                         ...(phone ? [{ phone }] : []),
                     ]
                 }
@@ -46,7 +52,7 @@ export async function POST(
 
             if (!invitation) {
                 return NextResponse.json(
-                    { error: "This is a private event. An invitation is required for this contact." },
+                    { error: "This is a private event. You must be invited by the host to RSVP." },
                     { status: 403 }
                 );
             }
@@ -55,8 +61,20 @@ export async function POST(
         const otpCode = generateOTP();
         const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        const contactWhere = verifyByPhone ? { guestPhone: phone } : { guestEmail };
-        const existingRSVP = await prisma.rSVP.findFirst({ where: { eventId, ...contactWhere } });
+        const contactWhere = verifyByPhone
+            ? { guestPhone: phone }
+            : { guestEmail: normalizedEmail };
+        const existingRSVP = await prisma.rSVP.findFirst({
+            where: {
+                eventId,
+                ...(verifyByPhone ? { guestPhone: phone } : {
+                    OR: [
+                        { guestEmail: normalizedEmail },
+                        { guestEmail: { equals: normalizedEmail, mode: "insensitive" } }
+                    ]
+                })
+            }
+        });
 
         if (existingRSVP) {
             await prisma.rSVP.update({
@@ -64,6 +82,7 @@ export async function POST(
                 data: {
                     otpCode,
                     otpExpires,
+                    guestEmail: normalizedEmail || existingRSVP.guestEmail,
                     guestPhone: phone || undefined,
                 }
             });
@@ -71,7 +90,7 @@ export async function POST(
             await prisma.rSVP.create({
                 data: {
                     eventId,
-                    guestEmail: guestEmail || null,
+                    guestEmail: normalizedEmail || null,
                     guestPhone: phone || null,
                     guestName: "Guest", // Placeholder until verified
                     status: "PENDING",

@@ -371,6 +371,7 @@ export const rsvpVerifySchema = z.object({
     otp: z.string().length(6, "OTP must be 6 digits"),
     status: z.enum(["ACCEPTED", "DECLINED", "MAYBE", "WAITLISTED"]),
     guestName: z.string().min(1, "Name is required"),
+    inviteToken: z.string().optional(),
     captchaToken: z.string().optional(),
 }).refine((data) => Boolean(data.guestEmail || data.guestPhone), {
     message: "Provide the email address or phone number used for verification",
@@ -380,6 +381,7 @@ export const rsvpVerifySchema = z.object({
 export const rsvpResendSchema = z.object({
     guestEmail: z.string().email("Invalid email address").toLowerCase().optional().or(z.literal("")),
     guestPhone: rsvpPhoneSchema.or(z.literal("")),
+    inviteToken: z.string().optional(),
 }).refine((data) => Boolean(data.guestEmail || data.guestPhone), {
     message: "Provide an email address or phone number",
     path: ["guestPhone"],

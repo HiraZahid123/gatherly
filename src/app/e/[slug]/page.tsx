@@ -83,7 +83,7 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
         theme.settings.reminders = event.reminders;
 
         // Check Permissions for Private Events
-        if (event.visibility === "PRIVATE") {
+        if (event.visibility === "PRIVATE" || event.isPrivate) {
             let isInvited = false;
 
             if (!isHost && !isAdmin) {
@@ -106,16 +106,18 @@ export default async function PublicEventPage({ params, searchParams }: PublicEv
                     const orConditions: any[] = [];
                     // Check token (from invite link)
                     if (inviteToken) {
-                        orConditions.push({ token: inviteToken });
+                        orConditions.push({ token: inviteToken.trim() });
                     }
-                    // Check signed-in user's email
+                    // Check signed-in user's email (case-insensitive)
                     if (session?.user?.email) {
-                        orConditions.push({ email: session.user.email });
+                        const cleanEmail = session.user.email.trim().toLowerCase();
+                        orConditions.push({ email: cleanEmail });
+                        orConditions.push({ email: { equals: cleanEmail, mode: "insensitive" } });
                     }
                     // Check signed-in user's phone
                     const userPhone = (session?.user as any)?.phone;
                     if (userPhone) {
-                        orConditions.push({ phone: userPhone });
+                        orConditions.push({ phone: userPhone.trim() });
                     }
 
                     if (orConditions.length > 0) {

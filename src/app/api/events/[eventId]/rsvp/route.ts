@@ -48,6 +48,7 @@ export async function POST(
             select: {
                 id: true,
                 isPrivate: true,
+                visibility: true,
                 capacity: true,
                 hostId: true,
                 status: true,
@@ -78,8 +79,9 @@ export async function POST(
 
         // 3. Verify Privacy / Invitations
         const isHost = session?.user?.id === event.hostId;
+        const isPrivate = event.isPrivate || event.visibility === "PRIVATE";
         let matchedInvitation: any = null;
-        if (event.isPrivate) { 
+        if (isPrivate) { 
             // Check if user is STAFF - staff cannot RSVP
             if (session?.user?.id) {
                 const isStaff = await (prisma as any).eventStaff.findUnique({
@@ -99,14 +101,18 @@ export async function POST(
                 }
             }
 
-            // Check if invited by token OR by email
+            // Check if invited by token OR by email (case-insensitive) OR phone
+            const normalizedEmail = contactEmail ? contactEmail.trim().toLowerCase() : "";
             matchedInvitation = await (prisma as any).invitation.findFirst({
                 where: {
                     eventId,
                     OR: [
-                        ...(inviteToken ? [{ token: inviteToken }] : []),
-                        ...(contactEmail ? [{ email: contactEmail }] : []),
-                        ...(contactPhone ? [{ phone: contactPhone }] : [])
+                        ...(inviteToken ? [{ token: inviteToken.trim() }] : []),
+                        ...(normalizedEmail ? [
+                            { email: normalizedEmail },
+                            { email: { equals: normalizedEmail, mode: "insensitive" } }
+                        ] : []),
+                        ...(contactPhone ? [{ phone: contactPhone.trim() }] : [])
                     ]
                 }
             });

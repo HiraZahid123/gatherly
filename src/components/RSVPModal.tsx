@@ -72,6 +72,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                     guestName: user.name || "",
                                     guestEmail: user.email || "",
                                     guestPhone: user.phone || "",
+                                    inviteToken: inviteToken,
                                 }),
                             });
                             const data = await response.json();
@@ -293,7 +294,11 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
             const response = await fetch(`/api/events/${event.id}/rsvp/verify/send`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ guestEmail: formData.email, guestPhone: formData.phone }),
+                body: JSON.stringify({
+                    guestEmail: formData.email,
+                    guestPhone: formData.phone,
+                    inviteToken: inviteToken
+                }),
             });
             const data = await response.json();
             if (data.success) {
@@ -321,6 +326,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                     otp: formData.otp,
                     status: status,
                     guestName: formData.name,
+                    inviteToken: inviteToken,
                     captchaToken: formData.captchaToken
                 }),
             });
