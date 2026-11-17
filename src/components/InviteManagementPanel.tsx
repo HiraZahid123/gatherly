@@ -171,22 +171,33 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
 
                 const results: any[] = data.results || [];
                 const alreadyInvited = results.filter(r => r.message === "Already invited");
-                const successes = results.filter(r => r.status === "success" || r.status === "partial");
+                const fullSuccesses = results.filter(r => r.status === "success");
+                const partials = results.filter(r => r.status === "partial");
 
-                if (alreadyInvited.length > 0 && successes.length === 0) {
+                if (alreadyInvited.length > 0 && fullSuccesses.length === 0 && partials.length === 0) {
                     setFeedback({
                         type: "warning",
-                        message: `Already on the list: ${alreadyInvited.map(r => r.contact).join(", ")}. Use the copy link or resend button below.`
+                        message: `Already on the list: ${alreadyInvited.map(r => r.contact).join(", ")}. Use the WhatsApp or Copy Link button below.`
                     });
-                } else if (alreadyInvited.length > 0) {
+                } else if (!isEmail) {
+                    setFeedback({
+                        type: "success",
+                        message: `Invitation created! Tap the green "WhatsApp" button below to send the invite directly to your guest.`
+                    });
+                } else if (fullSuccesses.length > 0) {
+                    setFeedback({
+                        type: "success",
+                        message: `Successfully dispatched ${fullSuccesses.length} invitation email(s)!`
+                    });
+                } else if (partials.length > 0) {
                     setFeedback({
                         type: "warning",
-                        message: `Sent ${successes.length} new invite(s). Note: ${alreadyInvited.map(r => r.contact).join(", ")} was already invited.`
+                        message: `Invite recorded! If email delivery fails, please copy the personal link below to share with your guest.`
                     });
                 } else {
                     setFeedback({
                         type: "success",
-                        message: `Successfully created and sent ${successes.length} invitation(s)!`
+                        message: `Invitations created successfully!`
                     });
                 }
             } else {
@@ -421,11 +432,11 @@ export default function InviteManagementPanel({ eventId }: InviteManagementPanel
                                     {invite.token && (
                                         <button
                                             onClick={() => handleWhatsAppShare(invite)}
-                                            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold transition-all flex items-center gap-1"
-                                            title="Send via WhatsApp"
+                                            className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                                            title="Send personal invite link via WhatsApp"
                                         >
-                                            <MessageSquare className="w-3 h-3" />
-                                            <span className="text-[10px]">WhatsApp</span>
+                                            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                                            <span className="text-[10px] font-bold">WhatsApp</span>
                                         </button>
                                     )}
 

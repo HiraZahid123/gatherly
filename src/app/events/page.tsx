@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { X, Sparkles, Pencil } from "lucide-react";
 import PublicEventClient from "@/components/event-page/PublicEventClient";
 
@@ -106,21 +108,31 @@ const EXAMPLE_COMMENTS = [
 // Page
 // ---------------------------------------------------------------------------
 export default function ExampleEventPage() {
+    const { data: session } = useSession();
+    const router = useRouter();
     const [showSignupModal, setShowSignupModal] = useState(false);
+
+    const handleCreateYours = () => {
+        if (session?.user) {
+            router.push("/events/create");
+        } else {
+            router.push("/auth/signin?callbackUrl=/events/create");
+        }
+    };
 
     return (
         <div className="relative">
             {/* ----------------------------------------------------------------
                 Example banner — fixed at very top, above the navbar
             ---------------------------------------------------------------- */}
-            <div className="fixed top-0 left-0 right-0 z-[300] bg-gradient-to-r from-emerald-600 via-green-600 to-yellow-600 text-white text-sm font-medium py-2 px-4 flex items-center justify-center gap-3 shadow-lg">
+            <div className="fixed top-0 left-0 right-0 z-[300] h-11 bg-gradient-to-r from-emerald-600 via-green-600 to-yellow-600 text-white text-sm font-medium px-4 flex items-center justify-center gap-3 shadow-lg">
                 <Sparkles className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">
                     This is an example event — see exactly what your guests will experience.
                 </span>
                 <span className="sm:hidden">Example event preview</span>
                 <button
-                    onClick={() => setShowSignupModal(true)}
+                    onClick={handleCreateYours}
                     className="ml-2 bg-white text-green-700 font-bold text-xs px-3 py-1 rounded-full hover:bg-green-50 transition-colors whitespace-nowrap"
                 >
                     Create yours →
@@ -128,7 +140,7 @@ export default function ExampleEventPage() {
             </div>
 
             {/* Push content down so the fixed banner doesn't overlap the navbar */}
-            <div className="h-9" />
+            <div className="h-11" />
 
             {/* ----------------------------------------------------------------
                 Real event-page component, fed with hardcoded example data.
@@ -193,17 +205,19 @@ export default function ExampleEventPage() {
                         </p>
 
                         <Link
-                            href="/auth/signup"
+                            href={session?.user ? "/events/create" : "/auth/signup?callbackUrl=/events/create"}
                             className="block w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-full hover:opacity-90 transition-opacity"
                         >
-                            Sign up free
+                            {session?.user ? "Create your event" : "Sign up free"}
                         </Link>
-                        <Link
-                            href="/auth/signin"
-                            className="block w-full mt-3 text-gray-500 text-sm hover:text-gray-700 transition-colors"
-                        >
-                            Already have an account? Sign in
-                        </Link>
+                        {!session?.user && (
+                            <Link
+                                href="/auth/signin?callbackUrl=/events/create"
+                                className="block w-full mt-3 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                            >
+                                Already have an account? Sign in
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}

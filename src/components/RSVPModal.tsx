@@ -43,7 +43,17 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
     });
 
     const [rsvpResult, setRsvpResult] = useState<any>(null);
+    const [resendCooldown, setResendCooldown] = useState(0);
     const isDeadlinePassed = event.rsvpDeadline && new Date() > new Date(event.rsvpDeadline);
+
+    // Countdown timer for resending OTP
+    useEffect(() => {
+        if (resendCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setResendCooldown(prev => Math.max(0, prev - 1));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [resendCooldown]);
 
     // Reset state when modal opens
     useEffect(() => {
@@ -302,6 +312,7 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
             });
             const data = await response.json();
             if (data.success) {
+                setResendCooldown(30);
                 nextStep("VERIFY");
             } else {
                 setError(data.error || "Failed to send verification code");
@@ -653,14 +664,25 @@ export default function RSVPModal({ isOpen, onClose, event, user, onRSVPSuccess,
                                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify & RSVP"}
                                     </button>
 
-                                    <p className="text-center">
-                                        <button
-                                            onClick={sendVerification}
-                                            className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
-                                        >
-                                            Didn't get the code? Resend
-                                        </button>
-                                    </p>
+                                    <div className="space-y-2 text-center pt-1">
+                                        <p className="text-[11px] text-white/40 leading-relaxed">
+                                            Code sent to <span className="text-white font-semibold">{formData.email || formData.phone}</span>. Please check your inbox and spam folder.
+                                        </p>
+                                        <p>
+                                            <button
+                                                type="button"
+                                                onClick={sendVerification}
+                                                disabled={loading || resendCooldown > 0}
+                                                className="text-[10px] font-black uppercase tracking-widest text-white/50 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                {loading
+                                                    ? "Sending code..."
+                                                    : resendCooldown > 0
+                                                        ? `Resend code in ${resendCooldown}s`
+                                                        : "Didn't get the code? Resend"}
+                                            </button>
+                                        </p>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}

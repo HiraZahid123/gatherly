@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import CreateEventButton from "@/components/CreateEventButton";
 import FeaturesSection from "@/components/FeaturesSection";
 import TextBlastSection from "@/components/TextBlastSection";
 import InteractiveShowcase from "@/components/InteractiveShowcase";
@@ -45,12 +46,9 @@ export default function Home() {
             </p>
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4 pt-4">
-              <Link
-                href="/auth/signup"
-                className="bg-white text-brand-green font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300"
-              >
+              <CreateEventButton className="bg-white text-brand-green font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300">
                 Create Event
-              </Link>
+              </CreateEventButton>
               <Link
                 href="/events"
                 className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-full hover:bg-white/10 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"

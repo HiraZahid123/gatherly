@@ -515,69 +515,108 @@ export default function EventForm({
                 </div>
 
 
-                {/* Paid Event Toggle */}
-                <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
+                {/* Admission Type (Free / Paid) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
                     <div className="flex items-center gap-4">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white/40 shrink-0">
                             <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                             <line x1="1" y1="10" x2="23" y2="10" />
                         </svg>
                         <div>
-                            <p className="text-base font-bold text-white/70">Paid Event</p>
-                            <p className="text-[11px] text-white/30 mt-0.5">
+                            <p className="text-base font-bold text-white/90">Admission Type</p>
+                            <p className="text-[12px] text-white/40 mt-0.5">
                                 {formData.isPaid ? "Ticket tiers can be set up after publishing" : "Free to attend"}
                             </p>
                         </div>
                     </div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            name="isPaid"
-                            checked={formData.isPaid}
-                            onChange={(e) => {
-                                const newData = { ...formData, isPaid: e.target.checked };
+                    <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-full p-1 self-start sm:self-center shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const newData = { ...formData, isPaid: false };
                                 setFormData(newData);
                                 onDataChange?.(newData);
                             }}
-                            className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-white/10 rounded-full relative peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-1 after:left-1 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5"></div>
-                    </label>
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                                !formData.isPaid
+                                    ? "bg-blue-600 text-white shadow-sm ring-1 ring-blue-400/40"
+                                    : "text-white/50 hover:text-white"
+                            }`}
+                        >
+                            Free
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const newData = { ...formData, isPaid: true };
+                                setFormData(newData);
+                                onDataChange?.(newData);
+                            }}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                                formData.isPaid
+                                    ? "bg-blue-600 text-white shadow-sm ring-1 ring-blue-400/40"
+                                    : "text-white/50 hover:text-white"
+                            }`}
+                        >
+                            Paid
+                        </button>
+                    </div>
                 </div>
 
-                {/* Private Event Toggle */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
+                {/* Event Privacy (Public / Private) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-white/5 group hover:bg-white/[0.01] transition-all">
                     <div className="flex items-center gap-4">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-white/40 shrink-0">
                             <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
                         <div>
-                            <p className="text-base font-bold text-white/70">Private Event</p>
-                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-0.5">
-                                Only invited guests can view and RSVP
+                            <p className="text-base font-bold text-white/90">Event Privacy</p>
+                            <p className="text-[12px] text-white/40 mt-0.5">
+                                {formData.isPrivate ? "Only invited guests can view and RSVP" : "Anyone with the link can view and RSVP"}
                             </p>
                         </div>
                     </div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            name="isPrivate"
-                            checked={!!formData.isPrivate}
-                            onChange={(e) => {
-                                const isChecked = e.target.checked;
+                    <div className="inline-flex items-center bg-white/5 border border-white/10 rounded-full p-1 self-start sm:self-center shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => {
                                 const newData = {
                                     ...formData,
-                                    isPrivate: isChecked,
-                                    visibility: (isChecked ? "PRIVATE" : "PUBLIC") as "PUBLIC" | "PRIVATE" | "UNLISTED"
+                                    isPrivate: false,
+                                    visibility: "PUBLIC" as "PUBLIC" | "PRIVATE" | "UNLISTED"
                                 };
                                 setFormData(newData);
                                 onDataChange?.(newData);
                             }}
-                            className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-white/10 rounded-full relative peer-checked:bg-emerald-500 transition-colors after:content-[''] after:absolute after:top-1 after:left-1 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5"></div>
-                    </label>
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                                !formData.isPrivate
+                                    ? "bg-blue-600 text-white shadow-sm ring-1 ring-blue-400/40"
+                                    : "text-white/50 hover:text-white"
+                            }`}
+                        >
+                            Public
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const newData = {
+                                    ...formData,
+                                    isPrivate: true,
+                                    visibility: "PRIVATE" as "PUBLIC" | "PRIVATE" | "UNLISTED"
+                                };
+                                setFormData(newData);
+                                onDataChange?.(newData);
+                            }}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
+                                formData.isPrivate
+                                    ? "bg-blue-600 text-white shadow-sm ring-1 ring-blue-400/40"
+                                    : "text-white/50 hover:text-white"
+                            }`}
+                        >
+                            Private
+                        </button>
+                    </div>
                 </div>
 
                 {/* Max Capacity */}

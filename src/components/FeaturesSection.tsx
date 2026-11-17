@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import CreateEventButton from "@/components/CreateEventButton";
 import { MessageCircle, Smile, Reply, Plus } from "lucide-react";
 
 const FeaturesSection = () => {
@@ -182,12 +183,11 @@ const FeaturesSection = () => {
                         <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-lg leading-relaxed">
                             Track RSVPs, see who&apos;s bringing a plus 1, who&apos;s still deciding, react to updates and build the hype before your event even begins
                         </p>
-                        <Link
-                            href="/auth/signup"
+                        <CreateEventButton
                             className="bg-black hover:bg-gray-800 text-white text-base font-semibold py-4 px-10 rounded-2xl transition duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 block w-fit"
                         >
                             Create your event
-                        </Link>
+                        </CreateEventButton>
                     </div>
                 </div>
             </div>

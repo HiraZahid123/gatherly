@@ -56,8 +56,11 @@ export default function PhotoAlbum({ eventId, eventSlug, isHost, primaryColor = 
     const fetchPhotos = async () => {
         try {
             const res = await fetch(`/api/events/${eventId}/photos`);
+            if (!res.ok) return;
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await res.json();
-            if (data.success) setPhotos(data.photos);
+            if (data?.success) setPhotos(data.photos);
         } catch (error) {
             console.error("Failed to fetch photos", error);
         } finally {

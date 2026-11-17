@@ -107,16 +107,31 @@ export async function POST(
             }
         } else {
             const emailResult = await sendEmail({
-                to: guestEmail!,
-                subject: `Verify your RSVP for ${event.title}`,
+                to: normalizedEmail,
+                subject: `${otpCode} is your verification code · JollyWitMe`,
+                priority: "high",
+                text: `Your JollyWitMe verification code is: ${otpCode}\n\nEnter this code to complete your RSVP for ${event.title}.\nThis code will expire in 10 minutes.\n\nIf you did not request this code, you can safely ignore this email.\n— The JollyWitMe Team`,
                 html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #ffffff; background: #000000; padding: 40px; border-radius: 16px;">
-                    <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; margin-bottom: 24px;">Verify your RSVP</h2>
-                    <p style="font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px;">You're almost there! Use the code below to verify your email for <strong>${event.title}</strong>:</p>
-                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 32px; text-align: center; font-size: 40px; font-weight: 900; letter-spacing: 12px; border-radius: 12px; color: #ffffff;">
-                        ${otpCode}
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 32px 24px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <h1 style="color: #059669; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">JollyWitMe</h1>
+                        <p style="color: #6b7280; font-size: 13px; margin: 0; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">Verification Code</p>
                     </div>
-                    <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 32px; text-transform: uppercase; letter-spacing: 0.1em;">This code expires in 10 minutes.</p>
+                    <div style="padding: 24px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6; text-align: center;">
+                        <p style="color: #111827; font-size: 15px; line-height: 1.5; margin: 0 0 20px 0;">
+                            Use the 6-digit code below to verify your email and complete your RSVP for <strong>${event.title}</strong>:
+                        </p>
+                        <div style="display: inline-block; background-color: #f0fdf4; border: 2px dashed #059669; padding: 16px 36px; border-radius: 12px; margin: 8px 0 20px 0;">
+                            <span style="font-size: 36px; font-weight: 900; letter-spacing: 10px; color: #059669; font-family: monospace;">${otpCode}</span>
+                        </div>
+                        <p style="color: #6b7280; font-size: 13px; margin: 0;">
+                            ⏳ This code expires in <strong>10 minutes</strong>.
+                        </p>
+                    </div>
+                    <div style="margin-top: 24px; text-align: center;">
+                        <p style="color: #9ca3af; font-size: 12px; margin: 0 0 6px 0;">If you didn't request this verification code, please ignore this email.</p>
+                        <p style="color: #111827; font-size: 13px; font-weight: 600; margin: 0;">From the JollyWitMe Team ✨</p>
+                    </div>
                 </div>
                 `,
             });

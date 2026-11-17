@@ -9,7 +9,7 @@ import BroadcastPanel from "./BroadcastPanel";
 import TicketTierManager from "./TicketTierManager";
 import SalesReportPanel from "./SalesReportPanel";
 import PhotoAlbum from "./event-page/PhotoAlbum";
-import { X, Crown, Users, FileText, Shield, Globe, Camera, DollarSign, AlarmClock, ChevronRight, Info, Plus, Settings, HelpCircle, ShieldPlus, Search, Megaphone, Mail, QrCode, Download, CheckSquare, Square, CheckCheck, UserX, Ticket, TrendingUp, CreditCard, Bell, Check, XCircle } from "lucide-react";
+import { X, Crown, Users, FileText, Shield, Globe, Camera, DollarSign, AlarmClock, ChevronRight, ChevronDown, Info, Plus, Settings, HelpCircle, ShieldPlus, Search, Megaphone, Mail, QrCode, Download, CheckSquare, Square, CheckCheck, UserX, Ticket, TrendingUp, CreditCard, Bell, Check, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface EventSettingsModalProps {
@@ -52,7 +52,26 @@ export default function EventSettingsModal({
     onTiersChange
 }: EventSettingsModalProps) {
     const rsvpStyle = event?.theme?.rsvpStyle || "standard";
+    const [currentRsvpStyle, setCurrentRsvpStyle] = useState<string>(event?.theme?.rsvpStyle || "standard");
     const showRSVP = event?.theme?.showRSVP ?? true;
+
+    useEffect(() => {
+        if (event?.theme?.rsvpStyle) {
+            setCurrentRsvpStyle(event.theme.rsvpStyle);
+        }
+    }, [event?.theme?.rsvpStyle]);
+
+    const handleStyleSelect = (val: string) => {
+        setCurrentRsvpStyle(val);
+        onStyleChange?.(val);
+        onUpdate?.({
+            ...event,
+            theme: {
+                ...(event?.theme || {}),
+                rsvpStyle: val,
+            }
+        });
+    };
 
     const [activeTab, setActiveTab] = useState(isHost || isCoHost ? initialTab : "RSVPs");
     const [isAddingCohost, setIsAddingCohost] = useState(false);
@@ -702,18 +721,26 @@ export default function EventSettingsModal({
 
                                         {/* RSVP Button Style */}
                                         <div className="flex items-center justify-between pb-4 border-b border-white/5">
-                                            <span className="text-[13px] font-bold">RSVP Button Style</span>
-                                             <select
-                                                disabled={!isHost}
-                                                value={rsvpStyle}
-                                                onChange={(e) => onStyleChange(e.target.value)}
-                                                className="bg-white/5 border border-white/10 text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-none outline-none appearance-none transition-all focus:border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                style={{ borderColor: `${primaryColor}30` }}
-                                            >
-                                                <option value="standard" className="bg-[#1a0c0c]">Standard</option>
-                                                <option value="emojis" className="bg-[#1a0c0c]">Emojis</option>
-                                                <option value="bloom" className="bg-[#1a0c0c]">Bloom</option>
-                                            </select>
+                                            <div>
+                                                <span className="text-[13px] font-bold block">RSVP Button Style</span>
+                                                <span className="text-[10px] text-white/40 block">Change the RSVP buttons appearance</span>
+                                            </div>
+                                            <div className="relative">
+                                                <select
+                                                    disabled={!isHost}
+                                                    value={currentRsvpStyle}
+                                                    onChange={(e) => handleStyleSelect(e.target.value)}
+                                                    className="bg-[#18181f] hover:bg-[#20202a] border border-white/15 text-[11px] font-black uppercase tracking-wider pl-3.5 pr-8 py-2 rounded-xl outline-none appearance-none transition-all focus:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-white shadow-sm"
+                                                    style={{ borderColor: `${primaryColor}40` }}
+                                                >
+                                                    <option value="standard" className="bg-[#141419] text-white">Standard (Icons)</option>
+                                                    <option value="emojis" className="bg-[#141419] text-white">Emojis (👍 🤔 👎)</option>
+                                                    <option value="bloom" className="bg-[#141419] text-white">Bloom (🌷 🌸 🥀)</option>
+                                                    <option value="flirty" className="bg-[#141419] text-white">Flirty (💋 😉 💔)</option>
+                                                    <option value="hearts" className="bg-[#141419] text-white">Hearts (❤️ 💖 🖤)</option>
+                                                </select>
+                                                <ChevronDown className="w-3.5 h-3.5 text-white/50 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" />
+                                            </div>
                                         </div>
 
                                         {/* Guest can RSVP Maybe */}

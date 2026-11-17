@@ -177,6 +177,12 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
     };
 
     const handleSelectImage = (url: string) => {
+        if (selectedImage === url) {
+            // Tapping an already selected image immediately confirms it
+            onSelect(url);
+            onClose();
+            return;
+        }
         setSelectedImage(url);
     };
 
@@ -188,49 +194,52 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 min-h-screen">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/80 backdrop-blur-3xl animate-in fade-in duration-500"
+                className="absolute inset-0 bg-black/80 backdrop-blur-3xl animate-in fade-in duration-300"
                 onClick={onClose}
             />
 
             {/* Modal */}
-            <div className="relative w-full max-w-4xl bg-black/40 border border-white/10 rounded-none overflow-hidden shadow-[0_60px_100px_-30px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="relative w-full max-w-4xl h-[90dvh] sm:h-[85vh] max-h-[850px] bg-[#0c0c10] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-300 flex flex-col">
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                <div className="shrink-0 px-5 sm:px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0c0c10] z-10">
                     <div>
-                        <h3 className="text-lg font-bold text-white tracking-tight">Choose Cover Image</h3>
-                        <p className="text-[11px] text-white/40 font-bold">Select a theme image or upload your own</p>
+                        <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Choose Cover Image</h3>
+                        <p className="text-[11px] text-white/40 font-medium">Select a theme image or upload your own</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-white/5 rounded-none transition-colors"
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
+                        aria-label="Close"
                     >
-                        <X className="w-5 h-5 text-white/40" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0 overscroll-contain">
                     {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-none text-red-500 text-xs font-bold">
+                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-semibold">
                             {error}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-4">
                         {/* Upload Button */}
                         <div
-                            className="aspect-square rounded-none border border-dashed border-white/10 hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 relative overflow-hidden group"
+                            className="aspect-square rounded-xl border-2 border-dashed border-white/15 hover:border-white/40 hover:bg-white/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 relative overflow-hidden group"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {uploading ? (
-                                <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+                                <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
                             ) : (
                                 <>
-                                    <Upload className="w-6 h-6 text-white/40 group-hover:text-white transition-colors" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">Upload</span>
+                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                        <Upload className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
+                                    </div>
+                                    <span className="text-[11px] font-bold tracking-wider text-white/60 group-hover:text-white transition-colors">Upload</span>
                                 </>
                             )}
                             <input
@@ -243,51 +252,82 @@ export default function CoverImageGallery({ isOpen, onClose, onSelect, currentIm
                         </div>
 
                         {/* Cover Templates */}
-                        {templates.map((img) => (
-                            <div
-                                key={img.id}
-                                className={`aspect-square rounded-none overflow-hidden relative group cursor-pointer border transition-all ${
-                                    selectedImage === img.url ? "border-white" : "border-white/5 hover:border-white/20"
-                                }`}
-                                onClick={() => handleSelectImage(img.url)}
-                            >
-                                <Image
-                                    src={img.url}
-                                    alt={img.title || "Cover"}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-1000"
-                                    unoptimized={img.url.startsWith("/uploads/")}
-                                />
-                                <span className="absolute bottom-0 inset-x-0 bg-black/70 px-2 py-1 text-[9px] font-bold text-white truncate">
-                                    {img.title}
-                                </span>
-                                {selectedImage === img.url && (
-                                    <div className="absolute top-2 right-2 bg-white text-black p-0.5">
-                                        <Check className="w-2.5 h-2.5" />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                        {templates.map((img) => {
+                            const isSelected = selectedImage === img.url;
+                            return (
+                                <div
+                                    key={img.id}
+                                    className={`aspect-square rounded-xl overflow-hidden relative group cursor-pointer border-2 transition-all ${
+                                        isSelected 
+                                            ? "border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg scale-[0.98]" 
+                                            : "border-white/10 hover:border-white/30"
+                                    }`}
+                                    onClick={() => handleSelectImage(img.url)}
+                                    onDoubleClick={() => {
+                                        onSelect(img.url);
+                                        onClose();
+                                    }}
+                                >
+                                    <Image
+                                        src={img.url}
+                                        alt={img.title || "Cover"}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized={img.url.startsWith("/uploads/")}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+                                    <span className="absolute bottom-2 inset-x-2 text-[10px] sm:text-xs font-bold text-white truncate drop-shadow">
+                                        {img.title}
+                                    </span>
+                                    {isSelected && (
+                                        <div className="absolute top-2 right-2 bg-emerald-500 text-black p-1 rounded-full shadow-lg">
+                                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between bg-white/[0.02]">
-                    <div className="flex items-center gap-2 text-white/20">
-                        <ImageIcon className="w-3 h-3" />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Selected Image Preview</span>
+                {/* Sticky Footer - Always visible on mobile and desktop without scrolling */}
+                <div className="shrink-0 sticky bottom-0 z-20 px-4 sm:px-6 py-3.5 border-t border-white/10 bg-[#0c0c10]/98 backdrop-blur-xl flex items-center justify-between gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.6)]">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        {selectedImage ? (
+                            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-white/20 shrink-0">
+                                <Image
+                                    src={selectedImage}
+                                    alt="Selected"
+                                    fill
+                                    className="object-cover"
+                                    unoptimized={selectedImage.startsWith("/uploads/")}
+                                />
+                            </div>
+                        ) : (
+                            <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                <ImageIcon className="w-4 h-4 text-white/30" />
+                            </div>
+                        )}
+                        <div className="min-w-0">
+                            <span className="text-[11px] font-bold text-white block truncate">
+                                {selectedImage ? "Template Selected" : "Tap an image to choose"}
+                            </span>
+                            <span className="text-[9px] text-white/40 block">
+                                {selectedImage ? "Tap again or click Select" : "Browse gallery above"}
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 shrink-0">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 rounded-none text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                            className="px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold text-white/60 hover:text-white hover:bg-white/5 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleConfirm}
                             disabled={!selectedImage || uploading}
-                            className="px-8 py-3 bg-white text-black rounded-none text-[10px] font-black uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                            className="px-5 sm:px-7 py-2.5 bg-white text-black hover:bg-white/90 rounded-xl text-xs font-black shadow-xl active:scale-95 transition-all disabled:opacity-40 disabled:scale-100"
                         >
                             Select Image
                         </button>

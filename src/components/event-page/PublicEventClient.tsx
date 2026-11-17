@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -103,8 +103,11 @@ export default function PublicEventClient({
         if (!event?.id) return;
         try {
             const res = await fetch(`/api/events/${event.id}/ticket-tiers`);
+            if (!res.ok) return;
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await res.json();
-            if (data.tiers) {
+            if (data?.tiers) {
                 setTicketTiers(data.tiers);
                 if (data.tiers.length > 0 && !event.isPaid) {
                     setEvent((prev: any) => ({ ...prev, isPaid: true }));
@@ -271,8 +274,11 @@ export default function PublicEventClient({
     const fetchMyRSVP = async () => {
         try {
             const response = await fetch(`/api/events/${event.id}/rsvp`);
+            if (!response.ok) return;
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await response.json();
-            if (data.success) {
+            if (data?.success) {
                 setMyRSVP(data.rsvp);
             }
         } catch (error) {
@@ -283,8 +289,11 @@ export default function PublicEventClient({
     const fetchGuests = async () => {
         try {
             const response = await fetch(`/api/events/${event.id}/guests`);
+            if (!response.ok) return;
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await response.json();
-            if (data.success) {
+            if (data?.success) {
                 setGuests(data.guests);
             }
         } catch (error) {
@@ -295,6 +304,9 @@ export default function PublicEventClient({
     const fetchComments = async () => {
         try {
             const res = await fetch(`/api/comments?eventId=${event.id}`);
+            if (!res.ok) return;
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await res.json();
             if (Array.isArray(data)) setComments(data);
         } catch (e) {
@@ -450,14 +462,21 @@ export default function PublicEventClient({
 
     const handleStyleChange = async (rsvpStyle: string) => {
         if (!event?.id) return;
+        setEvent((prev: any) => ({
+            ...prev,
+            theme: {
+                ...(prev?.theme || {}),
+                rsvpStyle,
+            }
+        }));
         try {
             const response = await fetch(`/api/events/${event.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ theme: { ...event.theme, rsvpStyle } }),
+                body: JSON.stringify({ theme: { ...(event.theme || {}), rsvpStyle } }),
             });
             const data = await response.json();
-            if (data.success) {
+            if (data.success && data.event) {
                 setEvent(data.event);
             }
         } catch (error) {
@@ -941,6 +960,7 @@ export default function PublicEventClient({
                                         isLoading={isRSVPLoading}
                                         requireApproval={requireApproval}
                                         isStaff={isStaff}
+                                        style={event.theme?.rsvpStyle || "standard"}
                                     />
                                     {(userRSVPStatus === 'ACCEPTED' || userRSVPStatus === 'MAYBE') && (
                                         <div className="space-y-2 mt-4">

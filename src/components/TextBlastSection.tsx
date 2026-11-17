@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import CreateEventButton from "@/components/CreateEventButton";
 import { Camera, Mic, Megaphone, Send } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -30,12 +31,11 @@ const TextBlastSection = () => {
                         <p className="text-lg md:text-xl text-gray-800 leading-relaxed max-w-lg">
                             Whether it&apos;s a venue change, giving directions, or any last-minute update, reach your entire guest list instantly!
                         </p>
-                        <Link
-                            href="/auth/signup"
+                        <CreateEventButton
                             className="bg-black hover:bg-gray-800 text-white font-bold py-4 px-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 block w-fit"
                         >
                             Create event
-                        </Link>
+                        </CreateEventButton>
                     </motion.div>
 
                     {/* Right Column - Visual Mockup (Phone) */}

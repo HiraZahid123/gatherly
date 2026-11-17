@@ -5,11 +5,41 @@ interface SendEmailParams {
     to: string;
     subject: string;
     html: string;
+    text?: string;
     replyTo?: string;
     from?: string;
+    priority?: "high" | "normal" | "low";
+    headers?: Record<string, string>;
 }
 
-export async function sendEmail({ to, subject, html, replyTo, from }: SendEmailParams) {
+// Global cached transporter with connection pooling for rapid, reliable delivery
+let cachedTransporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter {
+    if (cachedTransporter) return cachedTransporter;
+
+    const port = parseInt(process.env.MAIL_PORT || "465");
+    const isSecure = port === 465 || process.env.MAIL_ENCRYPTION === "ssl" || process.env.MAIL_ENCRYPTION === "tls_ssl";
+
+    cachedTransporter = nodemailer.createTransport({
+        host: process.env.MAIL_HOST || "smtp.hostinger.com",
+        port,
+        secure: isSecure,
+        pool: true, // Reuse open SMTP connections for instant sending
+        maxConnections: 5,
+        maxMessages: 100,
+        rateDelta: 1000,
+        rateLimit: 5,
+        auth: {
+            user: process.env.MAIL_USERNAME,
+            pass: process.env.MAIL_PASSWORD,
+        },
+    });
+
+    return cachedTransporter;
+}
+
+export async function sendEmail({ to, subject, html, text, replyTo, from, priority, headers }: SendEmailParams) {
     if (!process.env.MAIL_USERNAME) {
         console.log("================ MOCK EMAIL ================");
         console.log(`To: ${to}`);
@@ -20,26 +50,38 @@ export async function sendEmail({ to, subject, html, replyTo, from }: SendEmailP
         return { success: true, messageId: "mock-id-" + Date.now() };
     }
 
-    const port = parseInt(process.env.MAIL_PORT || "465");
-    const isSecure = port === 465 || process.env.MAIL_ENCRYPTION === "ssl" || process.env.MAIL_ENCRYPTION === "tls_ssl";
+    const transporter = getTransporter();
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST || "smtp.hostinger.com",
-        port,
-        secure: isSecure,
-        auth: {
-            user: process.env.MAIL_USERNAME,
-            pass: process.env.MAIL_PASSWORD,
-        },
-    });
+    // Ensure the sender matches the authenticated mailbox to prevent Hostinger 553 "Sender address rejected"
+    const senderEmail = process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME || "hello@jollywitme.com";
+    const senderName = process.env.MAIL_FROM_NAME || "JollyWitMe";
+    const defaultFrom = `"${senderName}" <${senderEmail}>`;
+
+    const cleanTo = (to || "").trim();
+
+    // Generate clean text fallback if omitted to prevent spam filters flagging HTML-only messages
+    const fallbackText = text || html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                                     .replace(/<[^>]+>/g, ' ')
+                                     .replace(/\s+/g, ' ')
+                                     .trim();
 
     try {
         const info = await transporter.sendMail({
-            from: from || `"${process.env.MAIL_FROM_NAME || 'JollyWitMe'}" <${process.env.MAIL_FROM_ADDRESS || 'support@jollywitme.com'}>`,
-            to,
-            replyTo,
+            from: from || defaultFrom,
+            to: cleanTo,
+            replyTo: replyTo || "support@jollywitme.com",
             subject,
             html,
+            text: fallbackText,
+            priority: priority || "normal",
+            headers: {
+                ...(priority === "high" ? {
+                    "X-Priority": "1 (Highest)",
+                    "X-MSMail-Priority": "High",
+                    "Importance": "High",
+                } : {}),
+                ...(headers || {}),
+            },
         });
 
         console.log("Message sent: %s", info.messageId);

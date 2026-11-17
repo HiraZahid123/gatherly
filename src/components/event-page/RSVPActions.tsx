@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, HelpCircle, X, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { RSVP_STYLES } from "@/components/RSVPOptions";
 
 interface RSVPActionsProps {
     onRSVP: (status: "ACCEPTED" | "MAYBE" | "DECLINED") => void;
@@ -8,9 +9,10 @@ interface RSVPActionsProps {
     isLoading?: boolean;
     requireApproval?: boolean;
     isStaff?: boolean;
+    style?: string;
 }
 
-export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireApproval, isStaff }: RSVPActionsProps) {
+export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireApproval, isStaff, style = "standard" }: RSVPActionsProps) {
     if (isStaff) {
         return (
             <div className="flex flex-col items-center gap-4 py-8 animate-in fade-in zoom-in-95 duration-700">
@@ -28,11 +30,14 @@ export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireA
         );
     }
 
+    const emojiset = RSVP_STYLES[style]?.emojiset || null;
+
     const actions = [
         {
             id: "ACCEPTED",
             label: currentStatus === "PENDING" ? "Requested" : (requireApproval ? "Request to Join" : "Going"),
             icon: Check,
+            emoji: emojiset ? emojiset[0] : null,
             color: "bg-green-500",
             borderColor: "border-green-300",
             glowColor: "rgba(34,197,94,0.4)",
@@ -43,6 +48,7 @@ export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireA
             id: "MAYBE", 
             label: "Maybe", 
             icon: HelpCircle, 
+            emoji: emojiset ? emojiset[1] : null,
             color: "bg-amber-500", 
             borderColor: "border-amber-300",
             glowColor: "rgba(245,158,11,0.4)",
@@ -53,6 +59,7 @@ export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireA
             id: "DECLINED", 
             label: "Can't Go", 
             icon: X, 
+            emoji: emojiset ? emojiset[2] : null,
             color: "bg-rose-500", 
             borderColor: "border-rose-300",
             glowColor: "rgba(244,63,94,0.4)",
@@ -71,7 +78,7 @@ export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireA
                 return (
                     <button
                         key={action.id}
-                        onClick={() => onRSVP(action.id)}
+                        onClick={() => onRSVP(action.id as "ACCEPTED" | "MAYBE" | "DECLINED")}
                         disabled={isLoading || isPending}
                         title={action.label}
                         className={`group relative flex flex-col items-center gap-4 transition-all duration-300 ${isLoading || isPending ? 'opacity-50 cursor-not-allowed' : 'active:scale-95'}`}
@@ -85,6 +92,10 @@ export default function RSVPActions({ onRSVP, currentStatus, isLoading, requireA
                         `}>
                             {isLoading && isActive ? (
                                 <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 animate-spin" strokeWidth={3} />
+                            ) : action.emoji ? (
+                                <span className={`text-3xl sm:text-4xl select-none transition-transform duration-300 ${isActive ? 'scale-125' : 'group-hover:scale-110'}`}>
+                                    {action.emoji}
+                                </span>
                             ) : (
                                 <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${isActive ? 'scale-110' : 'group-hover:scale-110 group-hover:text-white'} transition-all`} strokeWidth={3} />
                             )}

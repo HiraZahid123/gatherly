@@ -49,6 +49,7 @@ export default function Navbar() {
     const isPhotosPage = pathname.includes("/e/") && pathname.endsWith("/photos");
     const isHelpPage = pathname.startsWith("/help") || pathname.startsWith("/blog");
     const isCreationPage = pathname === "/events/create" || pathname === "/cards/create";
+    const isEventsPage = pathname === "/events";
     const showHomeBack = !isHomePage && !isDashboard && !isAdminPage && !isPhotosPage && pathname !== "/profile/edit";
 
     if (isDashboard || isAdminPage || isPhotosPage) return null;
@@ -56,7 +57,7 @@ export default function Navbar() {
     // Determine config based on scroll state
     const navClasses = isHelpPage 
         ? `sticky top-0 left-0 right-0 z-[100] bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10 py-4`
-        : `absolute top-0 left-0 right-0 z-[100] transition-all duration-300 bg-transparent py-5`;
+        : `absolute ${isEventsPage ? "top-11" : "top-0"} left-0 right-0 z-[100] transition-all duration-300 bg-transparent py-5`;
 
     const finalNavClasses = navClasses;
     const finalLogoWhite = true; // Use white logo on transparent background

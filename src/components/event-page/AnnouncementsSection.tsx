@@ -49,8 +49,11 @@ export default function AnnouncementsSection({
     const fetchAnnouncements = async () => {
         try {
             const res = await fetch(`/api/events/${eventId}/announcements`);
+            if (!res.ok) return;
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) return;
             const data = await res.json();
-            if (data.success) setAnnouncements(data.announcements);
+            if (data?.success) setAnnouncements(data.announcements);
         } catch (e) {
             console.error("Failed to fetch announcements", e);
         } finally {
